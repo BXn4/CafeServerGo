@@ -1,25 +1,22 @@
 package commands
 
 import (
-  "cafego/internal/types/requests"
-  "cafego/internal/client"
-  "cafego/internal/managers"
+	"cafego/internal/client"
+	"cafego/internal/managers"
+	"cafego/internal/types/requests"
 )
 
-// sgc - Send cafe 
+// sgc - Send cafe
 func SendCafe(req *requests.Request, c *client.Client, clientManager *managers.ClientManager, cafeManager *managers.CafeManager) error {
 
-  
-  args := []string{ "sgc", "-1", "0"}
-  args = append(args, c.Cafe.AsResponse()...)
+	args := []string{"sgc", "-1", "0"}
+	args = append(args, c.Cafe.AsResponse()...)
 
-  c.SendExtensionResponse(args...)
+	c.SendExtensionResponse(args...)
 
+	//TODO: jul
 
-  //TODO: jul
-
-
-  return nil
+	return nil
 }
 
 /*
@@ -60,7 +57,7 @@ async def handle_sgc(server: 'CafeServer', client: 'StreamWriter', cmd: str, *pa
 
         await server.send_response(client, ExtensionResponse(*response))
 
-    -------------- 
+    --------------
     player.room.clients.append(client)
 
     # NOTE: *player.room.clients also includes the client that just joined the room

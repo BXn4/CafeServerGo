@@ -1,60 +1,56 @@
 package commands
 
 import (
-  "strconv"
-  "cafego/internal/client"
-  "cafego/internal/types/requests"
-  "cafego/internal/managers"
+	"cafego/internal/client"
+	"cafego/internal/managers"
+	"cafego/internal/types/requests"
+	"strconv"
 )
 
 // lgn - Login
 func Login(req *requests.Request, c *client.Client, clientManager *managers.ClientManager, cafeManager *managers.CafeManager) error {
-  name := req.Args[2]
-  password := req.Args[3]
+	name := req.Args[2]
+	password := req.Args[3]
 
-  // Check credentials
-  statusCode, err := c.DB.Authenticate(name, password)
-  if err != nil {
-    return err
-  }
-  statusCodeStr := strconv.Itoa(statusCode)
+	// Check credentials
+	statusCode, err := c.DB.Authenticate(name, password)
+	if err != nil {
+		return err
+	}
+	statusCodeStr := strconv.Itoa(statusCode)
 
-  // TODO Check if already logged in log him/her out
+	// TODO Check if already logged in log him/her out
 
-  // Send login response (lgn)
-  c.SendExtensionResponse("lgn", "1", statusCodeStr)
+	// Send login response (lgn)
+	c.SendExtensionResponse("lgn", "1", statusCodeStr)
 
-  // Send room list (rlu)
-  RoomList(req, c, clientManager, cafeManager)
+	// Send room list (rlu)
+	RoomList(req, c, clientManager, cafeManager)
 
-  // TODO: Daily login reward check
+	// TODO: Daily login reward check
 
-  // Send user info (gui)
-  err = UserInfo(req, c, clientManager, cafeManager)
-  if err != nil {
-    return err
-  }
+	// Send user info (gui)
+	err = UserInfo(req, c, clientManager, cafeManager)
+	if err != nil {
+		return err
+	}
 
-  // Send balancing constants (sbc)
-  SendBalancingConstant(req, c, clientManager, cafeManager)
+	// Send balancing constants (sbc)
+	SendBalancingConstant(req, c, clientManager, cafeManager)
 
-  // Send mastery info (lmi)
-  SendMasteryInfo(req, c, clientManager, cafeManager)
+	// Send mastery info (lmi)
+	SendMasteryInfo(req, c, clientManager, cafeManager)
 
-  // Send fridge info (ifr)
-  SendFridgeInventory(req, c, clientManager, cafeManager)
+	// Send fridge info (ifr)
+	SendFridgeInventory(req, c, clientManager, cafeManager)
 
-  // TODO: Handle login bonus (lbu)
+	// TODO: Handle login bonus (lbu)
 
-  // Send Ping (pin)
-  SendPing(req, c, clientManager, cafeManager)
+	// Send Ping (pin)
+	SendPing(req, c, clientManager, cafeManager)
 
-  return nil
+	return nil
 }
-
-
-
-
 
 /*
 async def handle_lgn(server: 'CafeServer', client: 'StreamWriter', *params: str) -> None:
@@ -67,7 +63,7 @@ async def handle_lgn(server: 'CafeServer', client: 'StreamWriter', *params: str)
         response = ExtensionResponse('lgn', '1', str(status_code))
         await server.send_response(client, response)
     else:
-        // Check if logged in 
+        // Check if logged in
         check_player = [player for player in server.players if player.avatar.username == username]
         if check_player:
             player = check_player[0]
@@ -82,7 +78,7 @@ async def handle_lgn(server: 'CafeServer', client: 'StreamWriter', *params: str)
             return
 
 
-        
+
         address = client.get_extra_info('peername')
         server.clients[address] = player
 
@@ -122,5 +118,3 @@ async def handle_lgn(server: 'CafeServer', client: 'StreamWriter', *params: str)
 
         await handle_pin(server, client)
 */
-
-

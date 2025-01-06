@@ -46,8 +46,7 @@ func (s *CafeServer) Run() {
 	defer db.Close()
 	log.Printf("Server connected to database...")
 
-  s.cafeManager.SetCafeDB(db)
-
+	s.cafeManager.SetCafeDB(db)
 
 	// Start the TCP server
 	address := fmt.Sprintf("%s:%s", s.config.Host, s.config.Port)

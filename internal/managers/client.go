@@ -1,14 +1,13 @@
 package managers
 
 import (
-  "fmt"
-  "sync"
-  "cafego/internal/client"
+	"cafego/internal/client"
+	"fmt"
+	"sync"
 )
 
-
 type ClientManager struct {
-	mu    sync.Mutex
+	mu      sync.Mutex
 	clients []*client.Client
 }
 
@@ -20,12 +19,12 @@ func NewClientManager() *ClientManager {
 
 // AddClient adds a new client to the list
 func (cm *ClientManager) Add(c *client.Client) {
-	cm.mu.Lock() 
+	cm.mu.Lock()
 	defer cm.mu.Unlock()
 	cm.clients = append(cm.clients, c)
 }
 
-// RemoveClient removes a client by id 
+// RemoveClient removes a client by id
 func (cm *ClientManager) Remove(id int) {
 	cm.mu.Lock()
 	defer cm.mu.Unlock()
@@ -37,7 +36,6 @@ func (cm *ClientManager) Remove(id int) {
 		}
 	}
 }
-
 
 // GetClientByID retrieves a client by its ID
 func (cm *ClientManager) Get(id int) (*client.Client, error) {

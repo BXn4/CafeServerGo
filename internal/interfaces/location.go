@@ -1,33 +1,33 @@
 package interfaces
 
 import (
-  "net"
+	"net"
 )
 
 type CafeLocation interface {
-  // Add the player to the location by id 
-  Join(id int, conn net.Conn)
+	// Add the player to the location by id
+	Join(id int, conn net.Conn)
 
-  // Disconnects the player by id 
-  Leave(id int)
+	// Disconnects the player by id
+	Leave(id int)
 
-  // Returns the id of the location
-  ID() int
+	// Returns the id of the location
+	ID() int
 
-  //
-  AsResponse() []string
+	//
+	AsResponse() []string
 
-  // Send message to everyone in the location
-  Broadcast(arg ...string) 
+	// Send message to everyone in the location
+	Broadcast(arg ...string)
 
-  // Returns the info of the location
-  Info() string
+	// Returns the info of the location
+	Info() string
 
-  // Returns the fridge
-  Fridge() map[int]int
+	// Returns the fridge
+	Fridge() map[int]int
 
-  // Returns the owner id
-  Owner() int
+	// Returns the owner id
+	Owner() int
 
-  //TODO: Edit stuff
+	//TODO: Edit stuff
 }

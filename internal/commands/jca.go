@@ -1,62 +1,56 @@
 package commands
 
 import (
-  "cafego/internal/types/requests"
-  "cafego/internal/client"
-  "cafego/internal/managers"
-  "strconv"
+	"cafego/internal/client"
+	"cafego/internal/managers"
+	"cafego/internal/types/requests"
+	"strconv"
 )
 
 // jca - JoinCafe
 func JoinCafe(req *requests.Request, c *client.Client, clientManager *managers.ClientManager, cafeManager *managers.CafeManager) error {
-  
-  // Get id of cafe to join
-  id, err := strconv.Atoi(req.Args[3])
-  if err != nil {
-    return err
-  }
 
-  // Adds cafe to manager (load it if not loaded)
-  cafe := cafeManager.Add(id)
-  
+	// Get id of cafe to join
+	id, err := strconv.Atoi(req.Args[3])
+	if err != nil {
+		return err
+	}
 
-  // Send cafe joined 
-  c.SendExtensionResponse("jca", "-1", "0")
+	// Adds cafe to manager (load it if not loaded)
+	cafe := cafeManager.Add(id)
 
-  // TODO: Handle if already in a cafe
+	// Send cafe joined
+	c.SendExtensionResponse("jca", "-1", "0")
 
-  // Join cafe 
-  cafe.Join(id, c.Conn) 
+	// TODO: Handle if already in a cafe
 
-  // Save location
-  c.Cafe = cafe 
+	// Join cafe
+	cafe.Join(id, c.Conn)
 
-  // Send cafe layout (sgc)
-  SendCafe(req, c, clientManager, cafeManager)
+	// Save location
+	c.Cafe = cafe
 
+	// Send cafe layout (sgc)
+	SendCafe(req, c, clientManager, cafeManager)
 
-
-  return nil
+	return nil
 }
 
-
 /*
-        existing_player = [player for player in server.players if player.id == int(params[2])]
-        if existing_player:
-            wanted_player = existing_player[0]
-        else:
-            wanted_player = server.db.get_player_by_id(int(params[2]))
-            server.players.append(wanted_player)
+   existing_player = [player for player in server.players if player.id == int(params[2])]
+   if existing_player:
+       wanted_player = existing_player[0]
+   else:
+       wanted_player = server.db.get_player_by_id(int(params[2]))
+       server.players.append(wanted_player)
 
-        response = wanted_player.cafe.to_response('sgc', '-1', '0')
-        player.room = wanted_player.cafe
-        player.pos = wanted_player.cafe.get_start_pos()
+   response = wanted_player.cafe.to_response('sgc', '-1', '0')
+   player.room = wanted_player.cafe
+   player.pos = wanted_player.cafe.get_start_pos()
 
-        await server.send_response(client, ExtensionResponse(*response))
+   await server.send_response(client, ExtensionResponse(*response))
 
 */
-
-
 
 /*
 async def handle_jca(server: 'CafeServer', client: 'StreamWriter', *params: str) -> None:
@@ -95,4 +89,3 @@ async def handle_jca(server: 'CafeServer', client: 'StreamWriter', *params: str)
         create_task(spawn_customers_to_client(server, client, wanted_player.cafe))
         create_task(spawn_waiters_to_client(server, client, wanted_player.cafe))
 */
-
