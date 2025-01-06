@@ -17,14 +17,14 @@ func HandleClient(c *client.Client, clientManager *managers.ClientManager, cafeM
 		req, err := c.NextRequest()
 		if err != nil {
 			fmt.Printf("Failed to read request: %s\n", err.Error())
-			break
+
 		}
 
 		// Handle requests
 		err = HandleRequest(req, c, clientManager, cafeManager)
 		if err != nil {
 			fmt.Printf("Failed to handle request: %s\n", err.Error())
-			break
+
 		}
 
 	}
@@ -35,40 +35,32 @@ func HandleClient(c *client.Client, clientManager *managers.ClientManager, cafeM
 func HandleRequest(req *requests.Request, c *client.Client, clientManager *managers.ClientManager, cafeManager *managers.CafeManager) error {
 
 	var err error
-	if req.Kind == requests.POLICY_FILE {
+
+	switch req.Kind {
+	/* SYSTEM */
+	case requests.POLICY_FILE:
 		c.SendSystemResponse(responses.POLICY_FILE)
-
-	} else if req.Kind == requests.VERSION_CHECK {
+	case requests.VERSION_CHECK:
 		c.SendSystemResponse(responses.VERSION_CHECK)
-
-	} else if req.Kind == requests.AUTO_JOIN {
-		// TODO: Handle
+	case requests.AUTO_JOIN:
 		c.SendSystemResponse(responses.AUTO_JOIN)
-
-	} else if req.Kind == requests.ROUND_TRIP {
+	case requests.ROUND_TRIP:
 		c.SendSystemResponse(responses.ROUND_TRIP)
-
-	} else if req.Kind == requests.DISCONNECT {
+	case requests.DISCONNECT:
 		c.SendSystemResponse(responses.LOGOUT)
 
-	} else if req.Kind == requests.LOGIN {
+	/* COMMANDS */
+	case requests.LOGIN:
 		RoomList(req, c, clientManager, cafeManager)
-
-	} else if req.Kind == requests.C2S_VERSION_CHECK {
+	case requests.C2S_VERSION_CHECK:
 		err = VersionCheck(req, c, clientManager, cafeManager)
-
-	} else if req.Kind == requests.C2S_JOIN_CAFE {
+	case requests.C2S_JOIN_CAFE:
 		err = JoinCafe(req, c, clientManager, cafeManager)
-
-	} else if req.Kind == requests.C2S_LOGIN {
-		err = Login(req, c, clientManager, cafeManager) // lgn - S2C_LOGIN
+	case requests.C2S_LOGIN:
+		err = Login(req, c, clientManager, cafeManager)
 		if err != nil {
 			return err
 		}
-
-		//.....
-		//}else if(req.Kind == ROUND_TRIP_REQUEST) {
-
 	}
 
 	if err != nil {
