@@ -17,14 +17,14 @@ func HandleClient(c *client.Client, clientManager *managers.ClientManager, cafeM
 		req, err := c.NextRequest()
 		if err != nil {
 			fmt.Printf("Failed to read request: %s\n", err.Error())
-
+			break
 		}
 
 		// Handle requests
 		err = HandleRequest(req, c, clientManager, cafeManager)
 		if err != nil {
 			fmt.Printf("Failed to handle request: %s\n", err.Error())
-
+			break
 		}
 
 	}
