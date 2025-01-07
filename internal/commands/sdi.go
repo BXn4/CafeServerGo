@@ -6,37 +6,43 @@ import (
 	"cafego/internal/types/requests"
 	"cafego/internal/utils"
 	"fmt"
-	"slices"
 	"strconv"
+  "errors"
 )
 
 // sdi - C2S_SHOP_DELETE_ITEM
 func SellIngredient(req *requests.Request, c *client.Client, clientManager *managers.ClientManager, cafeManager *managers.CafeManager) error {
 
-	ingredients := utils.Ingredients
+  if c.Cafe.Owner() != c.Player.ID {
+    return errors.New("You dont own this cafe!")
+  }
 
-	var ingredientIDs []int
-	for _, ingredient := range ingredients {
-		ingredientIDs = append(ingredientIDs, ingredient.ID)
-	}
-
+  // Convert id got from cmd to int
 	ingredientID, err := strconv.Atoi(req.Args[2])
-	if err != nil || !slices.Contains(ingredientIDs, ingredientID) {
-		fmt.Printf("invalid ingredient ID: %v", err)
-		return err
-	}
-
-	ingredientAmount, err := strconv.Atoi(req.Args[3])
-	if err != nil || ingredientAmount <= 0 {
-		fmt.Printf("invalid ingredient amount: %v", err)
-		return err
-	}
-
-	ingredientInfo, err := utils.GetIngredientInfo(ingredientID)
 	if err != nil {
-		return nil
+		fmt.Printf("Can parse id to int: %v", err)
+		return err
 	}
 
+  // Check if there is ingredient with that id
+  ingredientInfo, err := utils.GetIngredient(ingredientID)
+  if  err != nil {
+		fmt.Printf("Invalid ingredient ID: %v", err)
+  }
+
+  // Convert amount got from cmd to int
+	ingredientAmount, err := strconv.Atoi(req.Args[3])
+	if err != nil {
+		fmt.Printf("Can parse ingredient amount to int: %v", err)
+		return err
+	}
+
+  // Check if amount is right
+  if count, ok := c.Cafe.Fridge()[ingredientID]; !ok && count < ingredientAmount && ingredientAmount < 0{
+    return fmt.Errorf("Invalid ingredient amount: %v, current amount: %v", ingredientAmount, count)
+  }
+
+  // Calcualte money
 	if ingredientInfo.Cash != 0 {
 		c.Player.Cash += int(float64(ingredientInfo.Cash) * 0.2 * float64(ingredientAmount))
 	} else if ingredientInfo.Gold != 0 {

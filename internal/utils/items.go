@@ -39,32 +39,14 @@ type Data struct {
 	Wods []Wod `xml:"wod"`
 }
 
-var (
-	Wods            []Wod
-	Tiles           []Wod
-	Walls           []Wod
-	Doors           []Wod
-	Stoves          []Wod
-	Counters        []Wod
-	Fridges         []Wod
-	Tables          []Wod
-	Decors          []Wod
-	Chairs          []Wod
-	Wallobjects     []Wod
-	Dishes          []Wod
-	Ingredients     []Wod
-	Vendingmachines []Wod
-	Expansions      []Wod
-	Achievements    []Wod
-	Coops           []Wod
-	FastFoods       []Wod
-)
+// !!! THIS SHOUL ONLY BE READ !!!
+var itemCollection map[string][]Wod
 
-func ReadAndCacheItems() {
+func ReadAndCacheItems() error {
 	xmlFile, err := os.Open("./data/CafeItems.xml")
 	if err != nil {
 		fmt.Println("Error opening file:", err)
-		return
+		return err
 	}
 	defer xmlFile.Close()
 	fmt.Println("Successfully Opened CafeItems.xml")
@@ -74,76 +56,174 @@ func ReadAndCacheItems() {
 	err = decoder.Decode(&result)
 	if err != nil {
 		fmt.Println("Error decoding XML:", err)
-		return
+		return err
 	}
 
-	Wods = result.Wods
-	Tiles = []Wod{}
-	Walls = []Wod{}
-	Doors = []Wod{}
-	Stoves = []Wod{}
-	Counters = []Wod{}
-	Fridges = []Wod{}
-	Tables = []Wod{}
-	Decors = []Wod{}
-	Chairs = []Wod{}
-	Wallobjects = []Wod{}
-	Dishes = []Wod{}
-	Ingredients = []Wod{}
-	Vendingmachines = []Wod{}
-	Expansions = []Wod{}
-	Achievements = []Wod{}
-	Coops = []Wod{}
-	FastFoods = []Wod{}
+  itemCollection = make(map[string][]Wod)
+  var loadedCount int
+	for _, wod := range result.Wods {
+    itemCollection[wod.Group] = append(itemCollection[wod.Group], wod)
+    loadedCount++
+  }
 
-	for _, wod := range Wods {
-		switch wod.Group {
-		case "Tile":
-			Tiles = append(Tiles, wod)
-		case "Wall":
-			Walls = append(Walls, wod)
-		case "Door":
-			Doors = append(Doors, wod)
-		case "Stove":
-			Stoves = append(Stoves, wod)
-		case "Counter":
-			Counters = append(Counters, wod)
-		case "Fridge":
-			Fridges = append(Fridges, wod)
-		case "Table":
-			Tables = append(Tables, wod)
-		case "Deco":
-			Decors = append(Decors, wod)
-		case "Chair":
-			Chairs = append(Chairs, wod)
-		case "Wallobject":
-			Wallobjects = append(Wallobjects, wod)
-		case "Dish":
-			Dishes = append(Dishes, wod)
-		case "Ingredient":
-			Ingredients = append(Ingredients, wod)
-		case "Vendingmachine":
-			Vendingmachines = append(Vendingmachines, wod)
-		case "Expansion":
-			Expansions = append(Expansions, wod)
-		case "Achievement":
-			Achievements = append(Achievements, wod)
-		case "Coop":
-			Coops = append(Coops, wod)
-		case "Fastfood":
-			FastFoods = append(FastFoods, wod)
-		}
-	}
-
-	fmt.Printf("Successfully loaded %d WOD entries\n", len(Wods))
+	fmt.Printf("Successfully loaded %d WOD entries\n", loadedCount)
 	fmt.Println("Filtered and grouped WOD entries")
+  return nil
 }
 
-func GetIngredientInfo(ingredientID int) (Wod, error) {
-	for _, ingredient := range Ingredients {
-		if ingredientID == ingredient.ID {
-			return ingredient, nil
+
+func GetIngredient(id int) (Wod, error) {
+	for _, item := range itemCollection["Ingredient"] {
+		if id == item.ID {
+			return item, nil
 		}
 	}
-	return Wod{}, nil
+  return Wod{}, fmt.Errorf("No item found with id: %v", id)
 }
+
+
+func GetTile(id int) (Wod, error) {
+	for _, item := range itemCollection["Tile"] {
+		if id == item.ID {
+			return item, nil
+		}
+	}
+  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+}
+
+func GetWall(id int) (Wod, error) {
+	for _, item := range itemCollection["Wall"] {
+		if id == item.ID {
+			return item, nil
+		}
+	}
+  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+}
+
+func GetDoor(id int) (Wod, error) {
+	for _, item := range itemCollection["Door"] {
+		if id == item.ID {
+			return item, nil
+		}
+	}
+  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+}
+
+func GetStove(id int) (Wod, error) {
+	for _, item := range itemCollection["Stove"] {
+		if id == item.ID {
+			return item, nil
+		}
+	}
+  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+}
+
+
+func GetCounter(id int) (Wod, error) {
+	for _, item := range itemCollection["Counter"] {
+		if id == item.ID {
+			return item, nil
+		}
+	}
+  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+}
+
+func GetFridge(id int) (Wod, error) {
+	for _, item := range itemCollection["Fridge"] {
+		if id == item.ID {
+			return item, nil
+		}
+	}
+  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+}
+
+func GetTable(id int) (Wod, error) {
+	for _, item := range itemCollection["Table"] {
+		if id == item.ID {
+			return item, nil
+		}
+	}
+  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+}
+
+func GetDeco(id int) (Wod, error) {
+	for _, item := range itemCollection["Deco"] {
+		if id == item.ID {
+			return item, nil
+		}
+	}
+  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+}
+
+func GetChair(id int) (Wod, error) {
+	for _, item := range itemCollection["Chair"] {
+		if id == item.ID {
+			return item, nil
+		}
+	}
+  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+}
+
+func GetWallobject(id int) (Wod, error) {
+	for _, item := range itemCollection["Wallobject"] {
+		if id == item.ID {
+			return item, nil
+		}
+	}
+  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+}
+
+func GetDish(id int) (Wod, error) {
+	for _, item := range itemCollection["Dish"] {
+		if id == item.ID {
+			return item, nil
+		}
+	}
+  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+}
+
+func GetVendingmachine(id int) (Wod, error) {
+	for _, item := range itemCollection["Vendingmachine"] {
+		if id == item.ID {
+			return item, nil
+		}
+	}
+  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+}
+
+func GetExpansion(id int) (Wod, error) {
+	for _, item := range itemCollection["Expansion"] {
+		if id == item.ID {
+			return item, nil
+		}
+	}
+  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+}
+
+func GetAchievement(id int) (Wod, error) {
+	for _, item := range itemCollection["Achievement"] {
+		if id == item.ID {
+			return item, nil
+		}
+	}
+  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+}
+
+func GetCoop(id int) (Wod, error) {
+	for _, item := range itemCollection["Coop"] {
+		if id == item.ID {
+			return item, nil
+		}
+	}
+  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+}
+
+func GetFastfood(id int) (Wod, error) {
+	for _, item := range itemCollection["Fastfood"] {
+		if id == item.ID {
+			return item, nil
+		}
+	}
+  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+}
+
