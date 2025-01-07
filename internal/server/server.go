@@ -5,6 +5,7 @@ import (
 	"cafego/internal/commands"
 	"cafego/internal/database"
 	"cafego/internal/managers"
+	"cafego/internal/utils"
 	"fmt"
 	"log"
 	"net"
@@ -36,6 +37,14 @@ func New(config *CafeConfig, dbconfig *database.DBConfig) *CafeServer {
 }
 
 func (s *CafeServer) Run() {
+
+	// Read the items XML file and cache it
+	utils.ReadAndCacheItems()
+
+	// Test
+	/*for _, chair := range utils.Chairs {
+		fmt.Printf("Wod ID: %d, Type: %s, Group: %s, Cash: %d\n", chair.ID, chair.Type, chair.Group, chair.Cash)
+	}*/
 
 	// Set up MariaDB connection
 	db, err := database.ConnectToDB(s.dbConfig)

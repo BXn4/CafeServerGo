@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Goodgame Studios Cafe - WOD -->
+<wodIds>
+<wod id="1" n="Static" g="Tile" t="Stonemediumgrey" walkable="1" rotatetype="0" cash="20" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="0" />
+<wod id="2" n="Static" g="Tile" t="Wooddarkbrown" walkable="1" rotatetype="0" cash="20" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="3" n="Static" g="Tile" t="Blank" walkable="1" rotatetype="0" />
+<wod id="4" n="Static" g="Tile" t="Woodmediumbrown" walkable="1" rotatetype="0" cash="20" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="0" />
+<wod id="5" n="Static" g="Tile" t="Chessblackwhite" walkable="1" rotatetype="0" cash="20" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="6" n="Static" g="Tile" t="Chessbluecream" walkable="1" rotatetype="0" cash="20" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="7" n="Static" g="Tile" t="Blankblocked" walkable="0" rotatetype="0" />
+<wod id="8" n="Static" g="Tile" t="Chessbluerose" walkable="1" rotatetype="1" cash="100" gold="0" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="9" n="Static" g="Tile" t="Chessgreyyellow" walkable="1" rotatetype="1" cash="100" gold="0" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="10" n="Static" g="Tile" t="Chesswhiterose" walkable="1" rotatetype="1" cash="100" gold="0" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="11" n="Static" g="Tile" t="Chessbackrose" walkable="1" rotatetype="1" cash="100" gold="0" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="12" n="Static" g="Tile" t="Saloonoldwood" walkable="1" rotatetype="1" cash="250" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="13" n="Static" g="Tile" t="Halloween" walkable="1" rotatetype="1" cash="600" gold="0" friends="0" goldNoFriends="0" releaseDate="1288166559" world="0" events="2" xp="0" level="1" />
+<wod id="14" n="Static" g="Tile" t="Daisyskyblue" walkable="1" rotatetype="1" cash="1000" gold="0" friends="0" goldNoFriends="0" releaseDate="1289915875" world="0" events="0" xp="0" level="1" />
+<wod id="15" n="Static" g="Tile" t="Daisypeach" walkable="1" rotatetype="1" cash="1000" gold="0" friends="0" goldNoFriends="0" releaseDate="1289915875" world="0" events="0" xp="0" level="1" />
+<wod id="16" n="Static" g="Tile" t="Daisygreen" walkable="1" rotatetype="1" cash="1000" gold="0" friends="0" goldNoFriends="0" releaseDate="1289915875" world="0" events="0" xp="0" level="1" />
+<wod id="17" n="Static" g="Tile" t="Xmasred" walkable="1" rotatetype="1" cash="1500" gold="0" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="18" n="Static" g="Tile" t="Xmaswood" walkable="1" rotatetype="1" cash="1000" gold="0" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="19" n="Static" g="Tile" t="Xmasbiscuit" walkable="1" rotatetype="1" cash="2000" gold="0" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="20" n="Static" g="Tile" t="Springchesspinkyellow" walkable="1" rotatetype="0" cash="1000" gold="0" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="21" n="Static" g="Tile" t="Springchessbluegreen" walkable="1" rotatetype="0" cash="1000" gold="0" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="22" n="Static" g="Tile" t="Springchessgreenyellow" walkable="1" rotatetype="0" cash="1000" gold="0" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="23" n="Static" g="Tile" t="Springchesspinklightpinkdark" walkable="1" rotatetype="0" cash="1000" gold="0" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="24" n="Static" g="Tile" t="Springchessbluecream" walkable="1" rotatetype="0" cash="1000" gold="0" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="25" n="Static" g="Tile" t="Springwooddark" walkable="1" rotatetype="0" cash="4000" gold="0" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="26" n="Static" g="Tile" t="Springwoodmiddle" walkable="1" rotatetype="0" cash="6000" gold="0" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="27" n="Static" g="Tile" t="Springwoodlight" walkable="1" rotatetype="0" cash="5000" gold="0" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="28" n="Static" g="Tile" t="Springfriedegg" walkable="1" rotatetype="0" cash="10000" gold="0" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="29" n="Static" g="Tile" t="Springthreeegg" walkable="1" rotatetype="0" cash="8000" gold="0" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="101" n="Static" g="Wall" t="Basicpaleblue" cash="20" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="0" />
+<wod id="102" n="Static" g="Wall" t="Basicbrown" cash="20" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="103" n="Static" g="Wall" t="Basicchocolatestripes" cash="40" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="104" n="Static" g="Wall" t="Basiccreampatern" cash="40" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="105" n="Static" g="Wall" t="Basicgrasgreen" cash="20" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="106" n="Static" g="Wall" t="Basiciceblue" cash="20" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="107" n="Static" g="Wall" t="Basicloungegrey" cash="20" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="108" n="Static" g="Wall" t="Basicoceangreen" cash="20" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="109" n="Static" g="Wall" t="Basicorange" cash="20" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="110" n="Static" g="Wall" t="Basicpink" cash="20" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="111" n="Static" g="Wall" t="Basicred" cash="20" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="112" n="Static" g="Wall" t="Basicrose" cash="20" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="113" n="Static" g="Wall" t="Basicsunnyyellow" cash="20" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="114" n="Static" g="Wall" t="Basicwhite" cash="20" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="115" n="Static" g="Wall" t="Basicwoodgreen" cash="20" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="116" n="Static" g="Wall" t="Blank" cash="0" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="0" />
+<wod id="117" n="Static" g="Wall" t="Chessblackwhite" cash="800" gold="0" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="118" n="Static" g="Wall" t="Chessbluewhite" cash="900" gold="0" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="119" n="Static" g="Wall" t="Chesswhiterose" cash="900" gold="0" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="120" n="Static" g="Wall" t="Saloonsexyred" cash="5000" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="121" n="Static" g="Wall" t="Saloonstripes" cash="4000" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="122" n="Static" g="Wall" t="Halloween" cash="7000" gold="0" friends="0" goldNoFriends="0" releaseDate="1288166559" world="0" events="2" xp="0" level="1" />
+<wod id="123" n="Static" g="Wall" t="Daisystrawberry" cash="6000" gold="0" friends="0" goldNoFriends="0" releaseDate="1289915875" world="0" events="0" xp="0" level="1" />
+<wod id="124" n="Static" g="Wall" t="Daisypeach" cash="7000" gold="0" friends="0" goldNoFriends="0" releaseDate="1289915875" world="0" events="0" xp="0" level="1" />
+<wod id="125" n="Static" g="Wall" t="Xmasredgreen" cash="1000" gold="0" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="126" n="Static" g="Wall" t="Xmasredred" cash="1500" gold="0" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="127" n="Static" g="Wall" t="Xmasredflakes" cash="2500" gold="0" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="128" n="Static" g="Wall" t="Xmasgingerbreadcandy" cash="7500" gold="0" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="129" n="Static" g="Wall" t="Xmasgingerbread" cash="7000" gold="0" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="130" n="Static" g="Wall" t="Springblowballs" cash="6000" gold="0" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="131" n="Static" g="Wall" t="Springtendrillar" cash="0" gold="1" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="132" n="Static" g="Wall" t="Springnest" cash="0" gold="1" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="133" n="Static" g="Wall" t="Springcream" cash="5000" gold="0" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="134" n="Static" g="Wall" t="Springflowers" cash="9000" gold="0" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="135" n="Static" g="Wall" t="Springseed" cash="11000" gold="0" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="201" n="Basic" g="Door" t="Basicwhite" cash="50" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="0" />
+<wod id="202" n="Basic" g="Door" t="Basicwood" cash="1100" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="203" n="Basic" g="Door" t="Saloon" cash="0" gold="15" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="204" n="Basic" g="Door" t="Halloween" cash="14000" gold="0" friends="0" goldNoFriends="0" releaseDate="1288166559" world="0" events="2" xp="0" level="1" />
+<wod id="205" n="Basic" g="Door" t="Daisy" cash="0" gold="3" friends="0" goldNoFriends="0" releaseDate="1289915875" world="0" events="0" xp="0" level="1" />
+<wod id="206" n="Basic" g="Door" t="Xmasgold" cash="0" gold="5" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="207" n="Basic" g="Door" t="Xmasgingerbread" cash="20000" gold="0" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="252" n="Basic" g="Stove" t="Basic" walkable="0" rotatetype="3" cash="1000" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="0" />
+<wod id="253" n="Basic" g="Stove" t="Dinerrose" walkable="0" rotatetype="3" cash="0" gold="5" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="254" n="Basic" g="Stove" t="Dinerturquoise" walkable="0" rotatetype="3" cash="0" gold="4" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="255" n="Basic" g="Stove" t="Saloon" walkable="0" rotatetype="3" cash="0" gold="7" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="256" n="Basic" g="Stove" t="Halloween" walkable="0" rotatetype="3" cash="0" gold="6" friends="0" goldNoFriends="0" releaseDate="1288166559" world="0" events="2" xp="0" level="1" />
+<wod id="257" n="Basic" g="Stove" t="Daisy" walkable="0" rotatetype="3" cash="12000" gold="0" friends="0" goldNoFriends="0" releaseDate="1289915875" world="0" events="0" xp="0" level="1" />
+<wod id="258" n="Basic" g="Stove" t="Xmas" walkable="0" rotatetype="3" cash="0" gold="3" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="259" n="Basic" g="Stove" t="Spring" walkable="0" rotatetype="3" cash="15000" gold="0" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="301" n="Basic" g="Counter" t="Basic" walkable="0" rotatetype="2" cash="500" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="0" />
+<wod id="302" n="Basic" g="Counter" t="Basicgreen" walkable="0" rotatetype="2" cash="1000" gold="0" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="303" n="Basic" g="Counter" t="Basicpink" walkable="0" rotatetype="2" cash="1500" gold="0" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="304" n="Basic" g="Counter" t="Basicred" walkable="0" rotatetype="2" cash="1000" gold="0" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="305" n="Basic" g="Counter" t="Basicwhite" walkable="0" rotatetype="2" cash="500" gold="0" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="306" n="Basic" g="Counter" t="Basicyellow" walkable="0" rotatetype="2" cash="1000" gold="0" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="307" n="Basic" g="Counter" t="Saloon" walkable="0" rotatetype="3" cash="0" gold="3" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="308" n="Basic" g="Counter" t="Halloween" walkable="0" rotatetype="2" cash="0" gold="4" friends="0" goldNoFriends="0" releaseDate="1288166559" world="0" events="2" xp="0" level="1" />
+<wod id="309" n="Basic" g="Counter" t="Daisy" walkable="0" rotatetype="3" cash="10000" gold="0" friends="0" goldNoFriends="0" releaseDate="1289915875" world="0" events="0" xp="0" level="1" />
+<wod id="310" n="Basic" g="Counter" t="Xmas" walkable="0" rotatetype="3" cash="10000" gold="0" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="311" n="Basic" g="Counter" t="Springdark" walkable="0" rotatetype="3" cash="10000" gold="0" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="312" n="Basic" g="Counter" t="Springlight" walkable="0" rotatetype="3" cash="0" gold="1" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="351" n="Basic" g="Fridge" t="Basic" walkable="0" rotatetype="3" cash="500" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="0" inventorySize="50" />
+<wod id="352" n="Basic" g="Fridge" t="Dinerrose" walkable="0" rotatetype="3" cash="0" gold="8" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" inventorySize="50" />
+<wod id="353" n="Basic" g="Fridge" t="Dinerturquoise" walkable="0" rotatetype="4" cash="0" gold="7" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" inventorySize="50" />
+<wod id="354" n="Basic" g="Fridge" t="Saloon" walkable="0" rotatetype="3" cash="0" gold="6" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" inventorySize="50" />
+<wod id="355" n="Basic" g="Fridge" t="Halloween" walkable="0" rotatetype="3" cash="0" gold="5" friends="0" goldNoFriends="0" releaseDate="1287066242" world="0" events="2" xp="0" level="1" inventorySize="50" />
+<wod id="356" n="Basic" g="Fridge" t="Daisy" walkable="0" rotatetype="3" cash="0" gold="4" friends="0" goldNoFriends="0" releaseDate="1289915875" world="0" events="0" xp="0" level="1" inventorySize="50" />
+<wod id="357" n="Basic" g="Fridge" t="Xmas" walkable="0" rotatetype="3" cash="0" gold="4" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" inventorySize="50" />
+<wod id="358" n="Basic" g="Fridge" t="Spring" walkable="0" rotatetype="3" cash="0" gold="5" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" inventorySize="50" />
+<wod id="401" n="Basic" g="Table" t="Basicwhite" walkable="0" rotatetype="1" cash="200" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="0" />
+<wod id="402" n="Basic" g="Table" t="Basicred" walkable="0" rotatetype="1" cash="200" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="403" n="Basic" g="Table" t="Basicyellow" walkable="0" rotatetype="1" cash="200" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="404" n="Basic" g="Table" t="Basicpink" walkable="0" rotatetype="1" cash="400" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="405" n="Basic" g="Table" t="Basicgreen" walkable="0" rotatetype="1" cash="200" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="406" n="Basic" g="Table" t="Basicblue" walkable="0" rotatetype="1" cash="200" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="407" n="Basic" g="Table" t="Dinerrounddark" walkable="0" rotatetype="1" cash="0" gold="1" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="408" n="Basic" g="Table" t="Dinerroundlight" walkable="0" rotatetype="1" cash="0" gold="1" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="409" n="Basic" g="Table" t="Dinersquareblue" walkable="0" rotatetype="1" cash="1500" gold="0" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="410" n="Basic" g="Table" t="Dinersquarepink" walkable="0" rotatetype="1" cash="2000" gold="0" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="411" n="Basic" g="Table" t="Dinersquareyellow" walkable="0" rotatetype="1" cash="1500" gold="0" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="412" n="Basic" g="Table" t="Saloonbarrel" walkable="0" rotatetype="1" cash="0" gold="2" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="413" n="Basic" g="Table" t="Saloon" walkable="0" rotatetype="1" cash="0" gold="2" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="414" n="Basic" g="Table" t="Saloonpoker" walkable="0" rotatetype="1" cash="0" gold="3" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="415" n="Basic" g="Table" t="Halloween" walkable="0" rotatetype="1" cash="0" gold="3" friends="0" goldNoFriends="0" releaseDate="1288166559" world="0" events="2" xp="0" level="1" />
+<wod id="416" n="Basic" g="Table" t="Daisybrown" walkable="0" rotatetype="1" cash="7500" gold="0" friends="0" goldNoFriends="0" releaseDate="1289915875" world="0" events="0" xp="0" level="1" />
+<wod id="417" n="Basic" g="Table" t="Daisysquares" walkable="0" rotatetype="1" cash="0" gold="1" friends="0" goldNoFriends="0" releaseDate="1289915875" world="0" events="0" xp="0" level="1" />
+<wod id="418" n="Basic" g="Table" t="Xmasgingerbread" walkable="0" rotatetype="1" cash="0" gold="2" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="419" n="Basic" g="Table" t="Xmasred" walkable="0" rotatetype="1" cash="0" gold="1" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="420" n="Basic" g="Table" t="Xmasgreen" walkable="0" rotatetype="1" cash="8000" gold="0" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="421" n="Basic" g="Table" t="Springegg" walkable="0" rotatetype="1" cash="0" gold="1" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="422" n="Basic" g="Table" t="Springwicker" walkable="0" rotatetype="1" cash="5000" gold="0" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="423" n="Basic" g="Table" t="Springdandelion" walkable="0" rotatetype="1" cash="0" gold="2" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="501" n="Basic" g="Deco" t="Basicfloorlamp" walkable="0" rotatetype="2" cash="2000" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="502" n="Basic" g="Deco" t="Basicumbrellastand" walkable="0" rotatetype="2" cash="1750" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="503" n="Basic" g="Deco" t="Cactus" walkable="0" rotatetype="2" cash="0" gold="3" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="504" n="Basic" g="Deco" t="Hibiscus" walkable="0" rotatetype="2" cash="500" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="505" n="Basic" g="Deco" t="Pinkflower1" walkable="0" rotatetype="2" cash="700" gold="0" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="506" n="Basic" g="Deco" t="Flowerpotyellow" walkable="0" rotatetype="2" cash="8000" gold="0" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="507" n="Basic" g="Deco" t="Cactusbigpink" walkable="0" rotatetype="2" cash="1500" gold="0" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="508" n="Basic" g="Deco" t="Flowerpotblue" walkable="0" rotatetype="2" cash="0" gold="2" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="509" n="Basic" g="Deco" t="Littlebigtree" walkable="0" rotatetype="2" cash="0" gold="3" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="510" n="Basic" g="Deco" t="Cactuslong" walkable="0" rotatetype="2" cash="20000" gold="0" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="511" n="Basic" g="Deco" t="Centralwell" walkable="0" rotatetype="0" />
+<wod id="512" n="Language" g="Deco" t="Weathercock" walkable="0" rotatetype="0" />
+<wod id="513" n="Basic" g="Deco" t="Stonewallleft" walkable="0" rotatetype="0" />
+<wod id="514" n="Basic" g="Deco" t="Stonewallright" walkable="0" rotatetype="0" />
+<wod id="515" n="Basic" g="Deco" t="Marketstand" walkable="0" rotatetype="0" />
+<wod id="516" n="Animated" g="Deco" t="Halloweengrave" walkable="0" rotatetype="2" cash="0" gold="9" friends="0" goldNoFriends="0" releaseDate="1288166559" world="0" events="2" xp="0" level="0" />
+<wod id="517" n="Basic" g="Deco" t="Dinerjukebox" walkable="0" rotatetype="4" cash="0" gold="5" friends="0" goldNoFriends="0" releaseDate="1283946837" world="0" events="0" xp="0" level="0" />
+<wod id="518" n="Basic" g="Deco" t="Saloondynamite" walkable="0" rotatetype="2" cash="0" gold="3" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="519" n="Basic" g="Deco" t="Saloonmoney" walkable="0" rotatetype="2" cash="0" gold="12" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="520" n="Basic" g="Deco" t="Saloonvulture" walkable="0" rotatetype="2" cash="0" gold="20" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="521" n="Basic" g="Deco" t="Saloonhallstand" walkable="0" rotatetype="2" cash="0" gold="3" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="522" n="Animated" g="Deco" t="Candles" walkable="0" rotatetype="2" cash="0" gold="5" friends="0" goldNoFriends="0" releaseDate="1288166559" world="0" events="2" xp="0" level="1" />
+<wod id="523" n="Animated" g="Deco" t="Halloweendracula" walkable="0" rotatetype="2" cash="0" gold="8" friends="0" goldNoFriends="0" releaseDate="1288166559" world="0" events="2" xp="0" level="1" />
+<wod id="524" n="Animated" g="Deco" t="Halloweencat" walkable="0" rotatetype="2" cash="0" gold="4" friends="0" goldNoFriends="0" releaseDate="1288166559" world="0" events="2" xp="0" level="1" />
+<wod id="525" n="Animated" g="Deco" t="Halloweenghost" walkable="0" rotatetype="2" cash="0" gold="3" friends="0" goldNoFriends="0" releaseDate="1288166559" world="0" events="2" xp="0" level="1" />
+<wod id="526" n="Animated" g="Deco" t="Halloweenpumkin" walkable="0" rotatetype="2" cash="0" gold="6" friends="0" goldNoFriends="0" releaseDate="1288166559" world="0" events="2" xp="0" level="1" />
+<wod id="527" n="Basic" g="Deco" t="Daisycherryblossomtree" walkable="0" rotatetype="2" cash="0" gold="5" friends="0" goldNoFriends="0" releaseDate="1289915875" world="0" events="0" xp="0" level="1" />
+<wod id="528" n="Basic" g="Deco" t="Daisypietree" walkable="0" rotatetype="2" cash="0" gold="3" friends="0" goldNoFriends="0" releaseDate="1289915875" world="0" events="0" xp="0" level="1" />
+<wod id="529" n="Basic" g="Deco" t="Daisyservingcart" walkable="0" rotatetype="2" cash="0" gold="3" friends="0" goldNoFriends="0" releaseDate="1289915875" world="0" events="0" xp="0" level="1" />
+<wod id="530" n="Basic" g="Deco" t="Xmastree" walkable="0" rotatetype="2" cash="0" gold="5" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="531" n="Basic" g="Deco" t="Xmasnarnialantern" walkable="0" rotatetype="2" cash="0" gold="3" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="532" n="Basic" g="Deco" t="Xmasrudolph" walkable="0" rotatetype="2" cash="0" gold="4" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="533" n="Basic" g="Deco" t="Xmassnowman" walkable="0" rotatetype="2" cash="0" gold="5" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="534" n="Basic" g="Deco" t="Xmascupcaketree" walkable="0" rotatetype="2" cash="0" gold="3" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="535" n="Advent" g="Deco" t="Xmasadventswreath" walkable="0" rotatetype="2" cash="4000" gold="0" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="536" n="Basic" g="Deco" t="Christmastree" walkable="0" rotatetype="0" />
+<wod id="537" n="Animated" g="Deco" t="Fountain" walkable="0" rotatetype="2" cash="0" gold="60" friends="0" goldNoFriends="0" releaseDate="1301608800" world="0" events="4" xp="0" level="0" />
+<wod id="538" n="Basic" g="Deco" t="Springnest" walkable="0" rotatetype="2" cash="0" gold="1" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="539" n="Basic" g="Deco" t="Springpussywillowlong" walkable="0" rotatetype="2" cash="12500" gold="0" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="540" n="Basic" g="Deco" t="Springpussywillowround" walkable="0" rotatetype="2" cash="10000" gold="0" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="541" n="Basic" g="Deco" t="Cottoncandymachine" walkable="0" rotatetype="3" cash="0" gold="25" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="4" xp="0" level="0" />
+<wod id="601" n="Basic" g="Chair" t="Basicwhite" walkable="0" rotatetype="3" cash="100" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="0" />
+<wod id="602" n="Basic" g="Chair" t="Basicblue" walkable="0" rotatetype="3" cash="100" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="603" n="Basic" g="Chair" t="Basicyellow" walkable="0" rotatetype="3" cash="100" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="604" n="Basic" g="Chair" t="Basicred" walkable="0" rotatetype="3" cash="100" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="605" n="Basic" g="Chair" t="Basicgreen" walkable="0" rotatetype="3" cash="100" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="606" n="Basic" g="Chair" t="Basicpink" walkable="0" rotatetype="3" cash="200" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="607" n="Basic" g="Chair" t="Dinerblue" walkable="0" rotatetype="3" cash="1600" gold="0" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="608" n="Basic" g="Chair" t="Dinerpink" walkable="0" rotatetype="3" cash="1700" gold="0" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="609" n="Basic" g="Chair" t="Dinerpinkblue" walkable="0" rotatetype="3" cash="2000" gold="0" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="610" n="Basic" g="Chair" t="Dinerred" walkable="0" rotatetype="3" cash="1800" gold="0" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="0" />
+<wod id="611" n="Basic" g="Chair" t="Dineryellow" walkable="0" rotatetype="3" cash="1500" gold="0" friends="0" goldNoFriends="0" releaseDate="1282748184" world="0" events="0" xp="0" level="1" />
+<wod id="612" n="Basic" g="Chair" t="Saloon" walkable="0" rotatetype="3" cash="3000" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="613" n="Basic" g="Chair" t="Saloonstool" walkable="0" rotatetype="2" cash="2000" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="614" n="Basic" g="Chair" t="Halloween" walkable="0" rotatetype="3" cash="0" gold="2" friends="0" goldNoFriends="0" releaseDate="1288166559" world="0" events="2" xp="0" level="1" />
+<wod id="615" n="Basic" g="Chair" t="Daisydinerbench" walkable="0" rotatetype="3" cash="0" gold="1" friends="0" goldNoFriends="0" releaseDate="1289915875" world="0" events="0" xp="0" level="1" />
+<wod id="616" n="Basic" g="Chair" t="Daisywickerchair" walkable="0" rotatetype="3" cash="9000" gold="0" friends="0" goldNoFriends="0" releaseDate="1289915875" world="0" events="0" xp="0" level="1" />
+<wod id="617" n="Basic" g="Chair" t="Xmaschoc" walkable="0" rotatetype="2" cash="4000" gold="0" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="618" n="Basic" g="Chair" t="Xmasredmuffin" walkable="0" rotatetype="2" cash="0" gold="1" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="619" n="Basic" g="Chair" t="Xmasgreenmuffin" walkable="0" rotatetype="2" cash="0" gold="1" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="620" n="Basic" g="Chair" t="Xmasred" walkable="0" rotatetype="3" cash="5000" gold="0" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="621" n="Basic" g="Chair" t="Xmasgreen" walkable="0" rotatetype="3" cash="0" gold="1" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="622" n="Basic" g="Chair" t="Springegg" walkable="0" rotatetype="2" cash="3500" gold="0" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="623" n="Basic" g="Chair" t="Springwicker" walkable="0" rotatetype="3" cash="0" gold="1" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="624" n="Basic" g="Chair" t="Springdandelion" walkable="0" rotatetype="3" cash="11000" gold="0" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="901" n="Basic" g="Wallobject" t="Windowbasicwhite" cash="400" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="0" />
+<wod id="902" n="Basic" g="Wallobject" t="Windowbasicwood" cash="800" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="903" n="Basic" g="Wallobject" t="Basicspicerack" cash="0" gold="4" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="904" n="Basic" g="Wallobject" t="Basichangingrack" cash="0" gold="5" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="905" n="Basic" g="Wallobject" t="Basicclock" cash="700" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="906" n="Basic" g="Wallobject" t="Windowdineropen" cash="8000" gold="0" friends="0" goldNoFriends="0" releaseDate="1283946837" world="0" events="0" xp="0" level="0" width="2" />
+<wod id="907" n="Basic" g="Wallobject" t="Windowdinerstripes" cash="6000" gold="0" friends="0" goldNoFriends="0" releaseDate="1283946837" world="0" events="0" xp="0" level="0" width="2" />
+<wod id="910" n="Basic" g="Wallobject" t="Dinercadillac" walkable="0" rotatetype="2" cash="0" gold="4" friends="0" goldNoFriends="0" releaseDate="1283946837" world="0" events="0" xp="0" level="0" width="2" />
+<wod id="911" n="Basic" g="Wallobject" t="Dinerlongplayclock" cash="5000" gold="0" friends="0" goldNoFriends="0" releaseDate="1283946837" world="0" events="0" xp="0" level="0" />
+<wod id="912" n="Basic" g="Wallobject" t="Dinermilkshake" walkable="0" rotatetype="2" cash="10000" gold="0" friends="0" goldNoFriends="0" releaseDate="1283946837" world="0" events="0" xp="0" level="0" />
+<wod id="913" n="Basic" g="Wallobject" t="Windowsaloon" cash="10000" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="914" n="Basic" g="Wallobject" t="Saloonlamp" cash="0" gold="5" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="915" n="Basic" g="Wallobject" t="Saloonliquorboard" cash="0" gold="5" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="916" n="Basic" g="Wallobject" t="Saloonwantedposter" walkable="0" rotatetype="2" cash="0" gold="4" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="917" n="Basic" g="Wallobject" t="Saloonskull" cash="0" gold="2" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
+<wod id="918" n="Basic" g="Wallobject" t="Windowhalloween" cash="0" gold="1" friends="0" goldNoFriends="0" releaseDate="1288166559" world="0" events="2" xp="0" level="1" />
+<wod id="919" n="Animated" g="Wallobject" t="Halloweentorch" cash="0" gold="1" friends="0" goldNoFriends="0" releaseDate="1288166559" world="0" events="2" xp="0" level="1" />
+<wod id="920" n="Animated" g="Wallobject" t="Halloweenpainting" cash="0" gold="3" friends="0" goldNoFriends="0" releaseDate="1288166559" world="0" events="2" xp="0" level="1" />
+<wod id="921" n="Animated" g="Wallobject" t="Halloweenboard" cash="0" gold="5" friends="0" goldNoFriends="0" releaseDate="1288166559" world="0" events="2" xp="0" level="1" />
+<wod id="922" n="Animated" g="Wallobject" t="Halloweenzombie" cash="0" gold="4" friends="0" goldNoFriends="0" releaseDate="1288166559" world="0" events="2" xp="0" level="1" />
+<wod id="923" n="Basic" g="Wallobject" t="Daisypainting" cash="0" gold="2" friends="0" goldNoFriends="0" releaseDate="1289915875" world="0" events="0" xp="0" level="1" />
+<wod id="924" n="Basic" g="Wallobject" t="Daisyplates" cash="0" gold="3" friends="0" goldNoFriends="0" releaseDate="1289915875" world="0" events="0" xp="0" level="1" />
+<wod id="925" n="Basic" g="Wallobject" t="Daisycherrylampe" cash="11000" gold="0" friends="0" goldNoFriends="0" releaseDate="1289915875" world="0" events="0" xp="0" level="1" />
+<wod id="926" n="Basic" g="Wallobject" t="Windowdaisysky" cash="12500" gold="0" friends="0" goldNoFriends="0" releaseDate="1289915875" world="0" events="0" xp="0" level="1" width="2" />
+<wod id="927" n="Basic" g="Wallobject" t="Windowdaisyflowers" cash="0" gold="4" friends="0" goldNoFriends="0" releaseDate="1289915875" world="0" events="0" xp="0" level="1" width="2" />
+<wod id="928" n="Basic" g="Wallobject" t="Windowxmasbutterbiscuit" cash="0" gold="3" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="929" n="Basic" g="Wallobject" t="Windowxmaspinksugar" cash="7000" gold="0" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="930" n="Basic" g="Wallobject" t="Xmasgarland" cash="500" gold="0" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="931" n="Basic" g="Wallobject" t="Xmasmistletoe" cash="1500" gold="0" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="932" n="Basic" g="Wallobject" t="Xmasstnicholassock" cash="2500" gold="0" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" />
+<wod id="933" n="Basic" g="Wallobject" t="Windowxmasgold" cash="15000" gold="0" friends="0" goldNoFriends="0" releaseDate="1291134071" world="0" events="3" xp="0" level="1" width="2" />
+<wod id="934" n="Basic" g="Wallobject" t="Springcollar" cash="0" gold="2" friends="0" goldNoFriends="0" releaseDate="1300806348" world="0" events="5" xp="0" level="1" />
+<wod id="1001" n="Top" g="Avatar" t="Girl" gender="1" colors="798F8F#C5CBE3#76AFB7#61B866#FFE266#F6BCC4#FF7C91#CE8AC5#4A877D#568C49#6BA831#87C7A8#79AEB8#3C7385#B3B4B7#BB8731#BA5C33" />
+<wod id="1002" n="Top" g="Avatar" t="Boy" gender="2" colors="475454#C5CBE3#76AFB7#61B866#FFE266#F6BCC4#FF7C91#CE8AC5#4A877D#568C49#6BA831#87C7A8#79AEB8#3C7385#B3B4B7#BB8731#BA5C33" />
+<wod id="1021" n="Skin" g="Avatar" t="Girl" gender="1" colors="F4C0A6#F2B187#E89C73#AB6845#CE875C#F3BD90#EEA675#DC9467" />
+<wod id="1022" n="Skin" g="Avatar" t="Boy" gender="2" colors="F4C0A6#F2B187#E89C73#AB6845#CE875C#F3BD90#EEA675#DC9467" />
+<wod id="1041" n="Hair" g="Avatar" t="Girl" gender="1" colors="FFDC88#FFCC52#D9733B#D68B4A#AF5F3A#73462F#41291C#26120D#DDB25B#BA884C#C77833#9B6134#6C4424#523520#40301C" />
+<wod id="1042" n="Hair" g="Avatar" t="Boy" gender="2" colors="FFDC88#FFCC52#D9733B#D68B4A#AF5F3A#73462F#41291C#26120D#DDB25B#BA884C#C77833#9B6134#6C4424#523520#40301C" />
+<wod id="1051" n="Legs" g="Avatar" t="Girl" gender="1" colors="475454#C5CBE3#76AFB7#61B866#FFE266#F6BCC4#FF7C91#CE8AC5#4A877D#568C49#6BA831#87C7A8#79AEB8#3C7385#B3B4B7#BB8731#BA5C33" />
+<wod id="1052" n="Legs" g="Avatar" t="Boy" gender="2" colors="475454#C5CBE3#76AFB7#61B866#FFE266#F6BCC4#FF7C91#CE8AC5#4A877D#568C49#6BA831#87C7A8#79AEB8#3C7385#B3B4B7#BB8731#BA5C33" />
+<wod id="1061" n="Hat" g="Avatar" t="Normal" gender="0" colors="0" />
+<wod id="1062" n="Hat" g="Avatar" t="Cook" gender="-1" colors="EEEEEE" />
+<wod id="1063" n="Hat" g="Avatar" t="Cookxmas" gender="-1" colors="EEEEEE" />
+<wod id="1081" n="Face" g="Avatar" t="Girl" gender="1" colors="0" />
+<wod id="1082" n="Face" g="Avatar" t="Boy" gender="2" colors="0" />
+<wod id="1201" n="Basic" g="Dish" t="Greensalad" events="0" xp="5" incomePerServing="24" servings="10" duration="3" level="0" dishcategory="3" requirements="1327+1#1318+1#1314+1#1406+1" />
+<wod id="1202" n="Basic" g="Dish" t="Spagetti" events="0" xp="624" incomePerServing="1" servings="1040" duration="540" level="1" dishcategory="1" requirements="1319+1#1316+1#1327+1#1401+1" />
+<wod id="1203" n="Basic" g="Dish" t="Chocmousse" events="0" xp="259" incomePerServing="4" servings="390" duration="180" level="1" dishcategory="0" requirements="1311+1#1307+1#1308+1#1408+1" />
+<wod id="1204" n="Basic" g="Dish" t="Tomatosoup" events="0" xp="16" incomePerServing="14" servings="40" duration="10" level="1" dishcategory="2" requirements="1327+1#1318+1#1308+1#1401+1" />
+<wod id="1205" n="Basic" g="Dish" t="Cheesedish" events="0" xp="287" incomePerServing="3" servings="390" duration="180" level="3" dishcategory="4" requirements="1305+3#1406+1" />
+<wod id="1206" n="Basic" g="Dish" t="Hamburger" events="0" xp="97" incomePerServing="7" servings="130" duration="60" level="2" dishcategory="5" requirements="1316+1#1327+1#1312+1#1402+1" />
+<wod id="1207" n="Basic" g="Dish" t="Mixedsalad" events="0" xp="107" incomePerServing="5" servings="130" duration="60" level="4" dishcategory="3" requirements="1327+1#1326+1#1320+1#1314+1#1406+1" />
+<wod id="1208" n="Basic" g="Dish" t="Toast" events="0" xp="216" incomePerServing="4" servings="260" duration="120" level="5" dishcategory="5" requirements="1305+1#1321+1#1312+1#1402+1" />
+<wod id="1209" n="Basic" g="Dish" t="Noodlesalad" events="0" xp="590" incomePerServing="2" servings="780" duration="360" level="6" dishcategory="3" requirements="1327+1#1319+1#1311+1#1317+1#1406+1" />
+<wod id="1210" n="Basic" g="Dish" t="Mexicansalad" events="0" xp="235" incomePerServing="3" servings="260" duration="120" level="7" dishcategory="3" requirements="1303+1#1326+1#1318+1#1301+1#1402+1" />
+<wod id="1211" n="Basic" g="Dish" t="Stuffedpeppers" events="0" xp="1073" incomePerServing="1" servings="1950" duration="900" level="8" dishcategory="4" requirements="1311+1#1324+1#1302+1#1406+1" />
+<wod id="1212" n="Basic" g="Dish" t="Vegetablesoup" events="0" xp="945" incomePerServing="1" servings="1300" duration="600" level="9" dishcategory="2" requirements="1327+1#1318+1#1322+1#1401+1" />
+<wod id="1213" n="Basic" g="Dish" t="Cheesefondue" events="0" xp="1229" incomePerServing="1" servings="1560" duration="720" level="14" dishcategory="4" requirements="1305+1#1313+1#1312+1#1402+1" />
+<wod id="1214" n="Basic" g="Dish" t="Friedpotatoes" events="0" xp="165" incomePerServing="9" servings="130" duration="60" level="16" dishcategory="1" requirements="1322+1#1318+1#1301+1#1407+1" />
+<wod id="1215" n="Basic" g="Dish" t="Macncheese" events="0" xp="1290" incomePerServing="1" servings="1400" duration="660" level="17" dishcategory="4" requirements="1319+1#1305+1#1308+1#1404+1" />
+<wod id="1216" n="Basic" g="Dish" t="Minestrone" events="0" xp="830" incomePerServing="1" servings="900" duration="420" level="12" dishcategory="2" requirements="1319+1#1327+1#1310+1#1401+1" />
+<wod id="1217" n="Basic" g="Dish" t="Nasigoreng" events="0" xp="581" incomePerServing="5" servings="520" duration="240" level="15" dishcategory="1" requirements="1306+1#1321+1#1324+1#1318+1#1311+1#1402+1" />
+<wod id="1218" n="Basic" g="Dish" t="Potatosalad" events="0" xp="616" incomePerServing="3" servings="600" duration="300" level="11" dishcategory="3" requirements="1322+1#1317+1#1309+1#1406+1" />
+<wod id="1219" n="Basic" g="Dish" t="Scouse" events="0" xp="1344" incomePerServing="2" servings="2500" duration="1440" level="10" dishcategory="1" requirements="1315+1#1309+1#1304+1#1311+1#1406+1" />
+<wod id="1220" n="Basic" g="Dish" t="Stewedrhubarb" events="0" xp="1283" incomePerServing="2" servings="2340" duration="1080" level="13" dishcategory="0" requirements="1323+1#1325+1#1408+1" />
+<wod id="1221" n="Basic" g="Dish" t="Pizza" events="0" xp="91" incomePerServing="11" servings="70" duration="30" level="19" dishcategory="5" requirements="1312+1#1305+1#1327+1#1402+1" />
+<wod id="1222" n="Basic" g="Dish" t="Lasagne" events="0" xp="1078" incomePerServing="2" servings="1000" duration="420" level="21" dishcategory="1" requirements="1305+1#1316+1#1327+1#1319+1#1401+1" />
+<wod id="1223" n="Basic" g="Dish" t="Cheeseburger" events="0" xp="68" incomePerServing="33" servings="42" duration="20" level="23" dishcategory="5" requirements="1305+1#1312+1#1316+1#1327+1#1402+1" />
+<wod id="1224" n="Basic" g="Dish" t="Jamspongepudding" events="0" xp="1413" incomePerServing="2" servings="1200" duration="540" level="25" dishcategory="0" requirements="1330+1#1328+1#1325+1#1408+1" />
+<wod id="1225" n="Basic" g="Dish" t="Sushi" events="0" xp="1872" incomePerServing="1" servings="2000" duration="960" level="27" dishcategory="5" requirements="1405+1#1324+1#1329+1#1309+1" />
+<wod id="1226" n="Basic" g="Dish" t="Chocolatecake" events="0" xp="1908" incomePerServing="1" servings="1500" duration="840" level="29" dishcategory="0" requirements="1312+1#1307+1#1308+1#1311+1#1408+1" />
+<wod id="1227" n="Basic" g="Dish" t="Strawberrycake" events="0" xp="1490" incomePerServing="1" servings="1040" duration="480" level="31" dishcategory="0" requirements="1328+1#1312+1#1308+1#1408+1" />
+<wod id="1228" n="Basic" g="Dish" t="Newyorkcheesecake" events="0" xp="1785" incomePerServing="2" servings="1300" duration="600" level="33" dishcategory="0" requirements="1332+1#1331+1#1325+1#1308+1#1408+1" />
+<wod id="1229" n="Basic" g="Dish" t="Christmasturkey" events="3" xp="2016" incomePerServing="1" servings="4000" duration="2160" level="1" dishcategory="1" requirements="1334+2#1335+4#1407+1" />
+<wod id="1230" n="Basic" g="Dish" t="Fruitpudding" events="3" xp="1137" incomePerServing="2" servings="1600" duration="840" level="1" dishcategory="0" requirements="1333+3#1409+1#1336+3" />
+<wod id="1231" n="Basic" g="Dish" t="Peasoup" events="0" xp="2968" incomePerServing="1" servings="2000" duration="1680" level="35" dishcategory="2" requirements="1318+1#1301+1#1320+3#1313+1#1406+1" />
+<wod id="1232" n="Basic" g="Dish" t="Roastchicken" events="0" xp="2420" incomePerServing="1" servings="2500" duration="1320" level="37" dishcategory="1" requirements="1306+1#1337+2#1318+3#1406+1" />
+<wod id="1233" n="Basic" g="Dish" t="Fishandchips" events="0" xp="1733" incomePerServing="4" servings="1200" duration="480" level="39" dishcategory="5" requirements="1329+1#1322+1#1312+1#1317+5#1320+1#1406+1" />
+<wod id="1234" n="Basic" g="Dish" t="Porkroastwithcrackling" events="0" xp="5664" incomePerServing="3" servings="3000" duration="2880" level="41" dishcategory="1" requirements="1315+2#1338+4#1318+1#1313+2#1407+1" />
+<wod id="1235" n="Basic" g="Dish" t="Hotcherrywaffles" events="0" xp="1501" incomePerServing="3" servings="780" duration="360" level="43" dishcategory="0" requirements="1312+1#1330+1#1339+2#1311+1#1308+1#1408+1" />
+<wod id="1236" n="Basic" g="Dish" t="Duckalorange" events="0" xp="3264" incomePerServing="2" servings="2000" duration="1440" level="9" dishcategory="1" requirements="1340+3#1341+1#1337+2#1318+1#1409+1" />
+<wod id="1237" n="Basic" g="Dish" t="Easterdish" events="5" xp="1137" incomePerServing="2" servings="2000" duration="840" level="1" dishcategory="0" requirements="1311+3#1307+2#1408+1" />
+<wod id="1238" n="Basic" g="Dish" t="Chocolatefondue" events="0" xp="509" incomePerServing="4" servings="325" duration="150" level="26" dishcategory="0" requirements="1307+1#1308+1#1328+1#1409+1" />
+<wod id="1239" n="Basic" g="Dish" t="Cherrycompote" events="0" xp="1697" incomePerServing="2" servings="800" duration="360" level="51" dishcategory="0" requirements="1325+1#1339+1#1408+1" />
+<wod id="1240" n="Basic" g="Dish" t="Redberrycompote" events="0" xp="1695" incomePerServing="3" servings="1400" duration="660" level="28" dishcategory="0" requirements="1325+1#1339+1#1328+1#1323+1#1408+1" />
+<wod id="1241" n="Basic" g="Dish" t="Strawberrymousse" events="0" xp="301" incomePerServing="12" servings="200" duration="90" level="24" dishcategory="0" requirements="1325+1#1308+1#1311+1#1328+1#1408+1" />
+<wod id="1242" n="Basic" g="Dish" t="Whitechocmousse" events="0" xp="611" incomePerServing="6" servings="260" duration="120" level="47" dishcategory="0" requirements="1342+1#1308+1#1311+1#1408+1" />
+<wod id="1243" n="Basic" g="Dish" t="Tofuburger" events="0" xp="357" incomePerServing="5" servings="260" duration="120" level="20" dishcategory="5" requirements="1312+1#1327+1#1343+1#1314+1#1402+1" />
+<wod id="1244" n="Basic" g="Dish" t="Chickenburger" events="0" xp="775" incomePerServing="6" servings="325" duration="150" level="49" dishcategory="5" requirements="1306+1#1309+1#1312+1#1327+1#1402+1" />
+<wod id="1245" n="Basic" g="Dish" t="Chickensoup" events="0" xp="2043" incomePerServing="1" servings="2500" duration="1140" level="32" dishcategory="2" requirements="1301+1#1306+1#1318+1#1319+1#1406+1" />
+<wod id="1246" n="Basic" g="Dish" t="Chiliconcarne" events="0" xp="2726" incomePerServing="1" servings="1600" duration="720" level="53" dishcategory="1" requirements="1301+1#1303+1#1316+1#1318+1#1327+1#1402+1" />
+<wod id="1247" n="Basic" g="Dish" t="Pizzatonno" events="0" xp="1577" incomePerServing="2" servings="1200" duration="540" level="30" dishcategory="5" requirements="1305+1#1312+1#1318+1#1327+1#1329+1#1405+1" />
+<wod id="1248" n="Basic" g="Dish" t="Pizzahawaii" events="0" xp="373" incomePerServing="12" servings="130" duration="60" level="59" dishcategory="5" requirements="1301+1#1305+1#1312+1#1321+1#1327+1#1402+1" />
+<wod id="1249" n="Basic" g="Dish" t="Whitechoccheesecake" events="0" xp="1498" incomePerServing="1" servings="2100" duration="960" level="18" dishcategory="0" requirements="1308+1#1330+1#1331+1#1332+1#1342+1#1408+1" />
+<wod id="1250" n="Basic" g="Dish" t="Chocolatecheesecake" events="0" xp="3271" incomePerServing="1" servings="2300" duration="1080" level="61" dishcategory="0" requirements="1307+1#1330+1#1331+1#1332+1#1408+1" />
+<wod id="1251" n="Basic" g="Dish" t="Cherriecake" events="0" xp="1400" incomePerServing="2" servings="1300" duration="600" level="22" dishcategory="0" requirements="1308+1#1312+1#1325+1#1339+1#1408+1" />
+<wod id="1252" n="Basic" g="Dish" t="Blackforestcherrycake" events="0" xp="2974" incomePerServing="1" servings="1700" duration="780" level="9" dishcategory="0" requirements="1307+1#1308+1#1312+1#1450+1#1408+1" />
+<wod id="1253" n="Basic" g="Dish" t="Marblecake" events="0" xp="1421" incomePerServing="4" servings="600" duration="270" level="55" dishcategory="0" requirements="1307+1#1312+1#1325+1#1337+1#1408+1" />
+<wod id="1254" n="Basic" g="Dish" t="Sandwich" events="0" xp="78" incomePerServing="50" servings="33" duration="15" level="45" dishcategory="5" requirements="1301+1#1305+1#1312+1#1327+1#1337+1#1406+1" />
+<wod id="1255" n="Basic" g="Dish" t="Omelette" events="0" xp="2" incomePerServing="100" servings="5" duration="1" level="1" dishcategory="5" requirements="1311+1#1402+1" />
+<wod id="1301" n="Basic" g="Ingredient" t="Bacon" cash="300" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="7" category="meat" amount="1" />
+<wod id="1302" n="Basic" g="Ingredient" t="Ballpepper" cash="450" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="8" category="vegatables" amount="1" />
+<wod id="1303" n="Basic" g="Ingredient" t="Beans" cash="100" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="7" category="vegatables" amount="1" />
+<wod id="1304" n="Basic" g="Ingredient" t="Beetroot" cash="400" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="10" category="vegatables" amount="1" />
+<wod id="1305" n="Basic" g="Ingredient" t="Cheese" cash="320" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="3" category="meat" amount="1" />
+<wod id="1306" n="Basic" g="Ingredient" t="Chicken" cash="900" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="15" category="meat" amount="1" />
+<wod id="1307" n="Basic" g="Ingredient" t="Chocolate" cash="300" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" category="other" amount="1" />
+<wod id="1308" n="Basic" g="Ingredient" t="Cream" cash="300" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" category="meat" amount="1" />
+<wod id="1309" n="Basic" g="Ingredient" t="Cucumber" cash="400" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="10" category="vegatables" amount="1" />
+<wod id="1310" n="Basic" g="Ingredient" t="Eggplant" cash="100" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="12" category="vegatables" amount="1" />
+<wod id="1311" n="Basic" g="Ingredient" t="Eggs" cash="400" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" category="meat" amount="1" />
+<wod id="1312" n="Basic" g="Ingredient" t="Flour" cash="200" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="2" category="other" amount="1" />
+<wod id="1313" n="Basic" g="Ingredient" t="Garlic" cash="750" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="14" category="vegatables" amount="1" />
+<wod id="1314" n="Basic" g="Ingredient" t="Lettuce" cash="30" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="0" category="vegatables" amount="1" />
+<wod id="1315" n="Basic" g="Ingredient" t="Meat" cash="1500" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="10" category="meat" amount="1" />
+<wod id="1316" n="Basic" g="Ingredient" t="Mincemeat" cash="400" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" category="meat" amount="1" />
+<wod id="1317" n="Basic" g="Ingredient" t="Oil" cash="300" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="6" category="other" amount="1" />
+<wod id="1318" n="Basic" g="Ingredient" t="Onion" cash="60" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="0" category="vegatables" amount="1" />
+<wod id="1319" n="Basic" g="Ingredient" t="Pasta" cash="250" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" category="other" amount="1" />
+<wod id="1320" n="Basic" g="Ingredient" t="Peas" cash="150" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="4" category="vegatables" amount="1" />
+<wod id="1321" n="Basic" g="Ingredient" t="Pinapple" cash="300" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="5" category="fruits" amount="1" />
+<wod id="1322" n="Basic" g="Ingredient" t="Potato" cash="550" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="9" category="vegatables" amount="1" />
+<wod id="1323" n="Basic" g="Ingredient" t="Rhubarb" cash="1500" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="13" category="fruits" amount="1" />
+<wod id="1324" n="Basic" g="Ingredient" t="Rice" cash="350" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="8" category="other" amount="1" />
+<wod id="1325" n="Basic" g="Ingredient" t="Sugar" cash="1000" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="13" category="other" amount="1" />
+<wod id="1326" n="Basic" g="Ingredient" t="Sweetcorn" cash="150" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="4" category="vegatables" amount="1" />
+<wod id="1327" n="Basic" g="Ingredient" t="Tomato" cash="90" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="0" category="vegatables" amount="1" />
+<wod id="1328" n="Basic" g="Ingredient" t="Strawberry" cash="200" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="24" category="fruits" amount="1" />
+<wod id="1329" n="Basic" g="Ingredient" t="Fish" cash="1000" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="27" category="meat" amount="1" />
+<wod id="1330" n="Basic" g="Ingredient" t="Milk" cash="250" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="18" category="meat" amount="1" />
+<wod id="1331" n="Basic" g="Ingredient" t="Cookies" cash="200" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="18" category="other" amount="1" />
+<wod id="1332" n="Basic" g="Ingredient" t="Quark" cash="350" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="18" category="meat" amount="1" />
+<wod id="1333" n="Basic" g="Ingredient" t="Bakingmix" cash="300" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="3" xp="0" level="1" category="other" amount="1" />
+<wod id="1334" n="Basic" g="Ingredient" t="Turkeymix" cash="400" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="3" xp="0" level="1" category="other" amount="1" />
+<wod id="1335" n="Basic" g="Ingredient" t="Vegiemix" cash="200" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="3" xp="0" level="1" category="vegatables" amount="1" />
+<wod id="1336" n="Basic" g="Ingredient" t="Spicemix" cash="200" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="3" xp="0" level="1" category="other" amount="1" />
+<wod id="1337" n="Basic" g="Ingredient" t="Butter" cash="425" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="9" category="meat" amount="1" />
+<wod id="1338" n="Basic" g="Ingredient" t="Carrots" cash="500" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="41" category="vegatables" amount="1" />
+<wod id="1339" n="Basic" g="Ingredient" t="Cherries" cash="250" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="22" category="fruits" amount="1" />
+<wod id="1340" n="Basic" g="Ingredient" t="Orange" cash="0" gold="1" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="9" category="fruits" amount="1" />
+<wod id="1341" n="Basic" g="Ingredient" t="Duck" cash="1500" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="9" category="meat" amount="1" />
+<wod id="1342" n="Basic" g="Ingredient" t="Whitechocolat" cash="500" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="18" category="other" amount="1" />
+<wod id="1343" n="Basic" g="Ingredient" t="Tofu" cash="650" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="20" category="vegatables" amount="1" />
+<wod id="1401" n="Basic" g="Ingredient" t="Basil" cash="0" gold="1" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="0" category="fancy" amount="10" />
+<wod id="1402" n="Basic" g="Ingredient" t="Chili" cash="0" gold="1" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="0" category="fancy" amount="10" />
+<wod id="1403" n="Basic" g="Ingredient" t="Coriander" cash="0" gold="1" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="0" category="fancy" amount="10" />
+<wod id="1404" n="Basic" g="Ingredient" t="Nutmeg" cash="0" gold="1" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="0" category="fancy" amount="10" />
+<wod id="1405" n="Basic" g="Ingredient" t="Horseradish" cash="0" gold="1" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="0" category="fancy" amount="10" />
+<wod id="1406" n="Basic" g="Ingredient" t="Parsley" cash="0" gold="1" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="0" category="fancy" amount="10" />
+<wod id="1407" n="Basic" g="Ingredient" t="Rosemary" cash="0" gold="1" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="0" category="fancy" amount="10" />
+<wod id="1408" n="Basic" g="Ingredient" t="Vanilla" cash="0" gold="1" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="0" category="fancy" amount="10" />
+<wod id="1409" n="Basic" g="Ingredient" t="Cinnamon" cash="0" gold="1" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="0" category="fancy" amount="10" />
+<wod id="1450" n="Basic" g="Ingredient" t="Cocktailcherry" cash="250" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="9" category="fruits" amount="1" />
+<wod id="1501" n="Cafe" g="Background" t="Village" />
+<wod id="1502" n="Marketplace" g="Background" t="Normal" />
+<wod id="1503" n="Static" g="Background" t="Villagewinter" />
+<wod id="1601" n="Basic" g="Moving" t="-" />
+<wod id="1602" n="Npcwaiter" g="Moving" t="-" />
+<wod id="1603" n="Plateholder" g="Moving" t="-" />
+<wod id="1604" n="Vested" g="Moving" t="-" />
+<wod id="1605" n="Hero" g="Moving" t="Cook" />
+<wod id="1606" n="Npcguest" g="Moving" t="-" />
+<wod id="1607" n="Otherplayer" g="Moving" t="-" />
+<wod id="1608" n="Npcbackground" g="Moving" t="-" />
+<wod id="1701" n="Smoothie" g="Vendingmachine" t="-" walkable="0" rotatetype="3" cash="500" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="0" />
+<wod id="1801" n="Basic" g="Expansion" t="0" expansionID="0" sizeX="8" sizeY="8" />
+<wod id="1806" n="Basic" g="Expansion" t="Cash1" cash="1000" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="1" events="0" xp="0" level="5" expansionID="1" sizeX="9" sizeY="9" />
+<wod id="1807" n="Basic" g="Expansion" t="Cash2" cash="10000" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="1" events="0" xp="0" level="10" expansionID="2" sizeX="10" sizeY="10" />
+<wod id="1808" n="Basic" g="Expansion" t="Cash3" cash="30000" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="1" events="0" xp="0" level="15" expansionID="3" sizeX="11" sizeY="11" />
+<wod id="1809" n="Basic" g="Expansion" t="Cash4" cash="100000" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="1" events="0" xp="0" level="20" expansionID="4" sizeX="12" sizeY="12" />
+<wod id="1810" n="Basic" g="Expansion" t="Gold1" cash="0" gold="0" friends="2" goldNoFriends="5" releaseDate="0" world="2" events="0" xp="0" level="0" expansionID="1" sizeX="9" sizeY="9" />
+<wod id="1811" n="Basic" g="Expansion" t="Gold2" cash="0" gold="0" friends="4" goldNoFriends="10" releaseDate="0" world="2" events="0" xp="0" level="0" expansionID="2" sizeX="10" sizeY="10" />
+<wod id="1812" n="Basic" g="Expansion" t="Gold3" cash="0" gold="0" friends="8" goldNoFriends="20" releaseDate="0" world="2" events="0" xp="0" level="0" expansionID="3" sizeX="11" sizeY="11" />
+<wod id="1813" n="Basic" g="Expansion" t="Gold4" cash="0" gold="0" friends="12" goldNoFriends="30" releaseDate="0" world="2" events="0" xp="0" level="0" expansionID="4" sizeX="12" sizeY="12" />
+<wod id="1814" n="Basic" g="Expansion" t="Cash5" cash="200000" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="1" events="0" xp="0" level="25" expansionID="5" sizeX="13" sizeY="13" />
+<wod id="1815" n="Basic" g="Expansion" t="Gold5" cash="0" gold="0" friends="16" goldNoFriends="40" releaseDate="0" world="2" events="0" xp="0" level="0" expansionID="5" sizeX="13" sizeY="13" />
+<wod id="1816" n="Basic" g="Expansion" t="Cash6" cash="1000000" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="1" events="0" xp="0" level="35" expansionID="6" sizeX="14" sizeY="14" />
+<wod id="1817" n="Basic" g="Expansion" t="Gold6" cash="0" gold="0" friends="20" goldNoFriends="50" releaseDate="0" world="2" events="0" xp="0" level="0" expansionID="6" sizeX="14" sizeY="14" />
+<wod id="1818" n="Basic" g="Expansion" t="Cash7" cash="2000000" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="1" events="0" xp="0" level="45" expansionID="7" sizeX="15" sizeY="15" />
+<wod id="1819" n="Basic" g="Expansion" t="Gold7" cash="0" gold="0" friends="24" goldNoFriends="60" releaseDate="0" world="2" events="0" xp="0" level="0" expansionID="7" sizeX="15" sizeY="15" />
+<wod id="1820" n="Basic" g="Expansion" t="Cash8" cash="4000000" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="1" events="0" xp="0" level="60" expansionID="8" sizeX="16" sizeY="16" />
+<wod id="1821" n="Basic" g="Expansion" t="Gold8" cash="0" gold="0" friends="28" goldNoFriends="70" releaseDate="0" world="2" events="0" xp="0" level="0" expansionID="8" sizeX="16" sizeY="16" />
+<wod id="1822" n="Basic" g="Expansion" t="Gold1" cash="0" gold="5" friends="0" goldNoFriends="5" releaseDate="0" world="1" events="0" xp="0" level="0" expansionID="1" sizeX="9" sizeY="9" />
+<wod id="1823" n="Basic" g="Expansion" t="Gold2" cash="0" gold="10" friends="0" goldNoFriends="10" releaseDate="0" world="1" events="0" xp="0" level="0" expansionID="2" sizeX="10" sizeY="10" />
+<wod id="1824" n="Basic" g="Expansion" t="Gold3" cash="0" gold="20" friends="0" goldNoFriends="20" releaseDate="0" world="1" events="0" xp="0" level="0" expansionID="3" sizeX="11" sizeY="11" />
+<wod id="1825" n="Basic" g="Expansion" t="Gold4" cash="0" gold="30" friends="0" goldNoFriends="30" releaseDate="0" world="1" events="0" xp="0" level="0" expansionID="4" sizeX="12" sizeY="12" />
+<wod id="1826" n="Basic" g="Expansion" t="Gold5" cash="0" gold="40" friends="0" goldNoFriends="40" releaseDate="0" world="1" events="0" xp="0" level="0" expansionID="5" sizeX="13" sizeY="13" />
+<wod id="1827" n="Basic" g="Expansion" t="Gold6" cash="0" gold="50" friends="0" goldNoFriends="50" releaseDate="0" world="1" events="0" xp="0" level="0" expansionID="6" sizeX="14" sizeY="14" />
+<wod id="1828" n="Basic" g="Expansion" t="Gold7" cash="0" gold="60" friends="0" goldNoFriends="60" releaseDate="0" world="1" events="0" xp="0" level="0" expansionID="7" sizeX="15" sizeY="15" />
+<wod id="1829" n="Basic" g="Expansion" t="Gold8" cash="0" gold="70" friends="0" goldNoFriends="70" releaseDate="0" world="1" events="0" xp="0" level="0" expansionID="8" sizeX="16" sizeY="16" />
+<wod id="1901" n="Cash" g="Currency" t="-" />
+<wod id="1902" n="Gold" g="Currency" t="-" />
+<wod id="1903" n="Basic" g="Icon" t="Rateup" />
+<wod id="1904" n="Basic" g="Icon" t="Ratedown" />
+<wod id="1905" n="Xp" g="Currency" t="-" />
+<wod id="1906" n="Logincash" g="Currency" t="-" />
+<wod id="1907" n="Basic" g="Icon" t="Guestwaiting" />
+<wod id="1908" n="Basic" g="Icon" t="Seekingjob" />
+<wod id="1909" n="Basic" g="Icon" t="Mysterybox" />
+<wod id="1910" n="Muffincash" g="Currency" t="-" />
+<wod id="2001" n="Basic" g="Achievement" t="Earnedchips" />
+<wod id="2002" n="Basic" g="Achievement" t="Spentchips" />
+<wod id="2003" n="Basic" g="Achievement" t="Spentgold" />
+<wod id="2004" n="Basic" g="Achievement" t="Boughtdeco" />
+<wod id="2005" n="Basic" g="Achievement" t="Boughtingredients" />
+<wod id="2006" n="Basic" g="Achievement" t="Solditems" />
+<wod id="2007" n="Basic" g="Achievement" t="Servingscount" />
+<wod id="2008" n="Basic" g="Achievement" t="Overcookedfoods" />
+<wod id="2009" n="Basic" g="Achievement" t="Firenpc" />
+<wod id="2010" n="Social" g="Achievement" t="Friendscount" />
+<wod id="2011" n="Basic" g="Achievement" t="Curiercount" />
+<wod id="2012" n="Basic" g="Achievement" t="Coopcount" />
+<wod id="2013" n="Basic" g="Achievement" t="Coopgoldcount" />
+<wod id="2014" n="Basic" g="Achievement" t="Servingcountsweets" />
+<wod id="2015" n="Basic" g="Achievement" t="Servingcountmeals" />
+<wod id="2016" n="Basic" g="Achievement" t="Servingcountsoups" />
+<wod id="2017" n="Basic" g="Achievement" t="Servingcountsalads" />
+<wod id="2018" n="Basic" g="Achievement" t="Servingcountvegans" />
+<wod id="2019" n="Basic" g="Achievement" t="Servingcountsnacks" />
+<wod id="2020" n="Basic" g="Achievement" t="Cookingcount" />
+<wod id="2021" n="Basic" g="Achievement" t="Differentdishes" />
+<wod id="2022" n="Basic" g="Achievement" t="Masteies" />
+<wod id="2023" n="Basic" g="Achievement" t="Masteriesgold" />
+<wod id="2024" n="Basic" g="Achievement" t="Fancycount" />
+<wod id="2025" n="Basic" g="Achievement" t="Instantcount" />
+<wod id="2026" n="Basic" g="Achievement" t="Jobserve" />
+<wod id="2027" n="Basic" g="Achievement" t="Jobclean" />
+<wod id="2028" n="Basic" g="Achievement" t="Muffinmancash" />
+<wod id="2029" n="Basic" g="Achievement" t="Muffinmangold" />
+<wod id="2030" n="Basic" g="Achievement" t="Wheeloffortune" />
+<wod id="2101" n="Basic" g="Coop" t="1" events="0" maxMember="3" maxLevel="6" chips="250" xp="34" gold="1" duration="1200" dishes="1204+20#1203+6#1202+2" />
+<wod id="2102" n="Basic" g="Coop" t="2" events="0" maxMember="4" maxLevel="41" chips="250" xp="47" gold="1" duration="1560" dishes="1210+30#1207+40#1206+50" />
+<wod id="2103" n="Basic" g="Coop" t="3" events="0" maxMember="4" maxLevel="41" chips="250" xp="202" gold="2" duration="6120" dishes="1219+20#1218+25" />
+<wod id="2104" n="Basic" g="Coop" t="4" events="0" maxMember="5" maxLevel="21" chips="250" xp="144" gold="1" duration="4560" dishes="1208+15#1207+10#1206+15#1220+12" />
+<wod id="2105" n="Basic" g="Coop" t="5" events="0" maxMember="3" maxLevel="26" chips="250" xp="98" gold="1" duration="3120" dishes="1203+20#1213+15" />
+<wod id="2106" n="Basic" g="Coop" t="6" events="0" maxMember="5" maxLevel="21" chips="250" xp="32" gold="1" duration="1080" dishes="1203+5#1201+40#1205+5#1217+8" />
+<wod id="2107" n="Basic" g="Coop" t="7" events="0" maxMember="5" maxLevel="31" chips="250" xp="91" gold="1" duration="2880" dishes="1203+15#1212+8#1215+10" />
+<wod id="2108" n="Basic" g="Coop" t="8" events="0" maxMember="5" maxLevel="21" chips="250" xp="50" gold="1" duration="1560" dishes="1221+25#1206+15#1209+12" />
+<wod id="2109" n="Basic" g="Coop" t="9" events="0" maxMember="5" maxLevel="36" chips="250" xp="77" gold="1" duration="2280" dishes="1216+8#1202+10#1221+30#1222+6" />
+<wod id="2110" n="Basic" g="Coop" t="10" events="3" maxMember="5" maxLevel="56" chips="250" xp="219" gold="2" duration="4800" dishes="1230+12#1229+10#1201+100#1203+10" />
+<wod id="2111" n="Basic" g="Coop" t="11" events="0" maxMember="5" maxLevel="129" chips="250" xp="245" gold="1" duration="4440" dishes="1224+45#1226+30#1227+50#1228+40" />
+<wod id="2112" n="Basic" g="Coop" t="12" events="0" maxMember="3" maxLevel="129" chips="250" xp="163" gold="1" duration="3600" dishes="1204+250#1212+44#1231+8" />
+<wod id="2113" n="Basic" g="Coop" t="13" events="0" maxMember="5" maxLevel="129" chips="250" xp="280" gold="1" duration="2520" dishes="1217+100#1225+25" />
+<wod id="2114" n="Basic" g="Coop" t="14" events="0" maxMember="5" maxLevel="129" chips="250" xp="560" gold="1" duration="6240" dishes="1232+65#1234+20#1214+100" />
+<wod id="2115" n="Basic" g="Coop" t="15" events="0" maxMember="5" maxLevel="129" chips="250" xp="263" gold="1" duration="3000" dishes="1224+50#1233+80" />
+<wod id="2201" n="Smoothie" g="Fastfood" t="Tomatojuice" cash="1000" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="5" level="0" incomePerServing="1" servings="10" color="D83600" ratingBonus="20" />
+<wod id="2202" n="Smoothie" g="Fastfood" t="Greensmoothie" cash="2500" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="8" level="0" incomePerServing="2" servings="30" color="B1CC28" ratingBonus="40" />
+<wod id="2203" n="Smoothie" g="Fastfood" t="Kiba" cash="0" gold="1" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="12" level="0" incomePerServing="3" servings="30" color="E65C8A" ratingBonus="60" />
+<wod id="2204" n="Smoothie" g="Fastfood" t="Pinacolada" cash="0" gold="2" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="20" level="0" incomePerServing="4" servings="50" color="EBA600" ratingBonus="80" />
+</wodIds>
