@@ -38,8 +38,12 @@ func (lc *LoadedCafe) Fridge() map[int]int {
 	return lc.cafe.FridgeInventory
 }
 
-func (lc *LoadedCafe) GetFridgeCapacity() int {
-	return lc.cafe.GetFridgeCapacity()
+func (lc *LoadedCafe) GetFridgeMaxCapacity() int {
+	return lc.cafe.GetFridgeMaxCapacity()
+}
+
+func (lc *LoadedCafe) GetFridgeFreeSpace() int {
+	return lc.cafe.GetFridgeFreeSpace()
 }
 
 func (lc *LoadedCafe) Furnitures() map[int]int {

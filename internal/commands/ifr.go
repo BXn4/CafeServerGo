@@ -21,10 +21,10 @@ func SendFridgeInventory(req *requests.Request, c *client.Client, clientManager 
 			return err
 		}
 		fridge = cafe.FridgeInventory
-		fridgeCap = cafe.GetFridgeCapacity()
+		fridgeCap = cafe.GetFridgeMaxCapacity()
 	} else {
 		c.Cafe.Fridge()
-		fridgeCap = c.Cafe.GetFridgeCapacity()
+		fridgeCap = c.Cafe.GetFridgeMaxCapacity()
 	}
 
 	var fridgeArgs []string

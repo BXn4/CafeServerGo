@@ -23,7 +23,8 @@ type Wod struct {
 	IncomePerServing int    `xml:"incomePerServing,attr,omitempty"`
 	Servings         int    `xml:"servings,attr,omitempty"`
 	Duration         int    `xml:"Duration,attr,omitempty"`
-	Category         int    `xml:"dishcategory,attr,omitempty"`
+	DishCategory     int    `xml:"dishcategory,attr,omitempty"`
+	Category         string `xml:"category,attr,omitempty"`
 	Requirements     string `xml:"requirements,attr,omitempty"`
 	ExpansionID      int    `xml:"expansionID,attr,omitempty"`
 	SizeX            int    `xml:"sizeX,attr,omitempty"`
@@ -59,18 +60,17 @@ func ReadAndCacheItems() error {
 		return err
 	}
 
-  itemCollection = make(map[string][]Wod)
-  var loadedCount int
+	itemCollection = make(map[string][]Wod)
+	var loadedCount int
 	for _, wod := range result.Wods {
-    itemCollection[wod.Group] = append(itemCollection[wod.Group], wod)
-    loadedCount++
-  }
+		itemCollection[wod.Group] = append(itemCollection[wod.Group], wod)
+		loadedCount++
+	}
 
 	fmt.Printf("Successfully loaded %d WOD entries\n", loadedCount)
 	fmt.Println("Filtered and grouped WOD entries")
-  return nil
+	return nil
 }
-
 
 func GetIngredient(id int) (Wod, error) {
 	for _, item := range itemCollection["Ingredient"] {
@@ -78,9 +78,17 @@ func GetIngredient(id int) (Wod, error) {
 			return item, nil
 		}
 	}
-  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+	return Wod{}, fmt.Errorf("No item found with id: %v", id)
 }
 
+func GetFancyIngredient(id int) (Wod, error) {
+	for _, item := range itemCollection["Ingredient"] {
+		if id == item.ID && item.Category == "fancy" {
+			return item, nil
+		}
+	}
+	return Wod{}, fmt.Errorf("No item found with id: %v", id)
+}
 
 func GetTile(id int) (Wod, error) {
 	for _, item := range itemCollection["Tile"] {
@@ -88,7 +96,7 @@ func GetTile(id int) (Wod, error) {
 			return item, nil
 		}
 	}
-  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+	return Wod{}, fmt.Errorf("No item found with id: %v", id)
 }
 
 func GetWall(id int) (Wod, error) {
@@ -97,7 +105,7 @@ func GetWall(id int) (Wod, error) {
 			return item, nil
 		}
 	}
-  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+	return Wod{}, fmt.Errorf("No item found with id: %v", id)
 }
 
 func GetDoor(id int) (Wod, error) {
@@ -106,7 +114,7 @@ func GetDoor(id int) (Wod, error) {
 			return item, nil
 		}
 	}
-  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+	return Wod{}, fmt.Errorf("No item found with id: %v", id)
 }
 
 func GetStove(id int) (Wod, error) {
@@ -115,9 +123,8 @@ func GetStove(id int) (Wod, error) {
 			return item, nil
 		}
 	}
-  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+	return Wod{}, fmt.Errorf("No item found with id: %v", id)
 }
-
 
 func GetCounter(id int) (Wod, error) {
 	for _, item := range itemCollection["Counter"] {
@@ -125,7 +132,7 @@ func GetCounter(id int) (Wod, error) {
 			return item, nil
 		}
 	}
-  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+	return Wod{}, fmt.Errorf("No item found with id: %v", id)
 }
 
 func GetFridge(id int) (Wod, error) {
@@ -134,7 +141,7 @@ func GetFridge(id int) (Wod, error) {
 			return item, nil
 		}
 	}
-  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+	return Wod{}, fmt.Errorf("No item found with id: %v", id)
 }
 
 func GetTable(id int) (Wod, error) {
@@ -143,7 +150,7 @@ func GetTable(id int) (Wod, error) {
 			return item, nil
 		}
 	}
-  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+	return Wod{}, fmt.Errorf("No item found with id: %v", id)
 }
 
 func GetDeco(id int) (Wod, error) {
@@ -152,7 +159,7 @@ func GetDeco(id int) (Wod, error) {
 			return item, nil
 		}
 	}
-  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+	return Wod{}, fmt.Errorf("No item found with id: %v", id)
 }
 
 func GetChair(id int) (Wod, error) {
@@ -161,7 +168,7 @@ func GetChair(id int) (Wod, error) {
 			return item, nil
 		}
 	}
-  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+	return Wod{}, fmt.Errorf("No item found with id: %v", id)
 }
 
 func GetWallobject(id int) (Wod, error) {
@@ -170,7 +177,7 @@ func GetWallobject(id int) (Wod, error) {
 			return item, nil
 		}
 	}
-  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+	return Wod{}, fmt.Errorf("No item found with id: %v", id)
 }
 
 func GetDish(id int) (Wod, error) {
@@ -179,7 +186,7 @@ func GetDish(id int) (Wod, error) {
 			return item, nil
 		}
 	}
-  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+	return Wod{}, fmt.Errorf("No item found with id: %v", id)
 }
 
 func GetVendingmachine(id int) (Wod, error) {
@@ -188,7 +195,7 @@ func GetVendingmachine(id int) (Wod, error) {
 			return item, nil
 		}
 	}
-  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+	return Wod{}, fmt.Errorf("No item found with id: %v", id)
 }
 
 func GetExpansion(id int) (Wod, error) {
@@ -197,7 +204,7 @@ func GetExpansion(id int) (Wod, error) {
 			return item, nil
 		}
 	}
-  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+	return Wod{}, fmt.Errorf("No item found with id: %v", id)
 }
 
 func GetAchievement(id int) (Wod, error) {
@@ -206,7 +213,7 @@ func GetAchievement(id int) (Wod, error) {
 			return item, nil
 		}
 	}
-  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+	return Wod{}, fmt.Errorf("No item found with id: %v", id)
 }
 
 func GetCoop(id int) (Wod, error) {
@@ -215,7 +222,7 @@ func GetCoop(id int) (Wod, error) {
 			return item, nil
 		}
 	}
-  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+	return Wod{}, fmt.Errorf("No item found with id: %v", id)
 }
 
 func GetFastfood(id int) (Wod, error) {
@@ -224,6 +231,5 @@ func GetFastfood(id int) (Wod, error) {
 			return item, nil
 		}
 	}
-  return Wod{}, fmt.Errorf("No item found with id: %v", id)
+	return Wod{}, fmt.Errorf("No item found with id: %v", id)
 }
-

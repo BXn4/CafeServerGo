@@ -65,7 +65,7 @@ func (c *Cafe) AsResponse() []string {
 	return args
 }
 
-func (c *Cafe) GetFridgeCapacity() int {
+func (c *Cafe) GetFridgeMaxCapacity() int {
 	fridgeCount := 0
 
 	for _, obj := range c.Objects {
@@ -74,4 +74,17 @@ func (c *Cafe) GetFridgeCapacity() int {
 		}
 	}
 	return fridgeCount * 50
+}
+
+func (c *Cafe) GetFridgeFreeSpace() int {
+	freeSpace := c.GetFridgeMaxCapacity()
+
+	for ingredientID := range c.FridgeInventory {
+		// Fancy does not take space in the fridge inventory. Fancys starts at ID 1401
+		if ingredientID < 1401 {
+			freeSpace -= 1
+		}
+	}
+
+	return freeSpace
 }
