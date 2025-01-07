@@ -39,24 +39,26 @@ type Data struct {
 	Wods []Wod `xml:"wod"`
 }
 
-var Wods []Wod
-var Tiles []Wod
-var Walls []Wod
-var Doors []Wod
-var Stoves []Wod
-var Counters []Wod
-var Fridges []Wod
-var Tables []Wod
-var Decors []Wod
-var Chairs []Wod
-var Wallobjects []Wod
-var Dishes []Wod
-var Ingredients []Wod
-var Vendingmachines []Wod
-var Expansions []Wod
-var Achievements []Wod
-var Coops []Wod
-var FastFoods []Wod
+var (
+	Wods            []Wod
+	Tiles           []Wod
+	Walls           []Wod
+	Doors           []Wod
+	Stoves          []Wod
+	Counters        []Wod
+	Fridges         []Wod
+	Tables          []Wod
+	Decors          []Wod
+	Chairs          []Wod
+	Wallobjects     []Wod
+	Dishes          []Wod
+	Ingredients     []Wod
+	Vendingmachines []Wod
+	Expansions      []Wod
+	Achievements    []Wod
+	Coops           []Wod
+	FastFoods       []Wod
+)
 
 func ReadAndCacheItems() {
 	xmlFile, err := os.Open("./data/CafeItems.xml")
@@ -135,4 +137,13 @@ func ReadAndCacheItems() {
 
 	fmt.Printf("Successfully loaded %d WOD entries\n", len(Wods))
 	fmt.Println("Filtered and grouped WOD entries")
+}
+
+func GetIngredientInfo(ingredientID int) (Wod, error) {
+	for _, ingredient := range Ingredients {
+		if ingredientID == ingredient.ID {
+			return ingredient, nil
+		}
+	}
+	return Wod{}, nil
 }

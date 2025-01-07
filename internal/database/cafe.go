@@ -94,7 +94,7 @@ func ConvertCafeDAOToCafe(cafeDAO CafeDAO) (*objects.Cafe, error) {
 
 	// Parse furniture inventory
 	cafe.FurnitureInventory = map[int]int{}
-	raw_fuInv := strings.Split(cafeDAO.FridgeInventory, "#")
+	raw_fuInv := strings.Split(cafeDAO.FurnitureInventory, "#")
 	for _, item := range raw_fuInv {
 		// Parse item and count
 		data := strings.Split(item, "+")

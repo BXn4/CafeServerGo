@@ -66,7 +66,7 @@ func HandleRequest(req *requests.Request, c *client.Client, clientManager *manag
 	case requests.C2S_SHOP_AVAILIBILITY:
 		err = ShopAvailibility(req, c, clientManager, cafeManager)
 	case requests.C2S_SHOP_DELETE_ITEM:
-		err = SellIngrediement(req, c, clientManager, cafeManager)
+		err = SellIngredient(req, c, clientManager, cafeManager)
 	}
 
 	if err != nil {
