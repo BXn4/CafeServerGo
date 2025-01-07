@@ -18,7 +18,7 @@ func main() {
 			Port:     "3306",
 			Database: "gg_cafe",
 			User:     "root",
-			Password: "",
+			Password: "1234",
 		},
 	)
 	srv.Run()

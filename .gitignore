@@ -26,4 +26,4 @@ go.work.sum
 
 ./cafego*
 
-.main.go
+main.go
