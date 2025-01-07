@@ -43,7 +43,7 @@ func (s *CafeServer) Run() {
 
 	// Test
 	/*for _, chair := range utils.Chairs {
-		fmt.Printf("Wod ID: %d, Type: %s, Group: %s, Cash: %d\n", chair.ID, chair.Type, chair.Group, chair.Cash)
+		fmt.Printf("Wod ID: %d, Type: %s, Group: %s, Cash: %d, Gold: %d\n", chair.ID, chair.Type, chair.Group, chair.Cash, chair.Gold)
 	}*/
 
 	// Set up MariaDB connection
