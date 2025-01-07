@@ -14,5 +14,6 @@ type Player struct {
 	NewGifts            int
 	Username            string
 	Avatar              Avatar
+	Position            []int
 	Mastery             string // TODO: Create proper mastery
 }

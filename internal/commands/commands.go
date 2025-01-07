@@ -61,6 +61,8 @@ func HandleRequest(req *requests.Request, c *client.Client, clientManager *manag
 		if err != nil {
 			return err
 		}
+	case requests.C2S_CAFE_WALK:
+		err = CafeWalk(req, c, clientManager, cafeManager)
 	}
 
 	if err != nil {
