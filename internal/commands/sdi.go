@@ -23,11 +23,13 @@ func SellIngredient(req *requests.Request, c *client.Client, clientManager *mana
 	ingredientID, err := strconv.Atoi(req.Args[2])
 	if err != nil || !slices.Contains(ingredientIDs, ingredientID) {
 		fmt.Printf("invalid ingredient ID: %v", err)
+		return err
 	}
 
 	ingredientAmount, err := strconv.Atoi(req.Args[3])
 	if err != nil || ingredientAmount <= 0 {
 		fmt.Printf("invalid ingredient amount: %v", err)
+		return err
 	}
 
 	ingredientInfo, err := utils.GetIngredientInfo(ingredientID)
