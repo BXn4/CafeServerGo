@@ -64,3 +64,14 @@ func (c *Cafe) AsResponse() []string {
 	}
 	return args
 }
+
+func (c *Cafe) GetFridgeCapacity() int {
+	fridgeCount := 0
+
+	for _, obj := range c.Objects {
+		if obj.isFridge() {
+			fridgeCount++
+		}
+	}
+	return fridgeCount * 50
+}

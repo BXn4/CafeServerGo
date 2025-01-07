@@ -26,6 +26,8 @@ type CafeLocation interface {
 	// Returns the fridge
 	Fridge() map[int]int
 
+	GetFridgeCapacity() int
+
 	// Returns the owner id
 	Owner() int
 

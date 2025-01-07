@@ -13,6 +13,7 @@ import (
 func SendFridgeInventory(req *requests.Request, c *client.Client, clientManager *managers.ClientManager, cafeManager *managers.CafeManager) error {
 
 	var fridge map[int]int
+	var fridgeCap int
 
 	if c.Cafe == nil {
 		cafe, err := c.DB.GetCafeByPlayerID(c.Player.ID)
@@ -20,11 +21,11 @@ func SendFridgeInventory(req *requests.Request, c *client.Client, clientManager 
 			return err
 		}
 		fridge = cafe.FridgeInventory
+		fridgeCap = cafe.GetFridgeCapacity()
 	} else {
 		c.Cafe.Fridge()
+		fridgeCap = c.Cafe.GetFridgeCapacity()
 	}
-
-	fridgeCap := len(fridge)
 
 	var fridgeArgs []string
 

@@ -77,6 +77,10 @@ func (c *CafeObject) IsVending() bool {
 	return c.Kind == 1701
 }
 
+func (c *CafeObject) isFridge() bool {
+	return 351 <= c.Kind && c.Kind <= 358
+}
+
 func (c *CafeObject) String() string {
 	args := []string{
 		strconv.Itoa(c.Pos[0]),
