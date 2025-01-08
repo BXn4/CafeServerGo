@@ -11,11 +11,13 @@ type CafeManager struct {
 	mu    sync.Mutex
 	cafes []*LoadedCafe
 	db    *database.CafeDB
+  clientManager *ClientManager
 }
 
-func NewCafeManager() *CafeManager {
+func NewCafeManager(cm *ClientManager) *CafeManager {
 	return &CafeManager{
 		cafes: make([]*LoadedCafe, 0),
+    clientManager: cm,
 	}
 }
 
@@ -56,7 +58,7 @@ func (cm *CafeManager) Add(id int) *LoadedCafe {
 		fmt.Printf("[ERROR] Player with id %v has no cafe in database", id)
 		return nil
 	}
-	cafe := NewLoadedCafe(cafeObj)
+	cafe := NewLoadedCafe(cafeObj, cm.clientManager)
 
 	cm.cafes = append(cm.cafes, cafe)
 

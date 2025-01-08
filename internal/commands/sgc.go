@@ -9,10 +9,10 @@ import (
 // sgc - Send cafe
 func SendCafe(req *requests.Request, c *client.Client, clientManager *managers.ClientManager, cafeManager *managers.CafeManager) error {
 
-	args := []string{"sgc", "-1", "0"}
-	args = append(args, c.Cafe.AsResponse()...)
+	//args := []string{"sgc", "-1", "0"}
+	//args = append(args, c.Cafe.AsResponse()...)
 
-	c.SendExtensionResponse(args...)
+	//c.SendExtensionResponse(args...)
 
 	//TODO: jul
 

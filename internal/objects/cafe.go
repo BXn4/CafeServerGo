@@ -65,6 +65,8 @@ func (c *Cafe) AsResponse() []string {
 	return args
 }
 
+
+
 func (c *Cafe) GetFridgeMaxCapacity() int {
 	fridgeCount := 0
 

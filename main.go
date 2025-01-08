@@ -4,20 +4,19 @@ import (
 	"cafego/internal/database"
 	"cafego/internal/server"
 	"cafego/internal/utils"
-  "github.com/joho/godotenv"
-  "fmt"
+	"fmt"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-  // Read .env file
-  envFile, err := godotenv.Read(".env")
-  
-  hasConfig := err == nil 
+	// Read .env file
+	envFile, err := godotenv.Read(".env")
 
-  if !hasConfig {
-    fmt.Printf("Cannot find .env file!\n")
-  }
+	hasConfig := err == nil
 
+	if !hasConfig {
+		fmt.Printf("Cannot find .env file!\n")
+	}
 
 	srv := server.New(
 		// This is the server config

@@ -69,6 +69,8 @@ func HandleRequest(req *requests.Request, c *client.Client, clientManager *manag
 		err = SellIngredient(req, c, clientManager, cafeManager)
 	case requests.C2S_SHOP_BUY_ITEM:
 		err = BuyIngredient(req, c, clientManager, cafeManager)
+  case requests.C2S_CAFE_CHAT:
+		err = SendChatMessage(req, c, clientManager, cafeManager)
 	}
 
 	if err != nil {

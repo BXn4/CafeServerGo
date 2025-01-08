@@ -124,3 +124,4 @@ func WrapSystemResponse(args ...string) string {
 func WrapExtensionResponse(args ...string) string {
 	return "%xt%" + strings.Join(args, "%") + "%\x00"
 }
+

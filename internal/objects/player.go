@@ -16,4 +16,6 @@ type Player struct {
 	Avatar              Avatar
 	Position            []int
 	Mastery             string // TODO: Create proper mastery
+  WorkTimeLeft        int
+  SeekingJob          bool
 }

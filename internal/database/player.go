@@ -74,6 +74,7 @@ func ConvertPlayerDAOToPlayer(playerDAO PlayerDAO) (*objects.Player, error) {
 	player.EmailVerified = playerDAO.email_verified
 	player.NewGifts = playerDAO.new_gifts
 	player.Username = playerDAO.username
+	player.Position = []int{0,0}
 
 	player.Mastery = playerDAO.mastery
 
