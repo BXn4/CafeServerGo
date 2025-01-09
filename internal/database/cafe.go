@@ -35,42 +35,20 @@ func ConvertCafeDAOToCafe(cafeDAO CafeDAO) (*objects.Cafe, error) {
 	cafe.Luxury = cafeDAO.Luxury
 	cafe.ExpansionID = cafeDAO.ExpansionID
 	cafe.OwnerName = cafeDAO.OwnerName
+	cafe.Background = objects.DefaultBackground
 
 	// Parse tiles
-	raw_tiles := strings.Split(cafeDAO.Tiles, "+")
-	size := cafeDAO.ExpansionID + 8
-	cafe.Tiles = make([][]int, size)
-	for i, _ := range cafe.Tiles {
-		cafe.Tiles[i] = make([]int, size)
-		for j, _ := range cafe.Tiles[i] {
-			value, err := strconv.Atoi(raw_tiles[(i*size)+j])
-			if err != nil {
-				return nil, err
-			}
-			cafe.Tiles[i][j] = value
-		}
-	}
+  var err error
+  err = cafe.ParseTiles(cafeDAO.Tiles)
+  if err != nil {
+    return nil, err
+  }
 
 	// Parse objects
-	var objs []objects.CafeObject
-	if err := json.Unmarshal([]byte(cafeDAO.Objects), &objs); err != nil {
-		return nil, err
-	}
-	for _, obj := range objs {
-		if obj.IsDoor() {
-			cafe.PlayerStart = []int{
-				obj.Pos[0],
-				obj.Pos[1],
-			}
-			if cafe.PlayerStart[0] == 0 {
-				cafe.PlayerStart[0] = 1
-			}
-			if cafe.PlayerStart[1] == 0 {
-				cafe.PlayerStart[1] = 1
-			}
-		}
-		cafe.Objects = append(cafe.Objects, &obj)
-	}
+  err = cafe.ParseObjectsFromJSON(cafeDAO.Objects)
+  if err != nil {
+    return nil,err
+  }
 
 	// Parse fridge inventory
 	cafe.FridgeInventory = map[int]int{}

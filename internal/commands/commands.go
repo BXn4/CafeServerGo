@@ -71,6 +71,8 @@ func HandleRequest(req *requests.Request, c *client.Client, clientManager *manag
 		err = BuyIngredient(req, c, clientManager, cafeManager)
   case requests.C2S_CAFE_CHAT:
 		err = SendChatMessage(req, c, clientManager, cafeManager)
+  case requests.C2S_MARKETPLACE_JOIN:
+		err = JoinMarketplace(req, c, clientManager, cafeManager)
 	}
 
 	if err != nil {

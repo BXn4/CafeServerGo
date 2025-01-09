@@ -5,6 +5,7 @@ import (
 	"cafego/internal/server"
 	"cafego/internal/utils"
 	"fmt"
+  "os"
 	"github.com/joho/godotenv"
 )
 
@@ -18,7 +19,7 @@ func main() {
 		fmt.Printf("Cannot find .env file!\n")
 	}
 
-	srv := server.New(
+	srv, err := server.New(
 		// This is the server config
 		&server.CafeConfig{
 			Host: utils.If(hasConfig, envFile["SERVER_HOST"], "localhost"),
@@ -34,5 +35,10 @@ func main() {
 		},
 	)
 
-	srv.Run()
+  if err != nil {
+    fmt.Printf("Something went wrong with creating the server object!\n")
+    os.Exit(1)
+  }else{
+	  srv.Run()
+  }
 }

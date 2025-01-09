@@ -36,27 +36,6 @@ type PlayerDAO struct {
 	daily_login           string `json:"daily_login" form:"daily_login" gorm:"column:daily_login"`
 }
 
-/*
-
-type Player struct {
-  ID int
-  Cash int
-  Gold int
-  XP int
-  InstantCookings int
-  OpenJobs bool
-  PlayedWheel bool
-  AllowFriendRequests bool
-  AllowEmails bool
-  EmailVerified bool
-  NewGifts int
-  Username string
-  Avatar Avatar
-  Mastery string // TODO: Create proper mastery
-}
-
-
-*/
 
 func ConvertPlayerDAOToPlayer(playerDAO PlayerDAO) (*objects.Player, error) {
 	var player objects.Player

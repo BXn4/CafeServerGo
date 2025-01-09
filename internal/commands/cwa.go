@@ -9,8 +9,8 @@ import (
 
 // cwa - C2S_CAFE_WALK
 func CafeWalk(req *requests.Request, c *client.Client, clientManager *managers.ClientManager, cafeManager *managers.CafeManager) error {
-	posX := req.Args[1]
-	posY := req.Args[2]
+	posX := req.Args[2]
+	posY := req.Args[3]
 
 	posXInt, err := strconv.Atoi(posX)
 	if err != nil {
@@ -23,6 +23,9 @@ func CafeWalk(req *requests.Request, c *client.Client, clientManager *managers.C
 
 	c.Player.Position = []int{posXInt, posYInt}
 
+
+
 	c.Cafe.Broadcast("cwa", "-1", "0", strconv.Itoa(c.Player.ID), "0", posX, posY)
+
 	return nil
 }

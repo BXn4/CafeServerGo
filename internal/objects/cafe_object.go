@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+  "fmt"
 )
 
 type CafeObjectKind int
@@ -42,13 +43,50 @@ type CafeObject struct {
 	FinishesAt *time.Time `json:"finishes_at,omitempty"`
 }
 
-func NewCafeObjectFromString(s string) (*CafeObject, error) {
+func NewCafeObjectFromJSON(s string) (*CafeObject, error) {
 
 	var cafeObj CafeObject
 
 	if err := json.Unmarshal([]byte(s), &cafeObj); err != nil {
 		return nil, err
 	}
+
+	return &cafeObj, nil
+}
+
+func NewCafeObjectFromString(s string) (*CafeObject, error) {
+
+  data := strings.Split(s, "+")
+
+  posX, err := strconv.Atoi(data[0])
+  if err != nil {
+    fmt.Printf("Error parsing %v to int", data[0])
+    return nil, err
+  } 
+
+  posY, err := strconv.Atoi(data[1])
+  if err != nil {
+    fmt.Printf("Error parsing %v to int", data[1])
+    return nil, err
+  }
+
+  kind, err := strconv.Atoi(data[2])
+  if err != nil {
+    fmt.Printf("Error parsing %v to int", data[2])
+    return nil, err
+  }
+
+  rotation, err := strconv.Atoi(data[3])
+  if err != nil {
+    fmt.Printf("Error parsing %v to int", data[3])
+    return nil, err
+  }
+
+  cafeObj := CafeObject{
+    Pos: []int{posX, posY},
+    Kind: CafeObjectKind(kind),
+    Rotation: CafeObjectRotation(rotation),
+  }
 
 	return &cafeObj, nil
 }

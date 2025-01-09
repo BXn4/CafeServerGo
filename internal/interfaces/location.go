@@ -20,6 +20,9 @@ type CafeLocation interface {
 	// Send message to everyone in the location
 	Broadcast(arg ...string)
 
+  // Send message to everyone except one person in location
+	BroadcastExcept(id int, arg ...string)
+
 	// Returns the info of the location
 	Info() string
 

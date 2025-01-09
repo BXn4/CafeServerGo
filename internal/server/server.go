@@ -27,14 +27,18 @@ type CafeServer struct {
 	cafeManager   *managers.CafeManager
 }
 
-func New(config *CafeConfig, dbconfig *database.DBConfig) *CafeServer {
+func New(config *CafeConfig, dbconfig *database.DBConfig) (*CafeServer, error) {
   cm := managers.NewClientManager()
+  cafem, err := managers.NewCafeManager(cm)
+  if err != nil {
+    return nil, err
+  }
 	return &CafeServer{
 		config:        config,
 		dbConfig:      dbconfig,
 		clientManager: cm,
-		cafeManager:   managers.NewCafeManager(cm),
-	}
+		cafeManager:   cafem,
+	},nil
 }
 
 func (s *CafeServer) Run() {

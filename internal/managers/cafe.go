@@ -9,16 +9,34 @@ import (
 
 type CafeManager struct {
 	mu    sync.Mutex
-	cafes []*LoadedCafe
+	cafes map[int]*LoadedCafe
 	db    *database.CafeDB
   clientManager *ClientManager
+  marketplace   *LoadedCafe
 }
 
-func NewCafeManager(cm *ClientManager) *CafeManager {
+func NewCafeManager(cm *ClientManager) (*CafeManager, error) {
+  
+  //Marketplace object
+  cafeObj, err := objects.NewMarketplace()
+  if err != nil {
+    return nil, err
+  }
+
+  // Create marketplace
+  marketplace := NewLoadedCafe(cafeObj, cm, nil)
+
+  // Create loaded cafes map
+  cafes := make(map[int]*LoadedCafe, 0)
+
+  // Add marketplace to cafe list
+  cafes[-1] = marketplace
+
 	return &CafeManager{
-		cafes: make([]*LoadedCafe, 0),
+		cafes: cafes,
     clientManager: cm,
-	}
+    
+	},nil
 }
 
 func (cm *CafeManager) SetCafeDB(db *database.CafeDB) {
@@ -33,7 +51,7 @@ func (cm *CafeManager) Remove(id int) {
 	for i, lc := range cm.cafes {
 		if lc.ID() == id {
 			// This removes the cafe by id by not changing the others memory address
-			cm.cafes = append(cm.cafes[:i], cm.cafes[i+1:]...)
+      delete(cm.cafes,i)
 			return
 		}
 	}
@@ -58,9 +76,9 @@ func (cm *CafeManager) Add(id int) *LoadedCafe {
 		fmt.Printf("[ERROR] Player with id %v has no cafe in database", id)
 		return nil
 	}
-	cafe := NewLoadedCafe(cafeObj, cm.clientManager)
+	cafe := NewLoadedCafe(cafeObj, cm.clientManager, cm.Remove)
 
-	cm.cafes = append(cm.cafes, cafe)
+	cm.cafes[cafe.ID()] = cafe
 
 	return cafe
 }
@@ -70,11 +88,9 @@ func (cm *CafeManager) Add(id int) *LoadedCafe {
 // |========================================|
 
 func (cm *CafeManager) Get(id int) (*LoadedCafe, error) {
-
-	for _, cafe := range cm.cafes {
-		if cafe.ID() == id {
-			return cafe, nil
-		}
+  cafe, ok := cm.cafes[id]
+	if ok {
+		return cafe, nil
 	}
 	return nil, fmt.Errorf("Cafe with ID %d not found", id)
 }

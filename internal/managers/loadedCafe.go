@@ -2,7 +2,7 @@ package managers
 
 import (
 	"cafego/internal/objects"
-	"cafego/internal/utils"
+	_"cafego/internal/utils"
 	"cafego/internal/types/responses"
 	"net"
 	"strconv"
@@ -17,13 +17,15 @@ type LoadedCafe struct {
 	occupants      map[int]net.Conn
 	mu             sync.Mutex
   clientManager  *ClientManager
+  deleteFunc     func(int)  // This is a loopback function provided by the cafe manager
 }
 
-func NewLoadedCafe(cafe *objects.Cafe, cm *ClientManager) *LoadedCafe {
+func NewLoadedCafe(cafe *objects.Cafe, cm *ClientManager, deleteFunc func(int)) *LoadedCafe {
 	return &LoadedCafe{
 		cafe:  cafe,
 		clientManager:  cm,
 		occupants:  make(map[int]net.Conn),
+    deleteFunc: deleteFunc,
 	}
 }
 
@@ -68,11 +70,15 @@ func (lc *LoadedCafe) Broadcast(args ...string) {
 	lc.mu.Lock()
 	defer lc.mu.Unlock()
 
-	for _, o := range lc.occupants {
-    msg := responses.WrapExtensionResponse(args...)
-	  fmt.Printf("[SENT] %s\n", msg)
-		o.Write([]byte(msg))
-	}
+  lc.broadcast(args...)
+}
+
+// This will send a message to everyone in the loaded cafe except one with id
+func (lc *LoadedCafe) BroadcastExcept(id int, args ...string) {
+	lc.mu.Lock()
+	defer lc.mu.Unlock()
+
+  lc.broadcastExcept(id, args...)
 }
 
 func (lc *LoadedCafe) Info() string {
@@ -84,7 +90,21 @@ func (lc *LoadedCafe) Info() string {
 
 func (lc *LoadedCafe) Join(id int, conn net.Conn) {
 	lc.mu.Lock()
-	defer lc.mu.Unlock()
+  defer lc.mu.Unlock()
+
+  // Get joined client
+  c, err := lc.clientManager.Get(id)
+  if err != nil {
+      fmt.Printf("Cant get client with id: %v\n", id)
+      return 
+  }
+
+  // Set position of player
+  c.Player.Position[0] = lc.cafe.PlayerStart[0]
+  c.Player.Position[1] = lc.cafe.PlayerStart[1]
+
+  // Send everyone the joined player
+  lc.broadcast("juj", "-1", "0", c.Player.String())
 
   // Add to players in cafe
 	lc.occupants[id] = conn
@@ -94,39 +114,28 @@ func (lc *LoadedCafe) Join(id int, conn net.Conn) {
 	args = append(args, lc.cafe.AsResponse()...)
   lc.send(id, args...)
 
-  // 
-
+  // Get all players in cafe
+  var playersStr []string
   
-  // Send all players in cafe
+  // Get all players in cafe
   for id, _ := range lc.occupants {
     c, err := lc.clientManager.Get(id)
     if err != nil {
-      fmt.Printf("Cant get client with id: %v", id)
+      fmt.Printf("Cant get client with id: %v\n", id)
       return 
     }
     player := c.Player
 
-    params := []string{
-      strconv.Itoa(player.ID),
-      strconv.Itoa(player.ID),
-      strconv.Itoa(player.XP),
-      strconv.Itoa(player.Position[0]),
-      strconv.Itoa(player.Position[1]),
-      strconv.Itoa(player.WorkTimeLeft),
-      strconv.Itoa(player.OpenJobs),
-      utils.If(player.SeekingJob, "1", "0"),
-      utils.If(player.AllowFriendRequests, "1", "0"),
-      player.Avatar.String(),
-    }
-
-    args := []string{
-      "jul", "-1", "0",
-      strings.Join(params, "+"),
-    }
-
-    lc.send(id, args...)
+    playersStr = append(playersStr, player.String())
   }
 
+  args = []string{
+    "jul", "-1", "0",
+    strings.Join(playersStr, "$"),
+  }
+  
+  // Send it to joined player
+  lc.send(id, args...)
 }
 
 func (lc *LoadedCafe) Leave(id int) {
@@ -139,7 +148,17 @@ func (lc *LoadedCafe) Leave(id int) {
 
 	delete(lc.occupants, id)
 
-	//TODO: Run reverse function provided by cafe manager
+
+  // If owner is not online
+  if player, _ := lc.clientManager.Get(lc.cafe.ID); player == nil {
+    // If there are no players at the location
+    if len(lc.occupants) == 0 {
+      lc.mu.Unlock()
+      lc.deleteFunc(lc.cafe.ID) // Delete cafe from manager
+      println("TEST DOES THIS WORK?????")
+    }
+  }
+
 }
 
 
@@ -164,6 +183,20 @@ func (lc *LoadedCafe) broadcast(args ...string) {
 	fmt.Printf("[BROADCAST] %s\n", msg)
 
 	for _, o := range lc.occupants {
+		o.Write([]byte(msg))
+	}
+}
+
+// |========================================|
+// | !!!  BEFORE USING THIS LOCK MUTEX  !!! |
+// |========================================|
+func (lc *LoadedCafe) broadcastExcept(id int, args ...string) {
+  
+  msg := responses.WrapExtensionResponse(args...)
+	fmt.Printf("[BROADCAST] %s\n", msg)
+
+	for oid, o := range lc.occupants {
+    if oid == id { continue; }
 		o.Write([]byte(msg))
 	}
 }
