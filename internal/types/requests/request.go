@@ -93,7 +93,6 @@ const (
 )
 
 func LookupRequestKind(kindStr string) RequestKind {
-	println("KIND STR: ", kindStr)
 	kindLookup := map[string]RequestKind{
 		// System
 		"logout":    DISCONNECT,

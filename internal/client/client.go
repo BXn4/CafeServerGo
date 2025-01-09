@@ -16,11 +16,13 @@ import (
 
 // Client
 type Client struct {
-	Conn   net.Conn
-	DB     *database.CafeDB
-	Cafe   interfaces.CafeLocation
-	Player *objects.Player
-	Reader *bufio.Reader
+	Conn     net.Conn // Writable connection to the client
+	Reader   *bufio.Reader // Readable connection to the client
+
+	DB       *database.CafeDB // Connection to the database
+
+	Location interfaces.CafeLocation // Players current location
+	Player   *objects.Player // Player object
 }
 
 func New(conn net.Conn, dbc *database.CafeDB) *Client {
@@ -37,10 +39,12 @@ func (c *Client) Alive() bool {
 }
 
 func (c *Client) Disconnect() {
-	if c.Cafe != nil {
-		c.Cafe.Leave(c.Player.ID) // Leaves the current room
-	}
-	c.Conn.Close()
+	defer c.Conn.Close()
+
+  if c.Player != nil { return }
+	if c.Location != nil { return }
+	
+	c.Location.Leave(c.Player.ID) // Leaves the current room
 }
 
 func (c *Client) NextRequest() (*requests.Request, error) {

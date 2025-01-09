@@ -3,13 +3,13 @@ package commands
 import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
-	_ "cafego/internal/objects"
 	"cafego/internal/types/requests"
+	"cafego/internal/utils"
 	"strconv"
 )
 
 // gui - USER INFO
-func UserInfo(req *requests.Request, c *client.Client, clientManager *managers.ClientManager, cafeManager *managers.CafeManager) error {
+func UserInfo(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 	var err error
 	name := req.Args[2]
 
@@ -18,26 +18,6 @@ func UserInfo(req *requests.Request, c *client.Client, clientManager *managers.C
 		if err != nil {
 			return err
 		}
-	}
-
-	playedWheel := "0"
-	if c.Player.PlayedWheel {
-		playedWheel = "1"
-	}
-
-	allowFriendRequests := "0"
-	if c.Player.AllowFriendRequests {
-		allowFriendRequests = "1"
-	}
-
-	allowEmails := "0"
-	if c.Player.AllowEmails {
-		allowEmails = "1"
-	}
-
-	emailVerified := "0"
-	if c.Player.EmailVerified {
-		emailVerified = "1"
 	}
 
 	c.SendExtensionResponse(
@@ -53,11 +33,11 @@ func UserInfo(req *requests.Request, c *client.Client, clientManager *managers.C
 		strconv.Itoa(c.Player.InstantCookings),
 		strconv.Itoa(c.Player.OpenJobs),
 		"0",
-		playedWheel,
+    utils.If(c.Player.PlayedWheel, "1", "0"),
 		"0",
-		allowFriendRequests,
-		allowEmails,
-		emailVerified,
+    utils.If(c.Player.AllowFriendRequests, "1", "0"),
+    utils.If(c.Player.AllowEmails, "1", "0"),
+    utils.If(c.Player.EmailVerified, "1", "0"),
 		strconv.Itoa(c.Player.NewGifts),
 		c.Player.Avatar.String(),
 	)

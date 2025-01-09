@@ -36,6 +36,7 @@ type Cafe struct {
 	CustomerCycle      string //TODO: Make it 'Task'
 }
 
+
 func (c *Cafe) AsResponse() []string {
 
 	var tiles []string

@@ -7,7 +7,7 @@ import (
 )
 
 // sbc - SendBalancingConstant
-func SendBalancingConstant(req *requests.Request, c *client.Client, clientManager *managers.ClientManager, cafeManager *managers.CafeManager) error {
+func SendBalancingConstant(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	c.SendExtensionResponse("sbc", "1", "0",
 		"15",         // cleanCostCash

@@ -10,12 +10,12 @@ import (
 )
 
 // ifr - SendFridgeInventory
-func SendFridgeInventory(req *requests.Request, c *client.Client, clientManager *managers.ClientManager, cafeManager *managers.CafeManager) error {
+func SendFridgeInventory(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	var fridge map[int]int
 	var fridgeCap int
 
-	if c.Cafe == nil {
+	if c.Location == nil {
 		cafe, err := c.DB.GetCafeByPlayerID(c.Player.ID)
 		if err != nil {
 			return err
@@ -23,8 +23,7 @@ func SendFridgeInventory(req *requests.Request, c *client.Client, clientManager 
 		fridge = cafe.FridgeInventory
 		fridgeCap = cafe.GetFridgeMaxCapacity()
 	} else {
-		c.Cafe.Fridge()
-		fridgeCap = c.Cafe.GetFridgeMaxCapacity()
+		fridgeCap = c.Location.Cafe().GetFridgeMaxCapacity()
 	}
 
 	var fridgeArgs []string

@@ -7,7 +7,7 @@ import (
 )
 
 // pin
-func SendPing(req *requests.Request, c *client.Client, clientManager *managers.ClientManager, cafeManager *managers.CafeManager) error {
+func SendPing(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	c.SendExtensionResponse("pin", "-1")
 

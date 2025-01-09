@@ -23,21 +23,18 @@ type CafeServer struct {
 	dbConfig      *database.DBConfig
 	maxConn       int
 	db            *database.CafeDB
-	clientManager *managers.ClientManager
-	cafeManager   *managers.CafeManager
+	gm            *managers.GameManager
 }
 
 func New(config *CafeConfig, dbconfig *database.DBConfig) (*CafeServer, error) {
-  cm := managers.NewClientManager()
-  cafem, err := managers.NewCafeManager(cm)
+  gm, err := managers.NewGameManager()
   if err != nil {
     return nil, err
   }
 	return &CafeServer{
-		config:        config,
-		dbConfig:      dbconfig,
-		clientManager: cm,
-		cafeManager:   cafem,
+		config:   config,
+		dbConfig: dbconfig,
+		gm:       gm,
 	},nil
 }
 
@@ -45,11 +42,6 @@ func (s *CafeServer) Run() {
 
 	// Read the items XML file and cache it
 	utils.ReadAndCacheItems()
-
-	// Test
-	/*for _, chair := range utils.Chairs {
-		fmt.Printf("Wod ID: %d, Type: %s, Group: %s, Cash: %d, Gold: %d\n", chair.ID, chair.Type, chair.Group, chair.Cash, chair.Gold)
-	}*/
 
 	// Set up MariaDB connection
 	db, err := database.ConnectToDB(s.dbConfig)
@@ -60,7 +52,7 @@ func (s *CafeServer) Run() {
 	defer db.Close()
 	log.Printf("Server connected to database...")
 
-	s.cafeManager.SetCafeDB(db)
+	s.gm.SetCafeDB(db)
 
 	// Start the TCP server
 	address := fmt.Sprintf("%s:%s", s.config.Host, s.config.Port)
@@ -81,9 +73,9 @@ func (s *CafeServer) Run() {
 
 		c := client.New(conn, db)
 		println("ADDING TO ClientManager")
-		s.clientManager.Add(c)
+		s.gm.AddClient(c)
 
-		go commands.HandleClient(c, s.clientManager, s.cafeManager)
+		go commands.HandleClient(c, s.gm)
 	}
 
 }

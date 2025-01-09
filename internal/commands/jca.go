@@ -8,7 +8,7 @@ import (
 )
 
 // jca - JoinCafe
-func JoinCafe(req *requests.Request, c *client.Client, clientManager *managers.ClientManager, cafeManager *managers.CafeManager) error {
+func JoinCafe(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	// Get id of cafe to join
 	id, err := strconv.Atoi(req.Args[3])
@@ -16,22 +16,22 @@ func JoinCafe(req *requests.Request, c *client.Client, clientManager *managers.C
 		return err
 	}
 
-	// Adds cafe to manager (load it if not loaded)
-	cafe := cafeManager.Add(id)
+	// Adds cafe to manager (loads it if not loaded)
+	location := gm.AddLocation(id)
 
 	// Send cafe joined
 	c.SendExtensionResponse("jca", "-1", "0")
 
 	// Leave cafe if already in one
-  if c.Cafe != nil {
-    c.Cafe.Leave(c.Player.ID)
+  if c.Location != nil {
+    c.Location.Leave(c.Player.ID)
   }
 
-	// Join cafe
-	cafe.Join(id, c.Conn)
+	// Join location
+	location.Join(c.Player.ID, c.Conn)
 
 	// Save location
-	c.Cafe = cafe
+	c.Location = location
 
 	return nil
 }

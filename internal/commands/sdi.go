@@ -11,9 +11,9 @@ import (
 )
 
 // sdi - C2S_SHOP_DELETE_ITEM
-func SellIngredient(req *requests.Request, c *client.Client, clientManager *managers.ClientManager, cafeManager *managers.CafeManager) error {
+func SellIngredient(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
-	if c.Cafe.Owner() != c.Player.ID {
+	if c.Location.Cafe().PlayerID != c.Player.ID {
 		return errors.New("You dont own this cafe!")
 	}
 
@@ -38,7 +38,7 @@ func SellIngredient(req *requests.Request, c *client.Client, clientManager *mana
 	}
 
 	// Check if amount is right
-	if count, ok := c.Cafe.Fridge()[ingredientID]; !ok && count < ingredientAmount && ingredientAmount < 0 {
+	if count, ok := c.Location.Cafe().FridgeInventory[ingredientID]; !ok && count < ingredientAmount && ingredientAmount < 0 {
 		return fmt.Errorf("Invalid ingredient amount: %v, current amount: %v", ingredientAmount, count)
 	}
 
@@ -49,10 +49,10 @@ func SellIngredient(req *requests.Request, c *client.Client, clientManager *mana
 		c.Player.Cash += int(float64(ingredientInfo.Gold) * 0.2 * float64(ingredientAmount))
 	}
 
-	c.Cafe.Fridge()[ingredientID] -= ingredientAmount
-	if c.Cafe.Fridge()[ingredientID] == 0 {
+	c.Location.Cafe().FridgeInventory[ingredientID] -= ingredientAmount
+	if c.Location.Cafe().FridgeInventory[ingredientID] == 0 {
 		// print("REMOVED!")
-		delete(c.Cafe.Fridge(), ingredientID)
+		delete(c.Location.Cafe().FridgeInventory, ingredientID)
 	}
 
 	c.SendExtensionResponse("sdi", "-1", "0", strconv.Itoa(ingredientID), strconv.Itoa(ingredientAmount))

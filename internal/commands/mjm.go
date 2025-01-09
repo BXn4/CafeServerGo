@@ -7,24 +7,28 @@ import (
 )
 
 //mjm - JoinMarketplace
-func JoinMarketplace(req *requests.Request, c *client.Client, clientManager *managers.ClientManager, cafeManager *managers.CafeManager) error {
+func JoinMarketplace(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
+
+  for _, v := range req.Args {
+    println(v)
+  }
 
   // Gets cafe location
-	cafe := cafeManager.Add(-1)
+	location := gm.AddLocation(-1)
 
 	// Send cafe joined
 	c.SendExtensionResponse("mjm", "-1", "0")
 
 	// Leave current cafe if there is one
-  if c.Cafe != nil {
-    c.Cafe.Leave(c.Player.ID)
+  if c.Location != nil {
+    c.Location.Leave(c.Player.ID)
   }
 
 	// Join cafe
-	cafe.Join(c.Player.ID, c.Conn)
+	location.Join(c.Player.ID, c.Conn)
 
 	// Save location
-	c.Cafe = cafe
+	c.Location = location
 
 	return nil
 }

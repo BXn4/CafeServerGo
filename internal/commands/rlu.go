@@ -7,7 +7,7 @@ import (
 )
 
 // rlu - RoomList
-func RoomList(req *requests.Request, c *client.Client, clientManager *managers.ClientManager, cafeManager *managers.CafeManager) error {
+func RoomList(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	var roomID string
 	if req.Args[0] == "lgn" {

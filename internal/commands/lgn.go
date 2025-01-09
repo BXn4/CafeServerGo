@@ -5,10 +5,11 @@ import (
 	"cafego/internal/managers"
 	"cafego/internal/types/requests"
 	"strconv"
+  "fmt"
 )
 
 // lgn - Login
-func Login(req *requests.Request, c *client.Client, clientManager *managers.ClientManager, cafeManager *managers.CafeManager) error {
+func Login(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 	name := req.Args[2]
 	password := req.Args[3]
 
@@ -17,37 +18,48 @@ func Login(req *requests.Request, c *client.Client, clientManager *managers.Clie
 	if err != nil {
 		return err
 	}
-	statusCodeStr := strconv.Itoa(statusCode)
 
-	// TODO Check if already logged in log him/her out
+	// Check if already logged in log him/her out
+  if searched, _ := gm.GetClientByName(name); searched != nil {
+    statusCode = 15
+  } 
+
+	statusCodeStr := strconv.Itoa(statusCode)
 
 	// Send login response (lgn)
 	c.SendExtensionResponse("lgn", "1", statusCodeStr)
+  if statusCode != 0 {
+    if statusCode == 15 {
+      return fmt.Errorf("Player %v is already logged in", name)
+    }else{
+      return fmt.Errorf("Access denied")
+    }
+  }
 
 	// Send room list (rlu)
-	RoomList(req, c, clientManager, cafeManager)
+	RoomList(req, c, gm)
 
 	// TODO: Daily login reward check
 
 	// Send user info (gui)
-	err = UserInfo(req, c, clientManager, cafeManager)
+	err = UserInfo(req, c, gm)
 	if err != nil {
 		return err
 	}
 
 	// Send balancing constants (sbc)
-	SendBalancingConstant(req, c, clientManager, cafeManager)
+	SendBalancingConstant(req, c, gm)
 
 	// Send mastery info (lmi)
-	SendMasteryInfo(req, c, clientManager, cafeManager)
+	SendMasteryInfo(req, c, gm)
 
 	// Send fridge info (ifr)
-	SendFridgeInventory(req, c, clientManager, cafeManager)
+	SendFridgeInventory(req, c, gm)
 
 	// TODO: Handle login bonus (lbu)
 
 	// Send Ping (pin)
-	SendPing(req, c, clientManager, cafeManager)
+	SendPing(req, c, gm)
 
 	return nil
 }

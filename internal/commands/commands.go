@@ -9,7 +9,7 @@ import (
 	"fmt"
 )
 
-func HandleClient(c *client.Client, clientManager *managers.ClientManager, cafeManager *managers.CafeManager) {
+func HandleClient(c *client.Client, gm *managers.GameManager) {
 
 	for c.Alive() {
 
@@ -21,10 +21,10 @@ func HandleClient(c *client.Client, clientManager *managers.ClientManager, cafeM
 		}
 
 		// Handle requests
-		err = HandleRequest(req, c, clientManager, cafeManager)
+		err = HandleRequest(req, c, gm)
 		if err != nil {
-			fmt.Printf("Failed to handle request: %s\n", err.Error())
-			break
+			fmt.Printf("Error while handling request: %s\n", err.Error())
+			continue
 		}
 
 	}
@@ -32,7 +32,7 @@ func HandleClient(c *client.Client, clientManager *managers.ClientManager, cafeM
 	c.Disconnect()
 }
 
-func HandleRequest(req *requests.Request, c *client.Client, clientManager *managers.ClientManager, cafeManager *managers.CafeManager) error {
+func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	var err error
 
@@ -51,33 +51,26 @@ func HandleRequest(req *requests.Request, c *client.Client, clientManager *manag
 
 	/* COMMANDS */
 	case requests.LOGIN:
-		RoomList(req, c, clientManager, cafeManager)
+		RoomList(req, c, gm)
 	case requests.C2S_VERSION_CHECK:
-		err = VersionCheck(req, c, clientManager, cafeManager)
+		err = VersionCheck(req, c, gm)
 	case requests.C2S_JOIN_CAFE:
-		err = JoinCafe(req, c, clientManager, cafeManager)
+		err = JoinCafe(req, c, gm)
 	case requests.C2S_LOGIN:
-		err = Login(req, c, clientManager, cafeManager)
-		if err != nil {
-			return err
-		}
+		err = Login(req, c, gm)
 	case requests.C2S_CAFE_WALK:
-		err = CafeWalk(req, c, clientManager, cafeManager)
+		err = CafeWalk(req, c, gm)
 	case requests.C2S_SHOP_AVAILIBILITY:
-		err = ShopAvailibility(req, c, clientManager, cafeManager)
+		err = ShopAvailibility(req, c, gm)
 	case requests.C2S_SHOP_DELETE_ITEM:
-		err = SellIngredient(req, c, clientManager, cafeManager)
+		err = SellIngredient(req, c, gm)
 	case requests.C2S_SHOP_BUY_ITEM:
-		err = BuyIngredient(req, c, clientManager, cafeManager)
+		err = BuyIngredient(req, c, gm)
   case requests.C2S_CAFE_CHAT:
-		err = SendChatMessage(req, c, clientManager, cafeManager)
+		err = SendChatMessage(req, c, gm)
   case requests.C2S_MARKETPLACE_JOIN:
-		err = JoinMarketplace(req, c, clientManager, cafeManager)
+		err = JoinMarketplace(req, c, gm)
 	}
 
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }

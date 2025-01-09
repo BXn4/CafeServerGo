@@ -7,9 +7,7 @@ import (
 )
 
 // lmi - SendMasteryInfo
-func SendMasteryInfo(req *requests.Request, c *client.Client, clientManager *managers.ClientManager, cafeManager *managers.CafeManager) error {
-
-	println("PLAYER MASTERY: ", c.Player.Mastery)
+func SendMasteryInfo(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	c.SendExtensionResponse("lmi", "-1", "0", c.Player.Mastery)
 

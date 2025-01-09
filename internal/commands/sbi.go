@@ -10,7 +10,7 @@ import (
 )
 
 // sbi - C2S_SHOP_BUY_ITEM
-func BuyIngredient(req *requests.Request, c *client.Client, clientManager *managers.ClientManager, cafeManager *managers.CafeManager) error {
+func BuyIngredient(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	ingredientID, err := strconv.Atoi(req.Args[2])
 	if err != nil {
@@ -26,11 +26,11 @@ func BuyIngredient(req *requests.Request, c *client.Client, clientManager *manag
 
 	ingredientAmount, err := strconv.Atoi(req.Args[3])
 	if err != nil || ingredientAmount <= 0 {
-		fmt.Printf("invalid ingredient amount: %v", err)
+		fmt.Printf("Invalid ingredient amount: %v", err)
 		return err
 	}
 
-	if c.Cafe.GetFridgeFreeSpace() < ingredientAmount {
+	if c.Location.Cafe().GetFridgeFreeSpace() < ingredientAmount {
 		c.SendExtensionResponse("sbi", "-1", "40")
 		return nil
 	}
@@ -53,10 +53,10 @@ func BuyIngredient(req *requests.Request, c *client.Client, clientManager *manag
 		}
 	}
 
-	if c.Cafe.Fridge()[ingredientID] != 0 {
-		c.Cafe.Fridge()[ingredientID] += ingredientAmount
+	if c.Location.Cafe().FridgeInventory[ingredientID] != 0 {
+		c.Location.Cafe().FridgeInventory[ingredientID] += ingredientAmount
 	} else {
-		c.Cafe.Fridge()[ingredientID] = ingredientAmount
+		c.Location.Cafe().FridgeInventory[ingredientID] = ingredientAmount
 	}
 
 	c.SendExtensionResponse("sbi", "-1", "0", strconv.Itoa(ingredientID), strconv.Itoa(ingredientAmount))
