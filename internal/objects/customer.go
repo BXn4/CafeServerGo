@@ -22,11 +22,12 @@ const (
 )
 
 type Customer struct {
-	id         int
-	avatar     Avatar
-	pos        []int
-	task       string // TODO: 'Task' here
-	dish       int
-	action     CustomerAction
-	is_thirsty int
+	ID         int
+	Avatar     Avatar
+	Pos        []int
+	Task       string // TODO: 'Task' here
+	Dish       int
+	Action     CustomerAction
+	IsThirsty int
+  AssignedWaiter int
 }

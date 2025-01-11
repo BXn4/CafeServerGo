@@ -71,12 +71,12 @@ func (c *Cafe) AsResponse() []string {
 func (cafe *Cafe) ParseTiles(rawTiles string) error {
 	// Parse tiles
 	raw_tiles := strings.Split(rawTiles, "+")
-	size := cafe.ExpansionID + 8
-	cafe.Tiles = make([][]int, size)
+	cafe.Size = cafe.ExpansionID + 8
+	cafe.Tiles = make([][]int, cafe.Size)
 	for i, _ := range cafe.Tiles {
-		cafe.Tiles[i] = make([]int, size)
+		cafe.Tiles[i] = make([]int, cafe.Size)
 		for j, _ := range cafe.Tiles[i] {
-			value, err := strconv.Atoi(raw_tiles[(i*size)+j])
+			value, err := strconv.Atoi(raw_tiles[(i*cafe.Size)+j])
 			if err != nil {
 				return err
 			}

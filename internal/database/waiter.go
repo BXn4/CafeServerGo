@@ -25,6 +25,7 @@ func ConvertWaiterDAOToWaiter(dao *WaiterDAO) (*objects.Waiter, error) {
 	waiter.Avatar = objects.Avatar{}
 	data := strings.Split(dao.Avatar, "+")
 	waiter.Avatar.Name = data[0]
+	waiter.Avatar.IsNPC = true
 
 	apperances := strings.Split(data[2], "#")
 	for _, apperance := range apperances {
