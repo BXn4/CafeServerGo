@@ -1,10 +1,10 @@
 package objects
 
 import (
+	"cafego/internal/utils"
+	"encoding/json"
 	"strconv"
 	"strings"
-	"encoding/json"
-  "cafego/internal/utils"
 )
 
 type CafeBackground string
@@ -24,7 +24,7 @@ type Cafe struct {
 	Luxury             int
 	ExpansionID        int
 	Size               int
-  Background         CafeBackground
+	Background         CafeBackground
 	Tiles              [][]int
 	Objects            []*CafeObject
 	AvailableTables    []*CafeObject
@@ -35,7 +35,6 @@ type Cafe struct {
 	Customers          []*Customer
 	CustomerCycle      string //TODO: Make it 'Task'
 }
-
 
 func (c *Cafe) AsResponse() []string {
 
@@ -70,10 +69,10 @@ func (c *Cafe) AsResponse() []string {
 }
 
 func (cafe *Cafe) ParseTiles(rawTiles string) error {
-  // Parse tiles
+	// Parse tiles
 	raw_tiles := strings.Split(rawTiles, "+")
-  size := cafe.ExpansionID + 8
-  cafe.Tiles = make([][]int, size)
+	size := cafe.ExpansionID + 8
+	cafe.Tiles = make([][]int, size)
 	for i, _ := range cafe.Tiles {
 		cafe.Tiles[i] = make([]int, size)
 		for j, _ := range cafe.Tiles[i] {
@@ -85,7 +84,7 @@ func (cafe *Cafe) ParseTiles(rawTiles string) error {
 		}
 	}
 
-  return nil
+	return nil
 }
 
 func (cafe *Cafe) ParseObjectsFromJSON(rawObjects string) error {
@@ -102,21 +101,21 @@ func (cafe *Cafe) ParseObjectsFromJSON(rawObjects string) error {
 		}
 		cafe.Objects = append(cafe.Objects, &obj)
 	}
-  return nil
+	return nil
 }
 
 func (cafe *Cafe) ParseObjects(rawObjects string) error {
-  cafe.Objects = []*CafeObject{}
+	cafe.Objects = []*CafeObject{}
 
-  objsStr := strings.Split(rawObjects, "#")
+	objsStr := strings.Split(rawObjects, "#")
 
 	for _, objStr := range objsStr {
 
-    obj, err := NewCafeObjectFromString(objStr)
+		obj, err := NewCafeObjectFromString(objStr)
 
-    if err != nil {
-      return err
-    }
+		if err != nil {
+			return err
+		}
 
 		if obj.IsDoor() {
 			cafe.PlayerStart = []int{
@@ -127,9 +126,26 @@ func (cafe *Cafe) ParseObjects(rawObjects string) error {
 
 		cafe.Objects = append(cafe.Objects, obj)
 	}
-  return nil
+	return nil
 }
 
+/*
+def get_object(self, x: int, y: int) -> Union['CafeObject', None]:
+
+	for obj in self.objects:
+	    if obj.pos == [x, y]:
+	        return obj
+	return None
+*/
+
+func (c *Cafe) GetObjectByPos(posX int, posY int) *CafeObject {
+	for _, obj := range c.Objects {
+		if obj.Pos[0] == posX && obj.Pos[1] == posY {
+			return obj
+		}
+	}
+	return nil
+}
 
 func (c *Cafe) GetFridgeMaxCapacity() int {
 	fridgeCount := 0

@@ -4,12 +4,17 @@ import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
 	"cafego/internal/types/requests"
+	"cafego/internal/utils"
 	"fmt"
 	"strconv"
+	"strings"
+	"time"
 )
 
 // ccc - C2S_CAFE_COOK
 func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
+
+	var usingFancy int = 0
 
 	posX, err := strconv.Atoi(req.Args[2])
 	if err != nil {
@@ -31,13 +36,64 @@ func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameMana
 		fmt.Printf("Cant parse isPrepared to int: %v", err)
 		return err
 	}
-	usingFancy, err := strconv.Atoi(req.Args[6])
+	usingFancy, err = strconv.Atoi(req.Args[6])
 	if err != nil {
 		fmt.Printf("Cant parse usingFancy to int: %v", err)
 		return err
 	}
 
 	cookingTime := c.Player.GetDishMasteryDuration(dishID)
+
+	stove := c.Location.Cafe().GetObjectByPos(posX, posY)
+
+	if stove == nil {
+		fmt.Printf("No stove found at: %v:%v", posX, posY)
+		return nil
+	}
+
+	if isPrepared == 0 {
+		dishInfo, err := utils.GetDish(dishID)
+		if err != nil {
+			fmt.Printf("Invalid ingredient ID: %v", err)
+		}
+
+		ingredientsStr := dishInfo.Requirements
+		ingredientsMap := make(map[int]int)
+		ingredients := strings.Split(ingredientsStr, "#")
+		for _, ingredient := range ingredients {
+			parts := strings.Split(ingredient, "+")
+			ingredientID, err := strconv.Atoi(parts[0])
+			if err != nil {
+				fmt.Println("Error converting ingredient ID:", err)
+				continue
+			}
+			ingredientAmount, err := strconv.Atoi(parts[1])
+			if err != nil {
+				fmt.Println("Error converting amount:", err)
+				return err
+			}
+
+			ingredientsMap[ingredientID] = ingredientAmount
+		}
+
+		for ingredientID, ingredientAmount := range ingredientsMap {
+			c.Location.Cafe().FridgeInventory[ingredientID] -= ingredientAmount
+			if c.Location.Cafe().FridgeInventory[ingredientID] == 0 {
+				delete(c.Location.Cafe().FridgeInventory, ingredientID)
+			}
+		}
+
+		stove.DishID = dishID
+		stove.FancyIng = usingFancy != 0
+
+	} else {
+		stove.DishID = dishID
+		currentTime := time.Now().UTC()
+		stove.StartedAt = &currentTime
+		finishesAt := stove.StartedAt.Add(time.Duration(cookingTime) * time.Second)
+		stove.FinishesAt = &finishesAt
+		fmt.Print(stove.FancyIng)
+	}
 
 	c.Location.Broadcast("ccc", "-1", "0",
 		strconv.Itoa(posX), strconv.Itoa(posY), strconv.Itoa(dishID),

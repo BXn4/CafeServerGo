@@ -2,10 +2,10 @@ package objects
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
-  "fmt"
 )
 
 type CafeObjectKind int
@@ -56,37 +56,37 @@ func NewCafeObjectFromJSON(s string) (*CafeObject, error) {
 
 func NewCafeObjectFromString(s string) (*CafeObject, error) {
 
-  data := strings.Split(s, "+")
+	data := strings.Split(s, "+")
 
-  posX, err := strconv.Atoi(data[0])
-  if err != nil {
-    fmt.Printf("Error parsing %v to int", data[0])
-    return nil, err
-  } 
+	posX, err := strconv.Atoi(data[0])
+	if err != nil {
+		fmt.Printf("Error parsing %v to int", data[0])
+		return nil, err
+	}
 
-  posY, err := strconv.Atoi(data[1])
-  if err != nil {
-    fmt.Printf("Error parsing %v to int", data[1])
-    return nil, err
-  }
+	posY, err := strconv.Atoi(data[1])
+	if err != nil {
+		fmt.Printf("Error parsing %v to int", data[1])
+		return nil, err
+	}
 
-  kind, err := strconv.Atoi(data[2])
-  if err != nil {
-    fmt.Printf("Error parsing %v to int", data[2])
-    return nil, err
-  }
+	kind, err := strconv.Atoi(data[2])
+	if err != nil {
+		fmt.Printf("Error parsing %v to int", data[2])
+		return nil, err
+	}
 
-  rotation, err := strconv.Atoi(data[3])
-  if err != nil {
-    fmt.Printf("Error parsing %v to int", data[3])
-    return nil, err
-  }
+	rotation, err := strconv.Atoi(data[3])
+	if err != nil {
+		fmt.Printf("Error parsing %v to int", data[3])
+		return nil, err
+	}
 
-  cafeObj := CafeObject{
-    Pos: []int{posX, posY},
-    Kind: CafeObjectKind(kind),
-    Rotation: CafeObjectRotation(rotation),
-  }
+	cafeObj := CafeObject{
+		Pos:      []int{posX, posY},
+		Kind:     CafeObjectKind(kind),
+		Rotation: CafeObjectRotation(rotation),
+	}
 
 	return &cafeObj, nil
 }
@@ -140,12 +140,12 @@ func (c *CafeObject) String() string {
 			args = append(args, fancyIngStr)
 
 			if c.StartedAt != nil {
-				currentTime := time.Now()
-				passedTime := currentTime.Second() - c.StartedAt.Second()
-				remainingTime := c.FinishesAt.Second() - currentTime.Second()
+				currentTime := time.Now().UTC()
+				passedTime := currentTime.Sub(*c.StartedAt).Seconds()
+				remainingTime := c.FinishesAt.Sub(currentTime).Seconds()
 
-				args = append(args, strconv.Itoa(passedTime))
-				args = append(args, strconv.Itoa(remainingTime))
+				args = append(args, strconv.Itoa(int(passedTime)))
+				args = append(args, strconv.Itoa(int(remainingTime)))
 			} else {
 				args = append(args, "-1")
 				args = append(args, "-1")
