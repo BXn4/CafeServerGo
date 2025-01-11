@@ -16,13 +16,13 @@ import (
 
 // Client
 type Client struct {
-	Conn     net.Conn // Writable connection to the client
-	Reader   *bufio.Reader // Readable connection to the client
+	Conn   net.Conn      // Writable connection to the client
+	Reader *bufio.Reader // Readable connection to the client
 
-	DB       *database.CafeDB // Connection to the database
+	DB *database.CafeDB // Connection to the database
 
 	Location interfaces.CafeLocation // Players current location
-	Player   *objects.Player // Player object
+	Player   *objects.Player         // Player object
 }
 
 func New(conn net.Conn, dbc *database.CafeDB) *Client {
@@ -41,10 +41,14 @@ func (c *Client) Alive() bool {
 func (c *Client) Disconnect() {
 	defer c.Conn.Close()
 
-  if c.Player != nil { return }
-	if c.Location != nil { return }
-	
-	c.Location.Leave(c.Player.ID) // Leaves the current room
+	if c.Player != nil {
+		// If the player exist, leave the player.
+		// With flash, when the client sends policy file request, the client disconnects after it
+		c.Location.Leave(c.Player.ID) // Leaves the current room
+	}
+	if c.Location != nil {
+		return
+	}
 }
 
 func (c *Client) NextRequest() (*requests.Request, error) {

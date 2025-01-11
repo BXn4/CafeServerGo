@@ -22,7 +22,7 @@ type Wod struct {
 	InventorySize    int    `xml:"inventorySize,attr,omitempty"`
 	IncomePerServing int    `xml:"incomePerServing,attr,omitempty"`
 	Servings         int    `xml:"servings,attr,omitempty"`
-	Duration         int    `xml:"Duration,attr,omitempty"`
+	Duration         int    `xml:"duration,attr,omitempty"`
 	DishCategory     int    `xml:"dishcategory,attr,omitempty"`
 	Category         string `xml:"category,attr,omitempty"`
 	Requirements     string `xml:"requirements,attr,omitempty"`

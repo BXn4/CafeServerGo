@@ -36,7 +36,6 @@ type PlayerDAO struct {
 	daily_login           string `json:"daily_login" form:"daily_login" gorm:"column:daily_login"`
 }
 
-
 func ConvertPlayerDAOToPlayer(playerDAO PlayerDAO) (*objects.Player, error) {
 	var player objects.Player
 
@@ -53,9 +52,9 @@ func ConvertPlayerDAOToPlayer(playerDAO PlayerDAO) (*objects.Player, error) {
 	player.EmailVerified = playerDAO.email_verified
 	player.NewGifts = playerDAO.new_gifts
 	player.Username = playerDAO.username
-	player.Position = []int{0,0}
+	player.Position = []int{0, 0}
 
-	player.Mastery = playerDAO.mastery
+	player.ParseMastery(playerDAO.mastery)
 
 	// Fill avatar
 	avatar := objects.Avatar{

@@ -66,10 +66,12 @@ func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameMan
 		err = SellIngredient(req, c, gm)
 	case requests.C2S_SHOP_BUY_ITEM:
 		err = BuyIngredient(req, c, gm)
-  case requests.C2S_CAFE_CHAT:
+	case requests.C2S_CAFE_CHAT:
 		err = SendChatMessage(req, c, gm)
-  case requests.C2S_MARKETPLACE_JOIN:
+	case requests.C2S_MARKETPLACE_JOIN:
 		err = JoinMarketplace(req, c, gm)
+	case requests.C2S_CAFE_COOK:
+		err = StartCooking(req, c, gm)
 	}
 
 	return err

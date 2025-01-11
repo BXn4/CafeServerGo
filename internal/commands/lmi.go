@@ -9,7 +9,7 @@ import (
 // lmi - SendMasteryInfo
 func SendMasteryInfo(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
-	c.SendExtensionResponse("lmi", "-1", "0", c.Player.Mastery)
+	c.SendExtensionResponse("lmi", "-1", "0", c.Player.BuildMastery())
 
 	return nil
 }
