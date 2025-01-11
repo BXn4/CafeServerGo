@@ -1,8 +1,8 @@
 package managers
 
 import (
-	"cafego/internal/objects"
 	"cafego/internal/agents"
+	"cafego/internal/objects"
 	"cafego/internal/types/responses"
 	_ "cafego/internal/utils"
 	"fmt"
@@ -18,7 +18,7 @@ type LoadedLocation struct {
 	occupants map[int]net.Conn
 	mu        sync.Mutex
 	gm        *GameManager
-  running   bool
+	running   bool
 }
 
 func NewLoadedLocation(cafe *objects.Cafe, gm *GameManager) *LoadedLocation {
@@ -26,7 +26,7 @@ func NewLoadedLocation(cafe *objects.Cafe, gm *GameManager) *LoadedLocation {
 		cafe:      cafe,
 		gm:        gm,
 		occupants: make(map[int]net.Conn),
-    running:   false,
+		running:   false,
 	}
 }
 
@@ -54,10 +54,10 @@ func (lc *LoadedLocation) Join(playerID int, conn net.Conn) {
 	lc.mu.Lock()
 	defer lc.mu.Unlock()
 
-  if !lc.running {
-    lc.running = true
-    go agents.AgentCycle(lc, lc.running)
-  }
+	if !lc.running {
+		lc.running = true
+		go agents.AgentCycle(lc, lc.running)
+	}
 
 	// Get joined client
 	c, err := lc.gm.GetClient(playerID)
@@ -117,9 +117,9 @@ func (lc *LoadedLocation) Leave(playerID int) {
 
 	// If there are no players at the location and the location is not the marketplace
 	if len(lc.occupants) == 0 && !(lc.cafe.ID < 0) {
-    lc.running = false
-	  // If owner is not online
-	  if player, _ := lc.gm.GetClient(lc.cafe.PlayerID); player == nil {
+		lc.running = false
+		// If owner is not online
+		if player, _ := lc.gm.GetClient(lc.cafe.PlayerID); player == nil {
 			lc.gm.RemoveLocation(lc.cafe.ID) // Delete cafe from manager
 		}
 	}
