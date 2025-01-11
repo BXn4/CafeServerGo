@@ -12,8 +12,8 @@ func UserLeave(req *requests.Request, c *client.Client, gm *managers.GameManager
 
 	idStr := strconv.Itoa(c.Player.ID)
 
-	// Send to people in the same location
-	c.Location.Broadcast("juq", "-1", "0", idStr)
+	// Send to people in the same location, but dont send to the current player
+	c.Location.Announce(c.Player.ID, "juq", "-1", "0", idStr)
 
 	return nil
 }

@@ -1,8 +1,8 @@
 package interfaces
 
 import (
+	"cafego/internal/objects"
 	"net"
-  "cafego/internal/objects"
 )
 
 // This is a wrapper for a cafe
@@ -17,6 +17,9 @@ type CafeLocation interface {
 	// Send message to everyone in the location
 	Broadcast(arg ...string)
 
-  // The wrapped cafe object 
-  Cafe() *objects.Cafe
+	// Send message to other clients in the location (Not going to send to the source)
+	Announce(id int, arg ...string)
+
+	// The wrapped cafe object
+	Cafe() *objects.Cafe
 }
