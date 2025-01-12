@@ -5,8 +5,8 @@ import (
 	"cafego/internal/server"
 	"cafego/internal/utils"
 	"fmt"
-  "os"
 	"github.com/joho/godotenv"
+	"os"
 )
 
 func main() {
@@ -35,10 +35,10 @@ func main() {
 		},
 	)
 
-  if err != nil {
-    fmt.Printf("Something went wrong with creating the server object!\n")
-    os.Exit(1)
-  }else{
-	  srv.Run()
-  }
+	if err != nil {
+		fmt.Printf("Something went wrong with creating the server object!\n")
+		os.Exit(1)
+	} else {
+		srv.Run()
+	}
 }

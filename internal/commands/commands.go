@@ -72,6 +72,8 @@ func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameMan
 		err = JoinMarketplace(req, c, gm)
 	case requests.C2S_CAFE_COOK:
 		err = StartCooking(req, c, gm)
+	case requests.C2S_CAFE_STOVE_DELIVER_INFO:
+		err = StoveDeliverInfo(req, c, gm)
 	}
 
 	return err

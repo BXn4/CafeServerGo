@@ -170,3 +170,5 @@ func (c *Cafe) GetFridgeFreeSpace() int {
 
 	return freeSpace
 }
+
+
