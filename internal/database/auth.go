@@ -23,10 +23,9 @@ func (db *CafeDB) Authenticate(name string, pass string) (int, error) {
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			fmt.Errorf("NO ROWS FOUND")
+			return 14, fmt.Errorf("NO ROWS FOUND")
 		}
-		fmt.Errorf("SQL ERR: %v", err)
-		return 14, err
+		return 14, fmt.Errorf("SQL ERR: %v", err)
 	}
 
 	// TODO: Secure authentication

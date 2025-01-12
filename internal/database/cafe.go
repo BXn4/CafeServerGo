@@ -38,17 +38,17 @@ func ConvertCafeDAOToCafe(cafeDAO CafeDAO) (*objects.Cafe, error) {
 	cafe.Background = objects.DefaultBackground
 
 	// Parse tiles
-  var err error
-  err = cafe.ParseTiles(cafeDAO.Tiles)
-  if err != nil {
-    return nil, err
-  }
+	var err error
+	err = cafe.ParseTiles(cafeDAO.Tiles)
+	if err != nil {
+		return nil, err
+	}
 
 	// Parse objects
-  err = cafe.ParseObjectsFromJSON(cafeDAO.Objects)
-  if err != nil {
-    return nil,err
-  }
+	err = cafe.ParseObjectsFromJSON(cafeDAO.Objects)
+	if err != nil {
+		return nil, err
+	}
 
 	// Parse fridge inventory
 	cafe.FridgeInventory = map[int]int{}
@@ -127,10 +127,9 @@ func (db *CafeDB) GetCafeByPlayerID(player_id int) (*objects.Cafe, error) {
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			fmt.Errorf("ID NOT FOUND")
+			return nil, fmt.Errorf("ID NOT FOUND")
 		}
-		fmt.Errorf("SQL ERR: %v", err)
-		return nil, err
+		return nil, fmt.Errorf("SQL ERR: %v", err)
 	}
 
 	cafe, err := ConvertCafeDAOToCafe(cafeDAO)

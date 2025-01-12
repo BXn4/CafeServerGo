@@ -33,14 +33,13 @@ type Cafe struct {
 	FurnitureInventory map[int]int
 	Waiters            []*Waiter
 	Customers          []*Customer
-	CustomerCycle      string //TODO: Make it 'Task'
 }
 
 func (c *Cafe) AsResponse() []string {
 
 	var tiles []string
 	for i, row := range c.Tiles {
-		for j, _ := range row {
+		for j := range len(row) {
 			tiles = append(tiles, strconv.Itoa(c.Tiles[i][j]))
 		}
 	}
@@ -73,9 +72,9 @@ func (cafe *Cafe) ParseTiles(rawTiles string) error {
 	raw_tiles := strings.Split(rawTiles, "+")
 	cafe.Size = cafe.ExpansionID + 8
 	cafe.Tiles = make([][]int, cafe.Size)
-	for i, _ := range cafe.Tiles {
+	for i := range len(cafe.Tiles) {
 		cafe.Tiles[i] = make([]int, cafe.Size)
-		for j, _ := range cafe.Tiles[i] {
+		for j := range len(cafe.Tiles[i]) {
 			value, err := strconv.Atoi(raw_tiles[(i*cafe.Size)+j])
 			if err != nil {
 				return err
@@ -129,15 +128,6 @@ func (cafe *Cafe) ParseObjects(rawObjects string) error {
 	return nil
 }
 
-/*
-def get_object(self, x: int, y: int) -> Union['CafeObject', None]:
-
-	for obj in self.objects:
-	    if obj.pos == [x, y]:
-	        return obj
-	return None
-*/
-
 func (c *Cafe) GetObjectByPos(posX int, posY int) *CafeObject {
 	for _, obj := range c.Objects {
 		if obj.Pos[0] == posX && obj.Pos[1] == posY {
@@ -170,5 +160,3 @@ func (c *Cafe) GetFridgeFreeSpace() int {
 
 	return freeSpace
 }
-
-

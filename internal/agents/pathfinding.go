@@ -45,10 +45,10 @@ func (p *CafePoint) Neighbors() []*CafePoint {
 	var neighbors []*CafePoint
 
 	directions := [][]int{
-		[]int{0, 1},  // Up
-		[]int{0, -1}, // Down
-		[]int{-1, 0}, // Left
-		[]int{1, 0},  // Right
+		{0, 1},  // Up
+		{0, -1}, // Down
+		{-1, 0}, // Left
+		{1, 0},  // Right
 	}
 
 	// Adds neighbours that are inside bounds
