@@ -5,8 +5,9 @@ import (
 	"cafego/internal/server"
 	"cafego/internal/utils"
 	"fmt"
-	"github.com/joho/godotenv"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {

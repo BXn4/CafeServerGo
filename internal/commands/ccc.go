@@ -18,28 +18,24 @@ func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameMana
 
 	posX, err := strconv.Atoi(req.Args[2])
 	if err != nil {
-		fmt.Printf("Cant parse posX to int: %v", err)
-		return err
+		return fmt.Errorf("Cant parse posX to int: %w", err)
 	}
 	posY, err := strconv.Atoi(req.Args[3])
 	if err != nil {
-		fmt.Printf("Cant parse posY to int: %v", err)
-		return err
+		return fmt.Errorf("Cant parse posY to int: %w", err)
 	}
 	dishID, err := strconv.Atoi(req.Args[4])
 	if err != nil {
-		fmt.Printf("Cant parse dishID to int: %v", err)
-		return err
+		return fmt.Errorf("Cant parse dishID to int: %w", err)
 	}
 	isPrepared, err := strconv.Atoi(req.Args[5])
 	if err != nil {
-		fmt.Printf("Cant parse isPrepared to int: %v", err)
-		return err
+		return fmt.Errorf("Cant parse isPrepared to int: %w", err)
 	}
 	usingFancy, err = strconv.Atoi(req.Args[6])
 	if err != nil {
-		fmt.Printf("Cant parse usingFancy to int: %v", err)
-		return err
+
+		return fmt.Errorf("Cant parse usingFancy to int: %w", err)
 	}
 
 	cookingTime := c.Player.GetDishMasteryDuration(dishID)
@@ -47,14 +43,13 @@ func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameMana
 	stove := c.Location.Cafe().GetObjectByPos(posX, posY)
 
 	if stove == nil {
-		fmt.Printf("No stove found at: %v:%v", posX, posY)
-		return nil
+		return fmt.Errorf("No stove found at: %v:%v", posX, posY)
 	}
 
 	if isPrepared == 0 {
 		dishInfo, err := utils.GetDish(dishID)
 		if err != nil {
-			fmt.Printf("Invalid ingredient ID: %v", err)
+			return fmt.Errorf("Invalid ingredient ID: %w", err)
 		}
 
 		ingredientsStr := dishInfo.Requirements
@@ -62,15 +57,15 @@ func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameMana
 		ingredients := strings.Split(ingredientsStr, "#")
 		for _, ingredient := range ingredients {
 			parts := strings.Split(ingredient, "+")
+
 			ingredientID, err := strconv.Atoi(parts[0])
 			if err != nil {
-				fmt.Println("Error converting ingredient ID:", err)
-				continue
+				return fmt.Errorf("Error converting ingredient ID: %w", err)
 			}
+
 			ingredientAmount, err := strconv.Atoi(parts[1])
 			if err != nil {
-				fmt.Println("Error converting amount:", err)
-				return err
+				return fmt.Errorf("Error converting amount: %w", err)
 			}
 
 			ingredientsMap[ingredientID] = ingredientAmount
@@ -92,12 +87,17 @@ func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameMana
 		stove.StartedAt = &currentTime
 		finishesAt := stove.StartedAt.Add(time.Duration(cookingTime) * time.Second)
 		stove.FinishesAt = &finishesAt
-		fmt.Print(stove.FancyIng)
 	}
 
-	c.Location.Broadcast("ccc", "-1", "0",
-		strconv.Itoa(posX), strconv.Itoa(posY), strconv.Itoa(dishID),
-		strconv.Itoa(isPrepared), strconv.Itoa(usingFancy), strconv.Itoa(int(cookingTime)))
+	c.Location.Broadcast(
+		"ccc", "-1", "0",
+		req.Args[2],
+		req.Args[3],
+		strconv.Itoa(dishID),
+		strconv.Itoa(isPrepared),
+		strconv.Itoa(usingFancy),
+		strconv.Itoa(int(cookingTime)),
+	)
 
 	return nil
 }

@@ -19,23 +19,23 @@ type CafeConfig struct {
 
 // Server
 type CafeServer struct {
-	config        *CafeConfig
-	dbConfig      *database.DBConfig
-	maxConn       int
-	db            *database.CafeDB
-	gm            *managers.GameManager
+	config   *CafeConfig
+	dbConfig *database.DBConfig
+	maxConn  int
+	db       *database.CafeDB
+	gm       *managers.GameManager
 }
 
 func New(config *CafeConfig, dbconfig *database.DBConfig) (*CafeServer, error) {
-  gm, err := managers.NewGameManager()
-  if err != nil {
-    return nil, err
-  }
+	gm, err := managers.NewGameManager()
+	if err != nil {
+		return nil, err
+	}
 	return &CafeServer{
 		config:   config,
 		dbConfig: dbconfig,
 		gm:       gm,
-	},nil
+	}, nil
 }
 
 func (s *CafeServer) Run() {

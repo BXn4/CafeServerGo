@@ -5,7 +5,6 @@ import (
 	"cafego/internal/managers"
 	"cafego/internal/types/requests"
 	"cafego/internal/types/responses"
-	_ "errors"
 	"fmt"
 )
 
@@ -74,6 +73,10 @@ func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameMan
 		err = StartCooking(req, c, gm)
 	case requests.C2S_CAFE_STOVE_DELIVER_INFO:
 		err = StoveDeliverInfo(req, c, gm)
+	case requests.C2S_CAFE_STOVE_DELIVER:
+		err = StoveDeliver(req, c, gm)
+	case requests.C2S_CAFE_CLEAN:
+		err = Clean(req, c, gm)
 	}
 
 	return err
