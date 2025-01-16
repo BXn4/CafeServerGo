@@ -12,6 +12,11 @@ import (
 // sbi - C2S_SHOP_BUY_ITEM
 func BuyIngredient(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
+	// Dont allow players to modify the packet and sending us MJM while in editor.
+	if c.Location.Cafe().InEditorMode {
+		return nil
+	}
+
 	ingredientID, err := strconv.Atoi(req.Args[2])
 	if err != nil {
 		fmt.Printf("Can't parse id to int: %v", err)

@@ -14,6 +14,11 @@ import (
 // ccc - C2S_CAFE_COOK
 func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
+	// Dont allow players to modify the packet and sending us CCC while in editor.
+	if c.Location.Cafe().InEditorMode {
+		return nil
+	}
+
 	var usingFancy int = 0
 
 	posX, err := strconv.Atoi(req.Args[2])

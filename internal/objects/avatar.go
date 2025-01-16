@@ -2,6 +2,7 @@ package objects
 
 import (
 	"fmt"
+	"math/rand"
 	"strings"
 )
 
@@ -52,4 +53,16 @@ func (a *Avatar) Apperance() string {
 	legs := fmt.Sprintf("%v$%v", 1050+int(a.Gender), a.LegsColor)
 
 	return strings.Join([]string{top, skin, hair, legs, hat, face}, "#")
+}
+
+func NewRandomAvatar() Avatar {
+	return Avatar{
+		Name:      "Customer",
+		Gender:    AvatarGender(rand.Intn(2) + 1),
+		SkinColor: rand.Intn(8),
+		TopColor:  rand.Intn(17),
+		HairColor: rand.Intn(15),
+		LegsColor: rand.Intn(17),
+		IsNPC:     true,
+	}
 }

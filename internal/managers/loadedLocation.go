@@ -2,11 +2,13 @@ package managers
 
 import (
 	"cafego/internal/agents"
+	"cafego/internal/client"
 	"cafego/internal/objects"
 	"cafego/internal/types/responses"
 	_ "cafego/internal/utils"
 	"fmt"
 	"net"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -14,11 +16,12 @@ import (
 
 // --- LoadedLocation ----------------------------------------------------------
 type LoadedLocation struct {
-	cafe      *objects.Cafe
-	occupants map[int]net.Conn
-	mu        sync.Mutex
-	gm        *GameManager
-	running   bool
+	cafe         *objects.Cafe
+	occupants    map[int]net.Conn
+	mu           sync.Mutex
+	gm           *GameManager
+	running      bool
+	reservedObjs []*objects.CafeObject
 }
 
 func NewLoadedLocation(cafe *objects.Cafe, gm *GameManager) *LoadedLocation {
@@ -50,6 +53,16 @@ func (lc *LoadedLocation) Announce(playerID int, args ...string) {
 	lc.announce(playerID, args...)
 }
 
+func (lc *LoadedLocation) IsRunning() bool {
+	return lc.running
+}
+
+func (lc *LoadedLocation) SetRunning(b bool) {
+	lc.mu.Lock()
+	defer lc.mu.Unlock()
+	lc.running = b
+}
+
 func (lc *LoadedLocation) Join(playerID int, conn net.Conn) {
 	lc.mu.Lock()
 	defer lc.mu.Unlock()
@@ -67,11 +80,11 @@ func (lc *LoadedLocation) Join(playerID int, conn net.Conn) {
 	}
 
 	// Set position of player
-	c.Player.Position[0] = lc.cafe.PlayerStart[0]
-	c.Player.Position[1] = lc.cafe.PlayerStart[1]
+	c.(*client.Client).Player.Position[0] = lc.cafe.PlayerStart[0]
+	c.(*client.Client).Player.Position[1] = lc.cafe.PlayerStart[1]
 
 	// Send everyone the joined player
-	lc.announce(playerID, "juj", "-1", "0", c.Player.String())
+	lc.announce(playerID, "juj", "-1", "0", c.(*client.Client).Player.String())
 
 	// Add to players in cafe
 	println("Added player to occupants: ", playerID)
@@ -85,7 +98,7 @@ func (lc *LoadedLocation) Join(playerID int, conn net.Conn) {
 	var playersStr []string
 
 	// Get all players in location
-	for id, _ := range lc.occupants {
+	for id := range lc.occupants {
 		println("PLAYERS IN CAFE: ", id)
 		c, err := lc.gm.GetClient(id)
 		if err != nil {
@@ -93,7 +106,7 @@ func (lc *LoadedLocation) Join(playerID int, conn net.Conn) {
 			return
 		}
 
-		playersStr = append(playersStr, c.Player.String())
+		playersStr = append(playersStr, c.(*client.Client).Player.String())
 	}
 
 	args = []string{
@@ -124,6 +137,164 @@ func (lc *LoadedLocation) Leave(playerID int) {
 		}
 	}
 
+}
+
+func (lc *LoadedLocation) ClearReservedObjects() {
+	println("--CLEAR------------------------")
+	println(len(lc.reservedObjs))
+	for _, obj := range lc.cafe.Objects {
+		if obj.IsChair() {
+			obj.DishID = -1
+		}
+	}
+	lc.reservedObjs = []*objects.CafeObject{}
+	println(len(lc.reservedObjs))
+}
+
+// Returns the first table and unreserves it
+func (lc *LoadedLocation) GetDirtySpace() *objects.CafeObject {
+	lc.mu.Lock()
+	defer lc.mu.Unlock()
+
+	chairIndex := -1
+	for i, o := range lc.reservedObjs {
+		if o.IsChair() && o.DishID == -2 {
+			chairIndex = i
+		}
+	}
+	if chairIndex == -1 {
+		return nil
+	}
+	chair := lc.reservedObjs[chairIndex]
+
+	// Get associated table
+	for j, o := range lc.reservedObjs {
+		if !o.IsTable() {
+			continue
+		}
+		nr := chair.GetNormalizedRotation()
+		if o.Pos[0] == chair.Pos[0]+nr[0] && o.Pos[1] == chair.Pos[1]+nr[1] {
+			// Unreserve chair
+			lc.reservedObjs = append(lc.reservedObjs[:chairIndex], lc.reservedObjs[chairIndex+1:]...)
+			if chairIndex < j {
+				j--
+			}
+
+			// Unreserve table
+			lc.reservedObjs = append(lc.reservedObjs[:j], lc.reservedObjs[j+1:]...)
+
+			return chair
+		}
+	}
+
+	return nil
+}
+
+// Get reserved item by pos
+func (lc *LoadedLocation) GetReservedObject(x, y int) *objects.CafeObject {
+	lc.mu.Lock()
+	defer lc.mu.Unlock()
+
+	for _, o := range lc.reservedObjs {
+		if o.Pos[0] == x && o.Pos[1] == y {
+			return o
+		}
+	}
+
+	return nil
+}
+
+func (lc *LoadedLocation) ReserveObject(obj *objects.CafeObject) bool {
+	lc.mu.Lock()
+	defer lc.mu.Unlock()
+	println("--RESERVED OBJECTS------------------------")
+
+	// Check if object is reserved
+	for _, o := range lc.reservedObjs {
+		if o.Pos[0] == obj.Pos[0] && o.Pos[1] == obj.Pos[1] {
+			return false
+		}
+	}
+
+	// Add to reserved
+	lc.reservedObjs = append(lc.reservedObjs, obj)
+
+	return true
+}
+
+func (lc *LoadedLocation) UnreserveObject(obj *objects.CafeObject) {
+	lc.mu.Lock()
+	defer lc.mu.Unlock()
+
+	println("--UNRESERVED OBJECTS------------------------")
+
+	// Search object index
+	index := -1
+	for i, o := range lc.reservedObjs {
+		if o.Pos[0] == obj.Pos[0] && o.Pos[1] == obj.Pos[1] {
+			index = i
+			break
+		}
+	}
+
+	// Check for bug (this should not happen if the code is rigth)
+	if index == -1 {
+		return
+	}
+
+	// Delete reservation
+	lc.reservedObjs = append(lc.reservedObjs[:index], lc.reservedObjs[index+1:]...)
+}
+
+func (lc *LoadedLocation) GetUniqueCustomerID() int {
+	lc.mu.Lock()
+	defer lc.mu.Unlock()
+
+	var ids []int
+	for _, customer := range lc.cafe.Customers {
+		ids = append(ids, customer.ID)
+	}
+
+	id := 101
+	for slices.Contains(ids, id) {
+		id++
+	}
+	return id
+}
+
+func (lc *LoadedLocation) AddCustomer(customer *objects.Customer) {
+	lc.mu.Lock()
+	defer lc.mu.Unlock()
+
+	lc.Cafe().Customers = append(lc.Cafe().Customers, customer)
+}
+
+func (lc *LoadedLocation) Owner() (*objects.Player, error) {
+	c, err := lc.gm.GetClient(lc.cafe.ID)
+	if err != nil {
+		return nil, err
+	}
+	return c.(*client.Client).Player, nil
+}
+
+func (lc *LoadedLocation) RemoveCustomer(id int) {
+	lc.mu.Lock()
+	defer lc.mu.Unlock()
+
+	index := -1
+	customers := lc.Cafe().Customers
+	for i := range customers {
+		if customers[i].ID == id {
+			index = i
+		}
+	}
+
+	if index == -1 {
+		// TODO error
+		return
+	}
+
+	lc.Cafe().Customers = append(lc.Cafe().Customers[:index], lc.Cafe().Customers[index+1:]...)
 }
 
 // |========================================|

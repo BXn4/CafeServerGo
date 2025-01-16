@@ -287,7 +287,7 @@
 <wod id="1252" n="Basic" g="Dish" t="Blackforestcherrycake" events="0" xp="2974" incomePerServing="1" servings="1700" duration="780" level="9" dishcategory="0" requirements="1307+1#1308+1#1312+1#1450+1#1408+1" />
 <wod id="1253" n="Basic" g="Dish" t="Marblecake" events="0" xp="1421" incomePerServing="4" servings="600" duration="270" level="55" dishcategory="0" requirements="1307+1#1312+1#1325+1#1337+1#1408+1" />
 <wod id="1254" n="Basic" g="Dish" t="Sandwich" events="0" xp="78" incomePerServing="50" servings="33" duration="15" level="45" dishcategory="5" requirements="1301+1#1305+1#1312+1#1327+1#1337+1#1406+1" />
-<wod id="1255" n="Basic" g="Dish" t="Omelette" events="0" xp="2" incomePerServing="100" servings="5" duration="1" level="1" dishcategory="5" requirements="1311+1#1402+1" />
+<wod id="1255" n="Basic" g="Dish" t="Omelette" events="0" xp="2" incomePerServing="100" servings="5" duration="0" level="1" dishcategory="5" requirements="1311+1#1402+1" />
 <wod id="1301" n="Basic" g="Ingredient" t="Bacon" cash="300" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="7" category="meat" amount="1" />
 <wod id="1302" n="Basic" g="Ingredient" t="Ballpepper" cash="450" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="8" category="vegatables" amount="1" />
 <wod id="1303" n="Basic" g="Ingredient" t="Beans" cash="100" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="7" category="vegatables" amount="1" />

@@ -51,9 +51,17 @@ CREATE TABLE friend_request (
 --- Data
 --- Dummy1
 INSERT INTO
-    player (id, email, password, xp, username, is_banned)
+    player (
+        id,
+        email,
+        password,
+        xp,
+        cash,
+        username,
+        is_banned
+    )
 VALUES
-    (1, 'a@a.a', '1234', 99999999, 'bence', 0);
+    (1, 'a@a.a', '1234', 99999999, 120999, 'bence', 0);
 
 INSERT INTO
     cafe (id, player_id, owner_name)
@@ -62,9 +70,17 @@ VALUES
 
 --- Dummy2
 INSERT INTO
-    player (id, email, password, xp, username, is_banned)
+    player (
+        id,
+        email,
+        password,
+        xp,
+        cash,
+        username,
+        is_banned
+    )
 VALUES
-    (2, 'b@b.b', '1234', 99999999, 'bence2', 0);
+    (2, 'b@b.b', '1234', 99999999, 120999, 'bence2', 0);
 
 INSERT INTO
     cafe (id, player_id, owner_name)

@@ -5,13 +5,24 @@ type ManagedItem interface {
 	ID() int
 }
 
-type Manager interface {
+type ClientManager interface {
 	// Add managed item
-	Add(itme *ManagedItem)
+	AddClient(item ManagedItem)
 
 	// Get managed item by id
-	Get(id int) (*ManagedItem, error)
+	GetClient(id int) (ManagedItem, error)
 
 	// Remove managed item by id
-	Remove(id int)
+	DisconnectClient(id int)
+}
+
+type CafeManager interface {
+	// Add managed item
+	AddCafe(item ManagedItem)
+
+	// Get managed item by id
+	GetCafe(id int) (ManagedItem, error)
+
+	// Remove managed item by id
+	DisconnectCafe(id int)
 }

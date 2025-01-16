@@ -71,7 +71,7 @@ func (s *CafeServer) Run() {
 			log.Fatal(err)
 		}
 
-		c := client.New(conn, db)
+		c := client.New(conn, db, s.gm)
 		println("ADDING TO ClientManager")
 		s.gm.AddClient(c)
 

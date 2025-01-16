@@ -77,6 +77,17 @@ func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameMan
 		err = StoveDeliver(req, c, gm)
 	case requests.C2S_CAFE_CLEAN:
 		err = Clean(req, c, gm)
+	case requests.C2S_EDITOR_MODE:
+		err = EditorMode(req, c, gm)
+	case requests.C2S_EDITOR_BUY_OBJECT:
+		// TODO: Need to check level.
+		err = BuyObject(req, c, gm)
+	case requests.C2S_EDITOR_STORE_OBJECT:
+		err = StoreObject(req, c, gm)
+	case requests.C2S_EDITOR_ROTATE_OBJECT:
+		err = RotateObject(req, c, gm)
+	case requests.C2S_EDITOR_MOVE_OBJECT:
+		err = MoveObject(req, c, gm)
 	}
 
 	return err

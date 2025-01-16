@@ -3,6 +3,8 @@ package objects
 import (
 	"cafego/internal/utils"
 	"encoding/json"
+	"fmt"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -33,6 +35,7 @@ type Cafe struct {
 	FurnitureInventory map[int]int
 	Waiters            []*Waiter
 	Customers          []*Customer
+	InEditorMode       bool
 }
 
 func (c *Cafe) AsResponse() []string {
@@ -128,10 +131,41 @@ func (cafe *Cafe) ParseObjects(rawObjects string) error {
 	return nil
 }
 
-func (c *Cafe) GetObjectByPos(posX int, posY int) *CafeObject {
-	for _, obj := range c.Objects {
+func (cafe *Cafe) GetObjectByPos(posX int, posY int) *CafeObject {
+	for _, obj := range cafe.Objects {
 		if obj.Pos[0] == posX && obj.Pos[1] == posY {
 			return obj
+		}
+	}
+	return nil
+}
+
+func (cafe *Cafe) AddNewObject(posX int, posY int, objID int, objRotation int) error {
+	obj, err := NewCafeObject(posX, posY, objID, objRotation)
+	if err != nil {
+		return err
+	}
+	cafe.Objects = append(cafe.Objects, obj)
+	return nil
+}
+func (cafe *Cafe) RemoveObject(posX int, posY int) error {
+	for i, object := range cafe.Objects {
+		if object.Pos[0] == posX && object.Pos[1] == posY {
+			cafe.Objects = append(cafe.Objects[:i], cafe.Objects[i+1:]...)
+			return nil
+		}
+	}
+	return fmt.Errorf("object not found at position (%d, %d)", posX, posY)
+}
+
+func (c *Cafe) GetPlayerStart() []int {
+	for _, obj := range c.Objects {
+		if obj.IsDoor() {
+			PlayerStart := []int{
+				utils.If(obj.Pos[0] == 0, 1, obj.Pos[0]),
+				utils.If(obj.Pos[1] == 0, 1, obj.Pos[1]),
+			}
+			return PlayerStart
 		}
 	}
 	return nil
@@ -141,7 +175,7 @@ func (c *Cafe) GetFridgeMaxCapacity() int {
 	fridgeCount := 0
 
 	for _, obj := range c.Objects {
-		if obj.isFridge() {
+		if obj.IsFridge() {
 			fridgeCount++
 		}
 	}
@@ -159,4 +193,59 @@ func (c *Cafe) GetFridgeFreeSpace() int {
 	}
 
 	return freeSpace
+}
+
+// Returns the tables and the chairs around it
+// the chairs should face the right direction
+func (c *Cafe) GetEatingSpaces() (tablesAndChairs map[*CafeObject][]*CafeObject) {
+
+	// Get all chairs and tables
+	tablesAndChairs = make(map[*CafeObject][]*CafeObject, 0)
+	var chairs []*CafeObject
+	var tables []*CafeObject
+	for _, obj := range c.Objects {
+		if obj.IsChair() && obj.DishID == -1 {
+			chairs = append(chairs, obj)
+		}
+		if obj.IsTable() {
+			tables = append(tables, obj)
+		}
+	}
+
+	// Loop through each table and get the chairs facing them
+	for _, table := range tables {
+		var availableChairs []*CafeObject
+		for _, chair := range chairs {
+
+			// Check if char beside the table
+			diffX := float64(table.Pos[0] - chair.Pos[0])
+			diffY := float64(table.Pos[1] - chair.Pos[1])
+			if math.Abs(diffX)+math.Abs(diffY) > 1 {
+				continue
+			}
+
+			// Check if chair faces the table
+			facingTable := false
+			if chair.Rotation == Right && int(diffY) == 1 {
+				facingTable = true
+			} else if chair.Rotation == Left && int(diffY) == -1 {
+				facingTable = true
+			} else if chair.Rotation == Down && int(diffX) == -1 {
+				facingTable = true
+			} else if chair.Rotation == Up && int(diffX) == 1 {
+				facingTable = true
+			}
+
+			if facingTable {
+				availableChairs = append(availableChairs, chair)
+			}
+
+		}
+		if table == nil || len(availableChairs) == 0 {
+			continue
+		}
+		tablesAndChairs[table] = availableChairs
+	}
+
+	return tablesAndChairs
 }

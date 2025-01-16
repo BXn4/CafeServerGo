@@ -72,6 +72,17 @@ func ReadAndCacheItems() error {
 	return nil
 }
 
+func GetObject(id int) (Wod, error) {
+	for _, wods := range itemCollection {
+		for _, wod := range wods {
+			if id == wod.ID {
+				return wod, nil
+			}
+		}
+	}
+	return Wod{}, fmt.Errorf("No item found with id: %v", id)
+}
+
 func GetIngredient(id int) (Wod, error) {
 	for _, item := range itemCollection["Ingredient"] {
 		if id == item.ID {

@@ -43,6 +43,15 @@ type CafeObject struct {
 	FinishesAt *time.Time `json:"finishes_at,omitempty"`
 }
 
+func NewCafeObject(posX int, posY int, objID int, objRotation int) (*CafeObject, error) {
+	cafeObj := CafeObject{
+		Pos:      []int{posX, posY},
+		Kind:     CafeObjectKind(objID),
+		Rotation: CafeObjectRotation(objRotation),
+	}
+	return &cafeObj, nil
+}
+
 func NewCafeObjectFromJSON(s string) (*CafeObject, error) {
 
 	var cafeObj CafeObject
@@ -91,6 +100,10 @@ func NewCafeObjectFromString(s string) (*CafeObject, error) {
 	return &cafeObj, nil
 }
 
+func (c *CafeObject) IsWall() bool {
+	return 101 <= c.Kind && c.Kind <= 135
+}
+
 func (c *CafeObject) IsDoor() bool {
 	return 201 <= c.Kind && c.Kind <= 207
 }
@@ -115,7 +128,7 @@ func (c *CafeObject) IsVending() bool {
 	return c.Kind == 1701
 }
 
-func (c *CafeObject) isFridge() bool {
+func (c *CafeObject) IsFridge() bool {
 	return 351 <= c.Kind && c.Kind <= 358
 }
 
@@ -166,4 +179,16 @@ func (c *CafeObject) String() string {
 	}
 
 	return strings.Join(args, "+")
+}
+
+func (c *CafeObject) GetNormalizedRotation() [2]int {
+	if c.Rotation == Up {
+		return [2]int{1, 0}
+	} else if c.Rotation == Down {
+		return [2]int{-1, 0}
+	} else if c.Rotation == Left {
+		return [2]int{0, -1}
+	} else /* Right */ {
+		return [2]int{0, 1}
+	}
 }

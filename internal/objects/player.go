@@ -75,43 +75,26 @@ func (p *Player) BuildMastery() string {
 	return strings.Join(pairs, "#")
 }
 
-/*     def get_mastery_level(self, item_id: int) -> int:
-       times_cooked = self.mastery[item_id]
-       base_duration = get_dish_info(item_id).get('duration', 0)
-
-       _loc3_ = base_duration / 60
-       _loc4_ = min(24, _loc3_ * ceil(0.5 / _loc3_) * 3)
-
-       lv1_req = _loc4_ / _loc3_ * 4
-       lv2_req = _loc4_ / _loc3_ * 20
-       lv3_req = _loc4_ / _loc3_ * 52
-
-       if times_cooked < lv1_req:
-           return 0
-       elif times_cooked < lv2_req:
-           return 1
-       elif times_cooked < lv3_req:
-           return 2
-       else:
-           return 3
-*/
-
 func (p *Player) GetDishMasteryLevel(dishID int) int {
+	// Get items info
 	timesCooked := p.Mastery[dishID]
 	dishInfo, err := utils.GetDish(dishID)
 	if err != nil {
 		fmt.Printf("Invalid dish ID: %v", err)
 	}
 
+	// Get base duration in minutes
 	baseDuration := dishInfo.Duration
 
-	_loc3_ := float64(baseDuration) / 60.0
+	// Get base duration in hours
+	durationInHours := float64(baseDuration) / 60.0
 
-	_loc4_ := math.Min(24, float64(_loc3_)*math.Ceil(0.5/float64(_loc3_))*3)
+	// TODO: Comment this shit out WTF ???
+	_loc4_ := math.Min(24, float64(durationInHours)*math.Ceil(0.5/float64(durationInHours))*3)
 
-	level1Req := _loc4_ / float64(_loc3_) * 4
-	level2Req := _loc4_ / float64(_loc3_) * 20
-	level3Req := _loc4_ / float64(_loc3_) * 52
+	level1Req := _loc4_ / float64(durationInHours) * 4
+	level2Req := _loc4_ / float64(durationInHours) * 20
+	level3Req := _loc4_ / float64(durationInHours) * 52
 
 	if timesCooked < int(level1Req) {
 		return 0

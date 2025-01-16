@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"cafego/internal/database"
 	"cafego/internal/interfaces"
+
 	"cafego/internal/objects"
 	"cafego/internal/types/requests"
 	"cafego/internal/types/responses"
@@ -16,21 +17,25 @@ import (
 
 // Client
 type Client struct {
-	Conn   net.Conn      // Writable connection to the client
-	Reader *bufio.Reader // Readable connection to the client
-
-	DB *database.CafeDB // Connection to the database
-
-	Location interfaces.CafeLocation // Players current location
-	Player   *objects.Player         // Player object
+	Conn          net.Conn                // Writable connection to the client
+	Reader        *bufio.Reader           // Readable connection to the client
+	DB            *database.CafeDB        // Connection to the database
+	Location      interfaces.CafeLocation // Players current location
+	Player        *objects.Player         // Player object
+	ClientManager interfaces.ClientManager
 }
 
-func New(conn net.Conn, dbc *database.CafeDB) *Client {
+func New(conn net.Conn, dbc *database.CafeDB, cm interfaces.ClientManager) *Client {
 	return &Client{
-		Conn:   conn,
-		DB:     dbc,
-		Reader: bufio.NewReader(conn),
+		Conn:          conn,
+		DB:            dbc,
+		Reader:        bufio.NewReader(conn),
+		ClientManager: cm,
 	}
+}
+
+func (c *Client) ID() int {
+	return c.Player.ID
 }
 
 func (c *Client) Alive() bool {
@@ -40,6 +45,8 @@ func (c *Client) Alive() bool {
 
 func (c *Client) Disconnect() {
 	defer c.Conn.Close()
+
+	c.ClientManager.DisconnectClient(c.Player.ID)
 
 	if c.Player != nil {
 		// If the player exist, leave the player.
@@ -56,16 +63,16 @@ func (c *Client) NextRequest() (*requests.Request, error) {
 	// Read message
 	message, err := c.Reader.ReadString('\x00')
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("Error while reading msq: %s\n", err.Error()))
 		c.Disconnect()
+		return nil, errors.New(fmt.Sprintf("Error while reading msq: %s\n", err.Error()))
 	}
 	fmt.Printf("[RECEIVED] %s\n", message)
 
 	// Parse request
 	req, err := requests.ParseRequest(strings.Trim(message, "\x00"))
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("Error parsing request: %s\n", err.Error()))
 		c.Disconnect()
+		return nil, errors.New(fmt.Sprintf("Error parsing request: %s\n", err.Error()))
 	}
 
 	return req, nil

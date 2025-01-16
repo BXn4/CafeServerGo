@@ -10,6 +10,11 @@ import (
 
 func Clean(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
+	// Dont allow players to modify the packet and sending us CCH while in editor.
+	if c.Location.Cafe().InEditorMode {
+		return nil
+	}
+
 	objX, err := strconv.Atoi(req.Args[2])
 	if err != nil {
 		return err
