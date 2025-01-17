@@ -3,11 +3,22 @@ package agents
 import (
 	"cafego/internal/interfaces"
 	"cafego/internal/objects"
+	"time"
 )
 
-func AgentCycle(l interfaces.CafeLocation, isRunning bool) {
+func AgentCycle(l interfaces.CafeLocation) {
+
+	println("---------------------------------")
+	println("---------------------------------")
+	println("-----  STARTED AGENT CYLCE  -----")
+	println("---------------------------------")
+	println("---------------------------------")
 
 	l.ClearReservedObjects()
+
+	if !SleepWhileRunning(l, 10*time.Second) {
+		return
+	}
 
 	// Spawn waiters
 	for i, w := range l.Cafe().Waiters {
@@ -26,8 +37,11 @@ func AgentCycle(l interfaces.CafeLocation, isRunning bool) {
 
 	// Spawn customers
 	go func() {
-		for isRunning {
+		for l.IsRunning() {
+			println("CHAIRS LEN: ", len(chairs))
+			println("CUSTOMERS LEN: ", len(l.Cafe().Customers))
 			if len(l.Cafe().Customers) < len(chairs) {
+				println("SPAWNED CUSTOMER!!!")
 				go IterateCustomer(l, SpawnCustomer(l))
 			}
 		}
@@ -38,10 +52,25 @@ func AgentCycle(l interfaces.CafeLocation, isRunning bool) {
 	waiters := l.Cafe().Waiters
 	for _, waiter := range waiters {
 		go func() {
-			for isRunning {
+			for l.IsRunning() {
 				IterateWaiter(l, waiter)
 			}
+			waiter.CurrentCounter = nil
+			waiter.Dish = -1
 		}()
 	}
 
+}
+
+func SleepWhileRunning(l interfaces.CafeLocation, d time.Duration) bool {
+	startTime := time.Now()
+	tick := time.NewTicker(100 * time.Millisecond)
+	defer tick.Stop()
+	for time.Since(startTime) < d {
+		if !l.IsRunning() { // We return if program is not running
+			return false
+		}
+		<-tick.C
+	}
+	return true
 }

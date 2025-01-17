@@ -61,6 +61,9 @@ func (lc *LoadedLocation) SetRunning(b bool) {
 	lc.mu.Lock()
 	defer lc.mu.Unlock()
 	lc.running = b
+	if b {
+		go agents.AgentCycle(lc)
+	}
 }
 
 func (lc *LoadedLocation) Join(playerID int, conn net.Conn) {
@@ -69,7 +72,7 @@ func (lc *LoadedLocation) Join(playerID int, conn net.Conn) {
 
 	if !lc.running {
 		lc.running = true
-		go agents.AgentCycle(lc, lc.running)
+		go agents.AgentCycle(lc)
 	}
 
 	// Get joined client
@@ -140,15 +143,12 @@ func (lc *LoadedLocation) Leave(playerID int) {
 }
 
 func (lc *LoadedLocation) ClearReservedObjects() {
-	println("--CLEAR------------------------")
-	println(len(lc.reservedObjs))
 	for _, obj := range lc.cafe.Objects {
 		if obj.IsChair() {
 			obj.DishID = -1
 		}
 	}
 	lc.reservedObjs = []*objects.CafeObject{}
-	println(len(lc.reservedObjs))
 }
 
 // Returns the first table and unreserves it
@@ -207,7 +207,6 @@ func (lc *LoadedLocation) GetReservedObject(x, y int) *objects.CafeObject {
 func (lc *LoadedLocation) ReserveObject(obj *objects.CafeObject) bool {
 	lc.mu.Lock()
 	defer lc.mu.Unlock()
-	println("--RESERVED OBJECTS------------------------")
 
 	// Check if object is reserved
 	for _, o := range lc.reservedObjs {
@@ -225,8 +224,6 @@ func (lc *LoadedLocation) ReserveObject(obj *objects.CafeObject) bool {
 func (lc *LoadedLocation) UnreserveObject(obj *objects.CafeObject) {
 	lc.mu.Lock()
 	defer lc.mu.Unlock()
-
-	println("--UNRESERVED OBJECTS------------------------")
 
 	// Search object index
 	index := -1

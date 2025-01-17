@@ -27,7 +27,7 @@ func SpawnCustomer(l interfaces.CafeLocation) *objects.Customer {
 		spawnInterval = rand.Intn(4) + 1
 	}
 
-	spawnInterval = 2
+	//spawnInterval = 2
 
 	for start, tick := time.Now(), time.NewTicker(100*time.Millisecond); time.Since(start) < time.Duration(spawnInterval)*time.Second; <-tick.C {
 		if !l.IsRunning() { // We return if program is not running
@@ -83,6 +83,9 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 		// Waiting for available space
 		table, chair, distanceToChair = GetAvailableEatingSpace(l)
 		time.Sleep(100 * time.Millisecond)
+		if !l.IsRunning() {
+			return
+		}
 	}
 
 	// --- Walk to chair ---------------------------
