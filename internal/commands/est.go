@@ -29,7 +29,8 @@ func StoreObject(req *requests.Request, c *client.Client, gm *managers.GameManag
 		return nil
 	}
 	// You have to have at least one stove / counter / fridge
-	var stovesCount uint = 0
+	// NEED A BETTER LOGIC!
+	/*var stovesCount uint = 0
 	var countersCount uint = 0
 	var fridgesCount int = 0
 	if obj.IsStove() || obj.IsCounter() || obj.IsFridge() {
@@ -48,7 +49,7 @@ func StoreObject(req *requests.Request, c *client.Client, gm *managers.GameManag
 			c.SendExtensionResponse("est", "-1", "39", strconv.Itoa(objX), strconv.Itoa(objY))
 			return nil
 		}
-	}
+	} */
 	if obj.DishID > 0 || obj.DishAmount > 0 {
 		c.SendExtensionResponse("est", "-1", "37", strconv.Itoa(objX), strconv.Itoa(objY))
 		return nil

@@ -27,6 +27,10 @@ func Clean(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 
 	obj := c.Location.Cafe().GetObjectByPos(objX, objY)
 
+	if obj == nil {
+		return err
+	}
+
 	var status string
 	if obj.IsStove() {
 		if c.Player.Cash < 15 {

@@ -7,6 +7,7 @@ import (
 	"cafego/internal/utils"
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 )
 
@@ -36,31 +37,27 @@ func SellIngredient(req *requests.Request, c *client.Client, gm *managers.GameMa
 	}
 
 	// Convert amount got from cmd to int
-	ingredientAmount, err := strconv.Atoi(req.Args[3])
+	sellAmount, err := strconv.Atoi(req.Args[3])
 	if err != nil {
 		fmt.Printf("Can parse ingredient amount to int: %v", err)
 		return err
 	}
 
 	// Check if amount is right
-	if count, ok := c.Location.Cafe().FridgeInventory[ingredientID]; !ok && count < ingredientAmount && ingredientAmount < 0 {
-		return fmt.Errorf("Invalid ingredient amount: %v, current amount: %v", ingredientAmount, count)
+	if count, ok := c.Location.Cafe().FridgeInventory[ingredientID]; !ok && count < sellAmount && sellAmount < 0 {
+		return fmt.Errorf("Invalid ingredient amount: %v, current amount: %v", sellAmount, count)
 	}
 
 	// Calcualte money
-	if ingredientInfo.Cash != 0 {
-		c.Player.Cash += int(float64(ingredientInfo.Cash) * 0.2 * float64(ingredientAmount))
-	} else if ingredientInfo.Gold != 0 {
-		c.Player.Cash += int(float64(ingredientInfo.Gold) * 0.2 * float64(ingredientAmount))
-	}
+	c.Player.Cash += sellAmount * int(math.Round(float64(ingredientInfo.Cash)*0.2+float64(ingredientInfo.Gold)*0.2))
 
-	c.Location.Cafe().FridgeInventory[ingredientID] -= ingredientAmount
+	c.Location.Cafe().FridgeInventory[ingredientID] -= sellAmount
 	if c.Location.Cafe().FridgeInventory[ingredientID] == 0 {
 		// print("REMOVED!")
 		delete(c.Location.Cafe().FridgeInventory, ingredientID)
 	}
 
-	c.SendExtensionResponse("sdi", "-1", "0", strconv.Itoa(ingredientID), strconv.Itoa(ingredientAmount))
+	c.SendExtensionResponse("sdi", "-1", "0", strconv.Itoa(ingredientID), strconv.Itoa(sellAmount))
 
 	return nil
 }

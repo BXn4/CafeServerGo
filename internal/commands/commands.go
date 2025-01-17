@@ -88,6 +88,10 @@ func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameMan
 		err = RotateObject(req, c, gm)
 	case requests.C2S_EDITOR_MOVE_OBJECT:
 		err = MoveObject(req, c, gm)
+	case requests.C2S_EDITOR_SELL_OBJECT:
+		err = SellObject(req, c, gm)
+	case requests.C2S_CAFE_INSTANTCOOK:
+		err = InstantCook(req, c, gm)
 	}
 
 	return err

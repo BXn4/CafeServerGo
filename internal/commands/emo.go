@@ -44,8 +44,10 @@ func MoveObject(req *requests.Request, c *client.Client, gm *managers.GameManage
 		c.SendExtensionResponse("emo", "-1", "39", strconv.Itoa(oldObjX), strconv.Itoa(oldObjY))
 		return nil
 	}
-	c.Location.Cafe().RemoveObject(oldObjX, oldObjY)
-	c.Location.Cafe().AddNewObject(newObjX, newObjY, int(obj.Kind), int(obj.Rotation))
+
+	obj.Pos[0] = newObjX
+	obj.Pos[1] = newObjY
+
 	c.SendExtensionResponse("emo", "-1", "0", strconv.Itoa(oldObjX), strconv.Itoa(oldObjY), strconv.Itoa(newObjX), strconv.Itoa(newObjX))
 	return nil
 }

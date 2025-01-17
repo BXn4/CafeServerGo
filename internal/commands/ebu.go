@@ -55,7 +55,6 @@ func BuyObject(req *requests.Request, c *client.Client, gm *managers.GameManager
 
 	// If the player does not have the object in their inventory, dont remove cash, gold
 	if c.Location.Cafe().FurnitureInventory[objID] != 0 {
-
 		if objectInfo.Cash != 0 && objectInfo.Cash > c.Player.Cash {
 			// Need to send the ID, because the client parse it / these.
 			c.SendExtensionResponse("ebu", "-1", "4", strconv.Itoa(objX), strconv.Itoa(objY), strconv.Itoa(objID), strconv.Itoa(objRotation))
