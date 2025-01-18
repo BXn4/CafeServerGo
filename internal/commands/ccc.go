@@ -25,18 +25,22 @@ func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameMana
 	if err != nil {
 		return fmt.Errorf("Cant parse posX to int: %w", err)
 	}
+
 	posY, err := strconv.Atoi(req.Args[3])
 	if err != nil {
 		return fmt.Errorf("Cant parse posY to int: %w", err)
 	}
+
 	dishID, err := strconv.Atoi(req.Args[4])
 	if err != nil {
 		return fmt.Errorf("Cant parse dishID to int: %w", err)
 	}
+
 	isPrepared, err := strconv.Atoi(req.Args[5])
 	if err != nil {
 		return fmt.Errorf("Cant parse isPrepared to int: %w", err)
 	}
+
 	usingFancy, err = strconv.Atoi(req.Args[6])
 	if err != nil {
 

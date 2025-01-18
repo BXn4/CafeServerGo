@@ -5,6 +5,7 @@ import (
 	"cafego/internal/managers"
 	"cafego/internal/types/requests"
 	"cafego/internal/utils"
+	"log"
 	"strconv"
 )
 
@@ -37,7 +38,7 @@ func EditorMode(req *requests.Request, c *client.Client, gm *managers.GameManage
 		}
 		c.Location.Cafe().InEditorMode = false
 		c.Location.SetRunning(true)
-		println("SET RUNING TRUE")
+		log.Printf("SET RUNING TRUE")
 		c.SendExtensionResponse("edi", "-1", "0",
 			strconv.Itoa(status), strconv.Itoa(c.Player.Position[0]), strconv.Itoa(c.Player.Position[1]), "") // <- Objects
 	case 1:
@@ -45,7 +46,7 @@ func EditorMode(req *requests.Request, c *client.Client, gm *managers.GameManage
 			strconv.Itoa(status), strconv.Itoa(c.Player.Position[0]), strconv.Itoa(c.Player.Position[1]), "") // <- Objects
 		c.Location.Cafe().InEditorMode = true
 		c.Location.SetRunning(false)
-		println("SET RUNING FALSE")
+		log.Printf("SET RUNING FALSE")
 	default:
 		return nil
 	}

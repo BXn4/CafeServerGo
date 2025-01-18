@@ -6,7 +6,7 @@ import (
 	"cafego/internal/objects"
 	"cafego/internal/types/responses"
 	_ "cafego/internal/utils"
-	"fmt"
+	"log"
 	"net"
 	"slices"
 	"strconv"
@@ -78,7 +78,7 @@ func (lc *LoadedLocation) Join(playerID int, conn net.Conn) {
 	// Get joined client
 	c, err := lc.gm.GetClient(playerID)
 	if err != nil {
-		fmt.Printf("Cant get client with id: %v\n", playerID)
+		log.Printf("Cant get client with id: %v\n", playerID)
 		return
 	}
 
@@ -102,10 +102,10 @@ func (lc *LoadedLocation) Join(playerID int, conn net.Conn) {
 
 	// Get all players in location
 	for id := range lc.occupants {
-		println("PLAYERS IN CAFE: ", id)
+		log.Printf("PLAYERS IN CAFE: %v\n", id)
 		c, err := lc.gm.GetClient(id)
 		if err != nil {
-			fmt.Printf("Cant get client with id: %v\n", id)
+			log.Printf("Cant get client with id: %v\n", id)
 			return
 		}
 
@@ -299,7 +299,7 @@ func (lc *LoadedLocation) RemoveCustomer(id int) {
 // |========================================|
 func (lc *LoadedLocation) send(id int, args ...string) {
 	msg := responses.WrapExtensionResponse(args...)
-	fmt.Printf("[SENT TO %v] %s\n", id, msg)
+	log.Printf("[SENT TO %v] %s\n", id, msg)
 	lc.occupants[id].Write([]byte(msg))
 }
 
@@ -311,7 +311,7 @@ func (lc *LoadedLocation) send(id int, args ...string) {
 func (lc *LoadedLocation) broadcast(args ...string) {
 
 	msg := responses.WrapExtensionResponse(args...)
-	fmt.Printf("[BROADCAST] %s\n", msg)
+	log.Printf("[BROADCAST] %s\n", msg)
 
 	for _, o := range lc.occupants {
 		o.Write([]byte(msg))
@@ -326,7 +326,7 @@ func (lc *LoadedLocation) broadcast(args ...string) {
 func (lc *LoadedLocation) announce(playerID int, args ...string) {
 
 	msg := responses.WrapExtensionResponse(args...)
-	fmt.Printf("[ANNOUNCE] %s\n", msg)
+	log.Printf("[ANNOUNCE] %s\n", msg)
 	for oid, o := range lc.occupants {
 		if oid == playerID {
 			continue

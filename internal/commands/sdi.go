@@ -26,21 +26,20 @@ func SellIngredient(req *requests.Request, c *client.Client, gm *managers.GameMa
 	// Convert id got from cmd to int
 	ingredientID, err := strconv.Atoi(req.Args[2])
 	if err != nil {
-		fmt.Printf("Can parse id to int: %v", err)
-		return err
+
+		return fmt.Errorf("Can parse id to int: %v", err)
 	}
 
 	// Check if there is ingredient with that id
 	ingredientInfo, err := utils.GetIngredient(ingredientID)
 	if err != nil {
-		fmt.Printf("Invalid ingredient ID: %v", err)
+		return fmt.Errorf("Invalid ingredient ID: %v", err)
 	}
 
 	// Convert amount got from cmd to int
 	sellAmount, err := strconv.Atoi(req.Args[3])
 	if err != nil {
-		fmt.Printf("Can parse ingredient amount to int: %v", err)
-		return err
+		return fmt.Errorf("Can parse ingredient amount to int: %v", err)
 	}
 
 	// Check if amount is right

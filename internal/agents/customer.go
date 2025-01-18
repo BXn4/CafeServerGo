@@ -4,7 +4,7 @@ import (
 	"cafego/internal/interfaces"
 	"cafego/internal/objects"
 	"cafego/internal/utils"
-	"fmt"
+	"log"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -207,13 +207,13 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 	// --- Add rewards to player ------------
 	player, err := l.Owner()
 	if err != nil {
-		fmt.Printf("Cant find owner!")
+		log.Printf("Cant find owner!")
 		return
 	}
 
 	dishInfo, err := utils.GetDish(c.Dish)
 	if err != nil {
-		fmt.Printf("Cant find dish! %v\n", c.Dish)
+		log.Printf("Cant find dish! %v\n", c.Dish)
 		return
 	}
 	player.Cash += dishInfo.IncomePerServing

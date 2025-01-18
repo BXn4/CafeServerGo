@@ -46,8 +46,8 @@ var itemCollection map[string][]Wod
 func ReadAndCacheItems() error {
 	xmlFile, err := os.Open("./data/CafeItems.xml")
 	if err != nil {
-		fmt.Println("Error opening file:", err)
-		return err
+
+		return fmt.Errorf("Error opening file: %v", err)
 	}
 	defer xmlFile.Close()
 	fmt.Println("Successfully Opened CafeItems.xml")
@@ -56,8 +56,7 @@ func ReadAndCacheItems() error {
 	decoder := xml.NewDecoder(xmlFile)
 	err = decoder.Decode(&result)
 	if err != nil {
-		fmt.Println("Error decoding XML:", err)
-		return err
+		return fmt.Errorf("Error decoding XML: %v\n", err)
 	}
 
 	itemCollection = make(map[string][]Wod)

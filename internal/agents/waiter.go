@@ -3,6 +3,7 @@ package agents
 import (
 	"cafego/internal/interfaces"
 	"cafego/internal/objects"
+	"log"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -13,7 +14,7 @@ import (
 func SpawnWaiter(l interfaces.CafeLocation, w *objects.Waiter) {
 
 	// --- Spawn waiter ----------
-	println("WAITER SPAWNED: ", w.ID)
+	log.Printf("WAITER SPAWNED: %v\n", w.ID)
 
 	// Set waiter starter position
 	w.Pos = []int{

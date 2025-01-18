@@ -4,6 +4,7 @@ import (
 	"cafego/internal/database"
 	"cafego/internal/objects"
 	"fmt"
+	"log"
 )
 
 func (gm *GameManager) SetCafeDB(db *database.CafeDB) {
@@ -30,7 +31,7 @@ func (gm *GameManager) RemoveLocation(id int) {
 	}
 }
 
-// NOTE: change this in the future because 
+// NOTE: change this in the future because
 // the client and the server wont be able to handle a lot of people in one place
 // so we need to cap it
 func (gm *GameManager) AddLocation(id int) *LoadedLocation {
@@ -49,7 +50,7 @@ func (gm *GameManager) AddLocation(id int) *LoadedLocation {
 	cafeObj, err = gm.db.GetCafeByPlayerID(id)
 	if err != nil {
 		// BIG FUCK UP
-		fmt.Printf("[ERROR] Player with id %v has no cafe in database", id)
+		log.Printf("[ERROR] Player with id %v has no cafe in database", id)
 		return nil
 	}
 	cafe := NewLoadedLocation(cafeObj, gm)

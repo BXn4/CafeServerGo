@@ -4,15 +4,17 @@ import (
 	"cafego/internal/interfaces"
 	"cafego/internal/objects"
 	"time"
+
+	"log"
 )
 
 func AgentCycle(l interfaces.CafeLocation) {
 
-	println("---------------------------------")
-	println("---------------------------------")
-	println("-----  STARTED AGENT CYLCE  -----")
-	println("---------------------------------")
-	println("---------------------------------")
+	log.Printf("---------------------------------\n")
+	log.Printf("---------------------------------\n")
+	log.Printf("-----  STARTED AGENT CYLCE  -----\n")
+	log.Printf("---------------------------------\n")
+	log.Printf("---------------------------------\n")
 
 	l.ClearReservedObjects()
 
@@ -38,10 +40,10 @@ func AgentCycle(l interfaces.CafeLocation) {
 	// Spawn customers
 	go func() {
 		for l.IsRunning() {
-			println("CHAIRS LEN: ", len(chairs))
-			println("CUSTOMERS LEN: ", len(l.Cafe().Customers))
+			log.Printf("CHAIRS LEN: %v\n", len(chairs))
+			log.Printf("CUSTOMERS LEN: %v\n", len(l.Cafe().Customers))
 			if len(l.Cafe().Customers) < len(chairs) {
-				println("SPAWNED CUSTOMER!!!")
+				log.Printf("SPAWNED CUSTOMER!!!")
 				go IterateCustomer(l, SpawnCustomer(l))
 			}
 		}

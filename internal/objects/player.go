@@ -3,6 +3,7 @@ package objects
 import (
 	"cafego/internal/utils"
 	"fmt"
+	"log"
 	"math"
 	"strconv"
 	"strings"
@@ -54,11 +55,11 @@ func (p *Player) ParseMastery(mastery string) {
 
 		dishID, err := strconv.Atoi(parts[0])
 		if err != nil {
-			fmt.Printf("Cant parse mastery dishID to int: %v", err)
+			log.Printf("Cant parse mastery dishID to int: %v", err)
 		}
 		timesCooked, err := strconv.Atoi(parts[1])
 		if err != nil {
-			fmt.Printf("Cant parse mastery timesCooked to int: %v", err)
+			log.Printf("Cant parse mastery timesCooked to int: %v", err)
 		}
 		p.Mastery[dishID] = timesCooked
 	}
@@ -80,7 +81,7 @@ func (p *Player) GetDishMasteryLevel(dishID int) int {
 	timesCooked := p.Mastery[dishID]
 	dishInfo, err := utils.GetDish(dishID)
 	if err != nil {
-		fmt.Printf("Invalid dish ID: %v", err)
+		log.Printf("Invalid dish ID: %v", err)
 	}
 
 	// Get base duration in minutes
@@ -112,7 +113,8 @@ func (p *Player) GetDishMasteryDuration(dishID int) int {
 
 	dishInfo, err := utils.GetDish(dishID)
 	if err != nil {
-		fmt.Printf("Invalid dish ID: %v", err)
+		log.Printf("Invalid dish ID: %v", err)
+		return 0 // ???
 	}
 
 	baseDuration := dishInfo.Duration

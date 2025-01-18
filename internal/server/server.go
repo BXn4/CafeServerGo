@@ -50,7 +50,7 @@ func (s *CafeServer) Run() {
 		log.Fatal(err)
 	}
 	defer db.Close()
-	log.Printf("Server connected to database...")
+	fmt.Printf("Server connected to database...\n")
 
 	s.gm.SetCafeDB(db)
 
@@ -62,7 +62,7 @@ func (s *CafeServer) Run() {
 	}
 	defer listener.Close()
 
-	log.Printf("Server started and listening on %s...", address)
+	fmt.Printf("Server started and listening on %s...\n", address)
 
 	// Handle connections
 	for {
@@ -72,7 +72,6 @@ func (s *CafeServer) Run() {
 		}
 
 		c := client.New(conn, db, s.gm)
-		println("ADDING TO ClientManager")
 		s.gm.AddClient(c)
 
 		go commands.HandleClient(c, s.gm)

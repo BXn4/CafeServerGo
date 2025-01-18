@@ -5,7 +5,7 @@ import (
 	"cafego/internal/managers"
 	"cafego/internal/types/requests"
 	"cafego/internal/types/responses"
-	"fmt"
+	"log"
 )
 
 func HandleClient(c *client.Client, gm *managers.GameManager) {
@@ -15,14 +15,14 @@ func HandleClient(c *client.Client, gm *managers.GameManager) {
 		// Read next request
 		req, err := c.NextRequest()
 		if err != nil {
-			fmt.Printf("Failed to read request: %s\n", err.Error())
+			log.Printf("Failed to read request: %s\n", err.Error())
 			break
 		}
 
 		// Handle requests
 		err = HandleRequest(req, c, gm)
 		if err != nil {
-			fmt.Printf("Error while handling request: %s\n", err.Error())
+			log.Printf("Error while handling request: %s\n", err.Error())
 			continue
 		}
 
@@ -92,6 +92,8 @@ func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameMan
 		err = SellObject(req, c, gm)
 	case requests.C2S_CAFE_INSTANTCOOK:
 		err = InstantCook(req, c, gm)
+	default:
+		log.Printf("[NOT IMPLEMENTED]: %v\n", req.Args[0])
 	}
 
 	return err

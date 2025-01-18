@@ -80,8 +80,6 @@ func StoveDeliver(req *requests.Request, c *client.Client, gm *managers.GameMana
 		req.Args[5],
 		strconv.Itoa(c.Player.ID),
 	)
-	// [RECEIVED] %xt%CafeEx%csd%-1%1%5%3%5%
-	// [SENT] %xt%csd%-1%0%1%5%3%5%1%
 
 	return nil
 }

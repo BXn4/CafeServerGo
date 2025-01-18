@@ -1,6 +1,7 @@
 package objects
 
 import (
+	"cafego/internal/utils"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -69,26 +70,22 @@ func NewCafeObjectFromString(s string) (*CafeObject, error) {
 
 	posX, err := strconv.Atoi(data[0])
 	if err != nil {
-		fmt.Printf("Error parsing %v to int", data[0])
-		return nil, err
+		return nil, fmt.Errorf("Error parsing %v to int: %v", data[0], err)
 	}
 
 	posY, err := strconv.Atoi(data[1])
 	if err != nil {
-		fmt.Printf("Error parsing %v to int", data[1])
-		return nil, err
+		return nil, fmt.Errorf("Error parsing %v to int: %v", data[1], err)
 	}
 
 	kind, err := strconv.Atoi(data[2])
 	if err != nil {
-		fmt.Printf("Error parsing %v to int", data[2])
-		return nil, err
+		return nil, fmt.Errorf("Error parsing %v to int: %v", data[2], err)
 	}
 
 	rotation, err := strconv.Atoi(data[3])
 	if err != nil {
-		fmt.Printf("Error parsing %v to int", data[3])
-		return nil, err
+		return nil, fmt.Errorf("Error parsing %v to int: %v", data[3], err)
 	}
 
 	cafeObj := CafeObject{
@@ -146,10 +143,7 @@ func (c *CafeObject) String() string {
 		args = append(args, strconv.Itoa(c.DishID))
 		if !(c.DishID == -1 || c.DishID == -2) {
 
-			fancyIngStr := "0"
-			if c.FancyIng {
-				fancyIngStr = "1"
-			}
+			fancyIngStr := utils.If(c.FancyIng, "1", "0")
 			args = append(args, fancyIngStr)
 
 			if c.StartedAt != nil {
@@ -157,25 +151,23 @@ func (c *CafeObject) String() string {
 				passedTime := currentTime.Sub(*c.StartedAt).Seconds()
 				remainingTime := c.FinishesAt.Sub(currentTime).Seconds()
 
-				args = append(args, strconv.Itoa(int(passedTime)))
-				args = append(args, strconv.Itoa(int(remainingTime)))
+				args = append(args,
+					strconv.Itoa(int(passedTime)),
+					strconv.Itoa(int(remainingTime)),
+				)
 			} else {
-				args = append(args, "-1")
-				args = append(args, "-1")
+				args = append(args, "-1", "-1")
 			}
 		}
 		// if COUNTER
 	} else if c.IsCounter() {
-		args = append(args, strconv.Itoa(c.DishID))
-		args = append(args, strconv.Itoa(c.DishAmount))
+		args = append(args, strconv.Itoa(c.DishID), strconv.Itoa(c.DishAmount))
 		// if CHAIR
 	} else if c.IsChair() {
-		args = append(args, strconv.Itoa(c.DishID))
-		args = append(args, strconv.Itoa(c.DishStatus))
+		args = append(args, strconv.Itoa(c.DishID), strconv.Itoa(c.DishStatus))
 		// if VENDING
 	} else if c.IsVending() {
-		args = append(args, strconv.Itoa(c.DishID))
-		args = append(args, strconv.Itoa(c.DishAmount))
+		args = append(args, strconv.Itoa(c.DishID), strconv.Itoa(c.DishAmount))
 	}
 
 	return strings.Join(args, "+")
