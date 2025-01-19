@@ -29,10 +29,8 @@ func SpawnCustomer(l interfaces.CafeLocation) *objects.Customer {
 
 	//spawnInterval = 2
 
-	for start, tick := time.Now(), time.NewTicker(100*time.Millisecond); time.Since(start) < time.Duration(spawnInterval)*time.Second; <-tick.C {
-		if !l.IsRunning() { // We return if program is not running
-			return nil
-		}
+	if !SleepWhileRunning(l, time.Duration(spawnInterval)*time.Second) {
+		return nil
 	}
 
 	customer := &objects.Customer{
@@ -61,6 +59,10 @@ func SpawnCustomer(l interfaces.CafeLocation) *objects.Customer {
 	l.Broadcast("nav", "-1", "0", strings.Join(args, "+"))
 	l.Broadcast("nac", "-1", "0", strID+"+"+"0")
 
+	if !SleepWhileRunning(l, 5*time.Second) {
+		return nil
+	}
+
 	return customer
 }
 
@@ -76,6 +78,7 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 	for table == nil || chair == nil {
 
 		if time.Since(startTime) >= 10*time.Second {
+			l.Cafe().Rating -= 2
 			Leave(l, c) // Leaves sad :(
 			return
 		}
@@ -103,19 +106,11 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 	l.Broadcast("nac", "-1", "0", strings.Join(args, "+"))
 
 	// Wait until walks to chair
-	for start, tick := time.Now(), time.NewTicker(100*time.Millisecond); time.Since(start) < time.Duration(distanceToChair-4)*time.Second; <-tick.C {
-		if !l.IsRunning() { // We return if program is not running
-			l.UnreserveObject(table)
-			l.UnreserveObject(chair)
-			return
-		}
-	}
-	if !l.IsRunning() {
+	if !SleepWhileRunning(l, time.Duration(distanceToChair-4)*time.Second) {
 		l.UnreserveObject(table)
 		l.UnreserveObject(chair)
 		return
-	} // We return if program is not running
-
+	}
 	// --- Sit down ---------------------------
 
 	// Send
@@ -150,12 +145,13 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 			return
 		}
 		if time.Since(startTime) >= 10*time.Second {
+			l.Cafe().Rating -= 2
 			Leave(l, c) // Leaves sad :(
 			l.UnreserveObject(table)
 			l.UnreserveObject(chair)
 			return
 		}
-		time.Sleep(1 * time.Second)
+		time.Sleep(100 * time.Millisecond)
 	}
 
 	// --- Wait until food is placed ----------------------
@@ -164,18 +160,16 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 		if !l.IsRunning() { // We return if program is not running
 			return
 		}
-		time.Sleep(1 * time.Second)
+		time.Sleep(100 * time.Millisecond)
 	}
 
 	c.Action = objects.CUSTOMER_EAT
 
 	// Wait for food so we dont eat the table xd
-	for start, tick := time.Now(), time.NewTicker(100*time.Millisecond); time.Since(start) < 3*time.Second; <-tick.C {
-		if !l.IsRunning() { // We return if program is not running
-			l.UnreserveObject(table)
-			l.UnreserveObject(chair)
-			return
-		}
+	if !SleepWhileRunning(l, 3*time.Second) {
+		l.UnreserveObject(table)
+		l.UnreserveObject(chair)
+		return
 	}
 
 	// --- Eat food ---------------------------
@@ -196,12 +190,10 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 	)
 
 	// Wait while checking for exit
-	for start, tick := time.Now(), time.NewTicker(100*time.Millisecond); time.Since(start) < 25*time.Second; <-tick.C {
-		if !l.IsRunning() { // We return if program is not running
-			l.UnreserveObject(table)
-			l.UnreserveObject(chair)
-			return
-		}
+	if !SleepWhileRunning(l, 25*time.Second) {
+		l.UnreserveObject(table)
+		l.UnreserveObject(chair)
+		return
 	}
 
 	// --- Add rewards to player ------------
@@ -218,12 +210,14 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 	}
 	player.Cash += dishInfo.IncomePerServing
 	player.XP += dishInfo.XP
+	l.Cafe().Rating++
 
 	// Dirty dishes
 	chair.DishID = -2 // Dirty
 
 	// --- Leave happy ------------------------
-	LeaveComplete(l, c)
+	//LeaveComplete(l, c)
+	Leave(l, c)
 }
 
 // Returns a chair and a table
@@ -281,48 +275,14 @@ func Leave(l interfaces.CafeLocation, c *objects.Customer) {
 	end := NewCafePoint(l.Cafe().PlayerStart, l)
 	_, distance, _ := Path(start, end)
 
-	for start, tick := time.Now(), time.NewTicker(100*time.Millisecond); time.Since(start) < time.Duration(distance)*time.Second; <-tick.C {
-		if !l.IsRunning() { // We return if program is not running
-			return
-		}
-	}
-
-	// Delete customer from customers
-	for start, tick := time.Now(), time.NewTicker(100*time.Millisecond); time.Since(start) < 5*time.Second; <-tick.C {
-		if !l.IsRunning() { // We return if program is not running
-			return
-		}
-	}
-	l.RemoveCustomer(c.ID)
-}
-
-func LeaveComplete(l interfaces.CafeLocation, c *objects.Customer) {
-
-	// Set it do move
-	c.Action = objects.CUSTOMER_LEAVE_COMPLETE
-	c.Pos[0] = l.Cafe().PlayerStart[0]
-	c.Pos[1] = l.Cafe().PlayerStart[1]
-
-	// Send leave complete
-	args := []string{
-		strconv.Itoa(c.ID),
-		strconv.Itoa(int(c.Action)),
-	}
-	if !l.IsRunning() {
+	if !SleepWhileRunning(l, time.Duration(distance)*time.Second) {
 		return
-	} // We return if program is not running
-	l.Broadcast(
-		"nac", "-1", "0",
-		strings.Join(args, "+"),
-	)
-
-	// Move to exit
-	start := NewCafePoint(c.Pos, l)
-	end := NewCafePoint(l.Cafe().PlayerStart, l)
-	_, distance, _ := Path(start, end)
-	time.Sleep(time.Duration(distance) * time.Second)
+	}
 
 	// Delete customer from customers
-	time.Sleep(5 * time.Second)
+	if !SleepWhileRunning(l, 5*time.Second) {
+		return
+	}
+
 	l.RemoveCustomer(c.ID)
 }
