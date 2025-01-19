@@ -92,6 +92,9 @@ func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameMan
 		err = SellObject(req, c, gm)
 	case requests.C2S_CAFE_INSTANTCOOK:
 		err = InstantCook(req, c, gm)
+	case requests.C2S_MINI_MUFFIN:
+		// TODO: Need to check level.
+		err = PlayMuffinGame(req, c, gm)
 	default:
 		log.Printf("[NOT IMPLEMENTED]: %v\n", req.Args[0])
 	}

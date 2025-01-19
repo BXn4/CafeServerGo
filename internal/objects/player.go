@@ -76,6 +76,10 @@ func (p *Player) BuildMastery() string {
 	return strings.Join(pairs, "#")
 }
 
+func (p *Player) UpdateMastery(dishID int) {
+	p.Mastery[dishID] += 1
+}
+
 func (p *Player) GetDishMasteryLevel(dishID int) int {
 	// Get items info
 	timesCooked := p.Mastery[dishID]
@@ -108,6 +112,40 @@ func (p *Player) GetDishMasteryLevel(dishID int) int {
 	}
 }
 
+func (p *Player) GetDishMasteryServings(dishID int) int {
+	masteryLevel := p.GetDishMasteryLevel(dishID)
+
+	dishInfo, err := utils.GetDish(dishID)
+	if err != nil {
+		log.Printf("Invalid dish ID: %v", err)
+		return 0 // ???
+	}
+
+	baseServings := dishInfo.Servings
+	if masteryLevel < 1 {
+		return baseServings
+	} else {
+		return int(math.Round(float64(baseServings) * 1.05))
+	}
+}
+
+func (p *Player) GetDishMasteryXP(dishID int) int {
+	masteryLevel := p.GetDishMasteryLevel(dishID)
+
+	dishInfo, err := utils.GetDish(dishID)
+	if err != nil {
+		log.Printf("Invalid dish ID: %v", err)
+		return 0 // ???
+	}
+
+	baseXP := dishInfo.XP
+	if masteryLevel < 2 {
+		return baseXP
+	} else {
+		return int(math.Round(float64(baseXP) * 1.05))
+	}
+}
+
 func (p *Player) GetDishMasteryDuration(dishID int) int {
 	masteryLevel := p.GetDishMasteryLevel(dishID)
 
@@ -122,6 +160,6 @@ func (p *Player) GetDishMasteryDuration(dishID int) int {
 	if masteryLevel < 3 {
 		return baseDuration * 60
 	} else {
-		return int(math.Floor(float64(baseDuration)*0.95) * 60)
+		return int(math.Round(float64(baseDuration)*0.95) * 60)
 	}
 }

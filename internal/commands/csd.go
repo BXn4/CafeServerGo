@@ -5,6 +5,7 @@ import (
 	"cafego/internal/managers"
 	"cafego/internal/types/requests"
 	"cafego/internal/utils"
+	"math"
 	"strconv"
 )
 
@@ -38,25 +39,45 @@ func StoveDeliver(req *requests.Request, c *client.Client, gm *managers.GameMana
 	stove := c.Location.Cafe().GetObjectByPos(stoveX, stoveY)
 	counter := c.Location.Cafe().GetObjectByPos(counterX, counterY)
 
-	// Add to counter
-	wod, err := utils.GetDish(stove.DishID)
-	if err != nil {
-		return err
-	}
-
-	stove.DishAmount = wod.Servings
-
-	if counter.DishID == stove.DishID {
-		counter.DishAmount += stove.DishAmount
-	} else {
-		counter.DishID = stove.DishID
-		counter.DishAmount = stove.DishAmount
-	}
-
 	// Get dish
 	dish, err := utils.GetDish(stove.DishID)
 	if err != nil {
 		return err
+	}
+
+	dishAmount := c.Player.GetDishMasteryServings(dish.ID)
+	dishXP := c.Player.GetDishMasteryXP(dish.ID)
+
+	if stove.FancyIng {
+		/*
+			var _loc1_:int = Math.max(this.MIN_FANCY_SUBTRAHEND,Math.min(this.MAX_FANCY_SUBTRAHEND,int(this.getDuration() / 60 / 3)));
+			return this.getMasterdServings() * (CafeConstants.fancyFactorServings - _loc1_) / 100;
+		*/
+
+		loc1 := int(dish.Duration / 60 / 3)
+		loc1 = int(math.Max(0, math.Min(19, float64(loc1))))
+
+		fancyAmount := dishAmount * (20 - loc1) / 100
+
+		dishAmount += fancyAmount
+
+		/*
+			var _loc1_:int = Math.max(this.MIN_FANCY_SUBTRAHEND,Math.min(this.MAX_FANCY_SUBTRAHEND,int(this.getDuration() / 60 / 3)));
+			return this.getMasterdXp() * (CafeConstants.fancyFactorXp - _loc1_) / 100;
+		*/
+
+		fancyXP := dishXP * (20 - loc1) / 100
+
+		dishXP += fancyXP
+
+		print(dishAmount)
+	}
+
+	if counter.DishID == stove.DishID {
+		counter.DishAmount += dishAmount
+	} else {
+		counter.DishID = stove.DishID
+		counter.DishAmount += dishAmount
 	}
 
 	// Reset stove
@@ -66,9 +87,9 @@ func StoveDeliver(req *requests.Request, c *client.Client, gm *managers.GameMana
 	stove.FinishesAt = nil
 
 	// Increase xp
-	c.Player.XP += dish.XP
+	c.Player.XP += c.Player.GetDishMasteryXP(dish.ID)
 
-	// Increase mastery
+	c.Player.UpdateMastery(dish.ID)
 	// TODO: Create masteryies
 
 	// response = ExtensionResponse('csd', '-1', '0', stove_x, stove_y, counter_x, counter_y, str(player.id))

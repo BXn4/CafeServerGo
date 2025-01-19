@@ -77,10 +77,21 @@ func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameMana
 				return fmt.Errorf("Error converting amount: %w", err)
 			}
 
-			ingredientsMap[ingredientID] = ingredientAmount
+			if ingredientID < 1401 {
+				// Dont add fancy in the req if the player is not using fancy
+				ingredientsMap[ingredientID] = ingredientAmount
+			} else if ingredientID >= 1401 && usingFancy != 0 {
+				// Add fancy in the req
+				ingredientsMap[ingredientID] = ingredientAmount
+			}
 		}
 
 		for ingredientID, ingredientAmount := range ingredientsMap {
+			fridgeInventoryAmount := c.Location.Cafe().FridgeInventory[ingredientID]
+			if ingredientAmount > fridgeInventoryAmount {
+				return fmt.Errorf("Player not have enough ingredient in the fridge")
+			}
+
 			c.Location.Cafe().FridgeInventory[ingredientID] -= ingredientAmount
 			if c.Location.Cafe().FridgeInventory[ingredientID] == 0 {
 				delete(c.Location.Cafe().FridgeInventory, ingredientID)
