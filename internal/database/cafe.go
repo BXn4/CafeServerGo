@@ -31,8 +31,8 @@ func ConvertCafeDAOToCafe(cafeDAO CafeDAO) (*objects.Cafe, error) {
 	var cafe objects.Cafe
 	cafe.ID = cafeDAO.ID
 	cafe.PlayerID = cafeDAO.PlayerID
-	cafe.Rating = cafeDAO.Rating
 	cafe.Luxury = cafeDAO.Luxury
+	cafe.Rating = cafe.GetMinimumRating(cafeDAO.Rating)
 	cafe.ExpansionID = cafeDAO.ExpansionID
 	cafe.OwnerName = cafeDAO.OwnerName
 	cafe.Background = objects.DefaultBackground

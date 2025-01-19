@@ -249,3 +249,30 @@ func (c *Cafe) GetEatingSpaces() (tablesAndChairs map[*CafeObject][]*CafeObject)
 
 	return tablesAndChairs
 }
+
+func (c *Cafe) UpdateRating(newRating int) {
+	rating := c.Rating + newRating
+
+	if rating < 10 {
+		rating = 10
+	} else if rating > 1000 {
+		rating = 1000
+	}
+
+	minimumRating := c.GetMinimumRating(rating)
+
+	if rating < minimumRating {
+		c.Rating = minimumRating
+	} else {
+		c.Rating = rating
+	}
+}
+
+func (c *Cafe) GetMinimumRating(rating int) int {
+	minimumRating := min(int((1+0.05*float64(c.Luxury))*10), 500)
+	if rating < minimumRating {
+		return minimumRating
+	}
+
+	return rating
+}
