@@ -57,10 +57,21 @@ func (lc *LoadedLocation) IsRunning() bool {
 	return lc.running
 }
 
+func (lc *LoadedLocation) GetIsRunning() *bool {
+	return &lc.running
+}
+
 func (lc *LoadedLocation) SetRunning(b bool) {
 	lc.mu.Lock()
 	defer lc.mu.Unlock()
 	lc.running = b
+	// Change waiter switch
+	for _, w := range lc.cafe.Waiters {
+		w.IsWorking = b
+	}
+
+	// Start agent cycle
+
 	if b {
 		go agents.AgentCycle(lc)
 	}

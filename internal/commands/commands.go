@@ -22,7 +22,7 @@ func HandleClient(c *client.Client, gm *managers.GameManager) {
 		// Handle requests
 		err = HandleRequest(req, c, gm)
 		if err != nil {
-			log.Printf("Error while handling request: %s\n", err.Error())
+			log.Printf("[WARNING] %v request: %s\n", req.Args[0], err.Error())
 			continue
 		}
 
@@ -95,6 +95,11 @@ func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameMan
 	case requests.C2S_MINI_MUFFIN:
 		// TODO: Need to check level.
 		err = PlayMuffinGame(req, c, gm)
+	case requests.C2S_NPC_HIRE:
+		err = HireWaiter(req, c, gm)
+	case requests.C2S_NPC_FIRE:
+		err = FireWaiter(req, c, gm)
+
 	default:
 		log.Printf("[NOT IMPLEMENTED]: %v\n", req.Args[0])
 	}

@@ -88,13 +88,13 @@ func TakePlates(l interfaces.CafeLocation, w *objects.Waiter) {
 	}
 
 	// Wait for response and set the table clean
-	if !SleepWhileRunning(l, time.Second) {
+	if !SleepWhileRunning(l, time.Second, &w.IsWorking) {
 		return
 	}
 	space.DishID = -1
 
 	// Wait until it puts back to counter
-	if !SleepWhileRunning(l, time.Second*3) {
+	if !SleepWhileRunning(l, time.Second*3, &w.IsWorking) {
 		return
 	}
 
@@ -251,7 +251,7 @@ func MoveWaiter(l interfaces.CafeLocation, w *objects.Waiter, pos []int, action 
 	} // We return if program is not running
 	l.Broadcast("nac", "-1", "0", strings.Join(args, "+"))
 
-	if !SleepWhileRunning(l, time.Duration(distance)*duration) {
+	if !SleepWhileRunning(l, time.Duration(distance)*duration, &w.IsWorking) {
 		return false
 	}
 

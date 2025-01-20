@@ -23,7 +23,7 @@ func (db *CafeDB) Authenticate(name string, pass string) (int, error) {
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return 14, fmt.Errorf("NO ROWS FOUND")
+			return 14, fmt.Errorf("Player \"%v\" not found!", name)
 		}
 		return 14, fmt.Errorf("SQL ERR: %v", err)
 	}

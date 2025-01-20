@@ -25,12 +25,21 @@ const (
 )
 
 type Waiter struct {
-	ID             int
-	Name           string
-	Priority       int
-	Avatar         Avatar
-	Pos            []int
-	Dish           int
-	Action         Action
-	CurrentCounter *CafeObject
+	ID              int
+	Name            string
+	Priority        int
+	Avatar          Avatar
+	Pos             []int
+	Dish            int
+	Action          Action
+	CurrentCounter  *CafeObject
+	CurrentCustomer *Customer
+	IsWorking       bool
+}
+
+func (w *Waiter) StopWorking() {
+	w.IsWorking = false
+	if w.CurrentCustomer != nil {
+		w.CurrentCustomer.AssignedWaiter = -1
+	}
 }

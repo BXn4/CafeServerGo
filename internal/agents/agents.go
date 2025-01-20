@@ -4,21 +4,13 @@ import (
 	"cafego/internal/interfaces"
 	"cafego/internal/objects"
 	"time"
-
-	"log"
 )
 
 func AgentCycle(l interfaces.CafeLocation) {
 
-	log.Printf("---------------------------------\n")
-	log.Printf("---------------------------------\n")
-	log.Printf("-----  STARTED AGENT CYLCE  -----\n")
-	log.Printf("---------------------------------\n")
-	log.Printf("---------------------------------\n")
-
 	l.ClearReservedObjects()
 
-	if !SleepWhileRunning(l, 10*time.Second) {
+	if !SleepWhileRunning(l, 10*time.Second, l.GetIsRunning()) {
 		return
 	}
 
@@ -40,10 +32,7 @@ func AgentCycle(l interfaces.CafeLocation) {
 	// Spawn customers
 	go func() {
 		for l.IsRunning() {
-			log.Printf("CHAIRS LEN: %v\n", len(chairs))
-			log.Printf("CUSTOMERS LEN: %v\n", len(l.Cafe().Customers))
 			if len(l.Cafe().Customers) < len(chairs) {
-				log.Printf("SPAWNED CUSTOMER!!!")
 				go IterateCustomer(l, SpawnCustomer(l))
 			}
 		}
@@ -64,12 +53,12 @@ func AgentCycle(l interfaces.CafeLocation) {
 
 }
 
-func SleepWhileRunning(l interfaces.CafeLocation, d time.Duration) bool {
+func SleepWhileRunning(l interfaces.CafeLocation, d time.Duration, isRunning *bool) bool {
 	startTime := time.Now()
 	tick := time.NewTicker(100 * time.Millisecond)
 	defer tick.Stop()
 	for time.Since(startTime) < d {
-		if !l.IsRunning() { // We return if program is not running
+		if !*isRunning { // We return if program is not running
 			return false
 		}
 		<-tick.C

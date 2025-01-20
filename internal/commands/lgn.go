@@ -4,8 +4,8 @@ import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
 	"cafego/internal/types/requests"
+	"fmt"
 	"strconv"
-  "fmt"
 )
 
 // lgn - Login
@@ -20,21 +20,21 @@ func Login(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 	}
 
 	// Check if already logged in log him/her out
-  if searched, _ := gm.GetClientByName(name); searched != nil {
-    statusCode = 15
-  } 
+	if searched, _ := gm.GetClientByName(name); searched != nil {
+		statusCode = 15
+	}
 
 	statusCodeStr := strconv.Itoa(statusCode)
 
 	// Send login response (lgn)
 	c.SendExtensionResponse("lgn", "1", statusCodeStr)
-  if statusCode != 0 {
-    if statusCode == 15 {
-      return fmt.Errorf("Player %v is already logged in", name)
-    }else{
-      return fmt.Errorf("Access denied")
-    }
-  }
+	if statusCode != 0 {
+		if statusCode == 15 {
+			return fmt.Errorf("Player %v is already logged in", name)
+		} else {
+			return fmt.Errorf("Access denied")
+		}
+	}
 
 	// Send room list (rlu)
 	RoomList(req, c, gm)

@@ -59,4 +59,7 @@ type CafeLocation interface {
 
 	//
 	IsRunning() bool
+
+	//
+	GetIsRunning() *bool
 }

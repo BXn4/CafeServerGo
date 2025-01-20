@@ -47,9 +47,8 @@ func (c *Client) Alive() bool {
 func (c *Client) Disconnect() {
 	defer c.Conn.Close()
 
-	c.ClientManager.DisconnectClient(c.Player.ID)
-
 	if c.Player != nil {
+		c.ClientManager.DisconnectClient(c.Player.ID)
 		// If the player exist, leave the player.
 		// With flash, when the client sends policy file request, the client disconnects after it
 		c.Location.Leave(c.Player.ID) // Leaves the current room
