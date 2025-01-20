@@ -32,8 +32,10 @@ type PlayerDAO struct {
 	LegsColor           int    `json:"legs_color" form:"legs_color" gorm:"column:legs_color"`
 	IsBanned            bool   `json:"is_banned" form:"is_banned" gorm:"column:is_banned"`
 	Mastery             string `json:"mastery" form:"mastery" gorm:"column:mastery"`
+	Achievement         string `json:"achievement" form:"achievement" gorm:"column:achievement"`
 	LastLogin           string `json:"last_login" form:"last_login" gorm:"column:last_login"`
 	DailyLogin          string `json:"daily_login" form:"daily_login" gorm:"column:daily_login"`
+	Gifts               string `json:"gifts" form:"gifts" gorm:"column:gifts"`
 }
 
 func ConvertPlayerDAOToPlayer(playerDAO PlayerDAO) (*objects.Player, error) {
@@ -53,8 +55,10 @@ func ConvertPlayerDAOToPlayer(playerDAO PlayerDAO) (*objects.Player, error) {
 	player.NewGifts = playerDAO.NewGifts
 	player.Username = playerDAO.Username
 	player.Position = []int{0, 0}
+	player.Gifts = playerDAO.Gifts
 
 	player.ParseMastery(playerDAO.Mastery)
+	player.ParseAchievement(playerDAO.Achievement)
 
 	// Fill avatar
 	avatar := objects.Avatar{
@@ -101,8 +105,59 @@ func (db *CafeDB) GetPlayerByName(name string) (*objects.Player, error) {
 		&playerDAO.LegsColor,
 		&playerDAO.IsBanned,
 		&playerDAO.Mastery,
+		&playerDAO.Achievement,
 		&playerDAO.LastLogin,
 		&playerDAO.DailyLogin,
+		&playerDAO.Gifts,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("ID NOT FOUND")
+		}
+		return nil, fmt.Errorf("SQL ERR: %v", err)
+	}
+
+	player, err := ConvertPlayerDAOToPlayer(playerDAO)
+	if err != nil {
+		return nil, err
+	}
+
+	return player, nil
+}
+
+func (db *CafeDB) GetPlayer(id int) (*objects.Player, error) {
+	db.mu.Lock()
+	defer db.mu.Unlock()
+
+	row := db.conn.QueryRow("SELECT * FROM player WHERE id = ?", id)
+
+	var playerDAO PlayerDAO
+	err := row.Scan(
+		&playerDAO.ID,
+		&playerDAO.Email,
+		&playerDAO.Password,
+		&playerDAO.Cash,
+		&playerDAO.Gold,
+		&playerDAO.XP,
+		&playerDAO.InstantCookings,
+		&playerDAO.OpenJobs,
+		&playerDAO.PlayedWheel,
+		&playerDAO.AllowFriendRequests,
+		&playerDAO.AllowEmails,
+		&playerDAO.EmailVerified,
+		&playerDAO.NewGifts,
+		&playerDAO.Username,
+		&playerDAO.Gender,
+		&playerDAO.TopColor,
+		&playerDAO.SkinColor,
+		&playerDAO.HairColor,
+		&playerDAO.LegsColor,
+		&playerDAO.IsBanned,
+		&playerDAO.Mastery,
+		&playerDAO.Achievement,
+		&playerDAO.LastLogin,
+		&playerDAO.DailyLogin,
+		&playerDAO.Gifts,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {

@@ -17,10 +17,6 @@ func HireWaiter(req *requests.Request, c *client.Client, gm *managers.GameManage
 	avatar.Gender = npcGender
 	avatar.Name = req.Args[2]
 
-	println("----------------------------------------------")
-	println("generating id... ")
-	println("----------------------------------------------")
-
 	// find new waiter id
 	newID := 1
 	changed := true
@@ -33,9 +29,6 @@ func HireWaiter(req *requests.Request, c *client.Client, gm *managers.GameManage
 			}
 		}
 	}
-	println("----------------------------------------------")
-	println("generated id")
-	println("----------------------------------------------")
 
 	// create new waiter
 	newWaiter := &objects.Waiter{

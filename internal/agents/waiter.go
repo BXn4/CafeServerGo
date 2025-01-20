@@ -66,7 +66,6 @@ func TakePlates(l interfaces.CafeLocation, w *objects.Waiter) {
 	if !w.IsWorking { // We return if program is not running
 		return
 	}
-	println("TAKING PLATES: ", w.ID)
 
 	// Get space with dirty plates
 	space := l.GetDirtySpace()
@@ -164,7 +163,6 @@ func ServeFood(l interfaces.CafeLocation, w *objects.Waiter) {
 	}
 
 	// --- Feed customer --------------------------
-	println("FOOD PLACING")
 	if !MoveWaiter(l, w, customer.Pos, objects.FEED, 750*time.Millisecond) {
 		return
 	}
@@ -172,15 +170,11 @@ func ServeFood(l interfaces.CafeLocation, w *objects.Waiter) {
 	// Set food to customer
 	customer.Dish = savedDish
 
-	println("FOOD PLACED")
-
 	// Move back to counter
 	if !MoveWaiter(l, w, w.CurrentCounter.Pos, objects.MOVE_TO_COUNTER, 750*time.Millisecond) {
 		return
 	}
-	println("MOVED BACK TO COUNTER")
 	w.CurrentCounter = nil
-
 }
 
 // Get a random counter that has food and it is reachable from the start location

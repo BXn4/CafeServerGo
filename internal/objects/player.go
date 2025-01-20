@@ -25,8 +25,10 @@ type Player struct {
 	Avatar              Avatar
 	Position            []int
 	Mastery             map[int]int
+	Achievement         map[int]int
 	WorkTimeLeft        int
 	SeekingJob          bool
+	Gifts               string
 }
 
 func (player *Player) String() string {
@@ -65,11 +67,42 @@ func (p *Player) ParseMastery(mastery string) {
 	}
 }
 
+func (p *Player) ParseAchievement(achivement string) {
+	pairs := strings.Split(achivement, "#")
+
+	p.Achievement = make(map[int]int)
+
+	for _, pair := range pairs {
+		parts := strings.Split(pair, "+")
+
+		achivementID, err := strconv.Atoi(parts[0])
+		if err != nil {
+			log.Printf("Cant parse achievement to int: %v", err)
+		}
+		progression, err := strconv.Atoi(parts[1])
+		if err != nil {
+			log.Printf("Cant parse achievement progress to int: %v", err)
+		}
+		p.Achievement[achivementID] = progression
+	}
+}
+
 func (p *Player) BuildMastery() string {
 	var pairs []string
 
 	for dishID, timesCooked := range p.Mastery {
 		pair := fmt.Sprintf("%d+%d", dishID, timesCooked)
+		pairs = append(pairs, pair)
+	}
+
+	return strings.Join(pairs, "#")
+}
+
+func (p *Player) BuildAchievement() string {
+	var pairs []string
+	println("ACHIVMENTS len: ", len(p.Achievement))
+	for achivement, progress := range p.Achievement {
+		pair := fmt.Sprintf("%d+%d", achivement-2001, progress)
 		pairs = append(pairs, pair)
 	}
 
