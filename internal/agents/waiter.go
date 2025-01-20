@@ -13,9 +13,6 @@ import (
 // Spawns a waiter at the location
 func SpawnWaiter(l interfaces.CafeLocation, w *objects.Waiter) {
 
-	// --- Spawn waiter ----------
-	log.Printf("WAITER SPAWNED: %v\n", w.ID)
-
 	// Set waiter starter position
 	w.Pos = []int{
 		l.Cafe().PlayerStart[0],
@@ -30,13 +27,21 @@ func SpawnWaiter(l interfaces.CafeLocation, w *objects.Waiter) {
 		"-1", // DishID (unnecessary for waiters)
 		w.Avatar.String(),
 	}
-	if !l.IsRunning() {
+	if !w.IsWorking {
 		return
-	} // We return if program is not running
+	}
 	l.Broadcast("nav", "-1", "0", strings.Join(args, "+"))
 
 	// Spawn waiter
 	l.Broadcast("nac", "-1", "0", args[0], "0")
+
+	// Wait to go in door
+	if !SleepWhileChecking(l, 1*time.Second, &w.IsWorking) {
+		return
+	}
+
+	// --- Spawn waiter ----------
+	log.Printf("WAITER SPAWNED: %v\n", w.ID)
 
 }
 
@@ -58,9 +63,10 @@ func IterateWaiter(l interfaces.CafeLocation, w *objects.Waiter) {
 
 func TakePlates(l interfaces.CafeLocation, w *objects.Waiter) {
 
-	if !l.IsRunning() { // We return if program is not running
+	if !w.IsWorking { // We return if program is not running
 		return
 	}
+	println("TAKING PLATES: ", w.ID)
 
 	// Get space with dirty plates
 	space := l.GetDirtySpace()
@@ -88,13 +94,13 @@ func TakePlates(l interfaces.CafeLocation, w *objects.Waiter) {
 	}
 
 	// Wait for response and set the table clean
-	if !SleepWhileRunning(l, time.Second, &w.IsWorking) {
+	if !SleepWhileChecking(l, time.Second, &w.IsWorking) {
 		return
 	}
 	space.DishID = -1
 
 	// Wait until it puts back to counter
-	if !SleepWhileRunning(l, time.Second*3, &w.IsWorking) {
+	if !SleepWhileChecking(l, time.Second*3, &w.IsWorking) {
 		return
 	}
 
@@ -103,13 +109,13 @@ func TakePlates(l interfaces.CafeLocation, w *objects.Waiter) {
 
 func ServeFood(l interfaces.CafeLocation, w *objects.Waiter) {
 
-	if !l.IsRunning() { // We return if program is not running
+	if !w.IsWorking { // We return if program is not running
 		return
 	}
 
 	//var distance int
 	if w.CurrentCounter == nil || w.CurrentCounter.DishID == -1 {
-		// --- Get random counter -------------------------------
+		// --- Get random counter (prioritizes counter with food) -------------------------------
 		counter, _ := GetRandomCounter(l)
 		if counter == nil {
 			return
@@ -158,6 +164,7 @@ func ServeFood(l interfaces.CafeLocation, w *objects.Waiter) {
 	}
 
 	// --- Feed customer --------------------------
+	println("FOOD PLACING")
 	if !MoveWaiter(l, w, customer.Pos, objects.FEED, 750*time.Millisecond) {
 		return
 	}
@@ -165,11 +172,13 @@ func ServeFood(l interfaces.CafeLocation, w *objects.Waiter) {
 	// Set food to customer
 	customer.Dish = savedDish
 
+	println("FOOD PLACED")
+
 	// Move back to counter
 	if !MoveWaiter(l, w, w.CurrentCounter.Pos, objects.MOVE_TO_COUNTER, 750*time.Millisecond) {
 		return
 	}
-
+	println("MOVED BACK TO COUNTER")
 	w.CurrentCounter = nil
 
 }
@@ -231,7 +240,6 @@ func MoveWaiter(l interfaces.CafeLocation, w *objects.Waiter, pos []int, action 
 	start := NewCafePoint(w.Pos, l)
 	end := NewCafePoint(pos, l)
 	path, distance, found := Path(start, end)
-
 	if !found {
 		return false
 	}
@@ -246,12 +254,13 @@ func MoveWaiter(l interfaces.CafeLocation, w *objects.Waiter, pos []int, action 
 		strconv.Itoa(pos[0]),
 		strconv.Itoa(pos[1]),
 	}
-	if !l.IsRunning() {
+
+	if !w.IsWorking {
 		return false
-	} // We return if program is not running
+	}
 	l.Broadcast("nac", "-1", "0", strings.Join(args, "+"))
 
-	if !SleepWhileRunning(l, time.Duration(distance)*duration, &w.IsWorking) {
+	if !SleepWhileChecking(l, time.Duration(distance)*duration, &w.IsWorking) {
 		return false
 	}
 

@@ -29,7 +29,7 @@ func SpawnCustomer(l interfaces.CafeLocation) *objects.Customer {
 
 	//spawnInterval = 2
 
-	if !SleepWhileRunning(l, time.Duration(spawnInterval)*time.Second, l.GetIsRunning()) {
+	if !SleepWhileChecking(l, time.Duration(spawnInterval)*time.Second, l.GetIsRunning()) {
 		return nil
 	}
 
@@ -59,7 +59,7 @@ func SpawnCustomer(l interfaces.CafeLocation) *objects.Customer {
 	l.Broadcast("nav", "-1", "0", strings.Join(args, "+"))
 	l.Broadcast("nac", "-1", "0", strID+"+"+"0")
 
-	if !SleepWhileRunning(l, 5*time.Second, l.GetIsRunning()) {
+	if !SleepWhileChecking(l, 1*time.Second, l.GetIsRunning()) {
 		return nil
 	}
 
@@ -106,7 +106,7 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 	l.Broadcast("nac", "-1", "0", strings.Join(args, "+"))
 
 	// Wait until walks to chair
-	if !SleepWhileRunning(l, time.Duration(distanceToChair-4)*time.Second, l.GetIsRunning()) {
+	if !SleepWhileChecking(l, time.Duration(distanceToChair-2)*time.Second, l.GetIsRunning()) {
 		l.UnreserveObject(table)
 		l.UnreserveObject(chair)
 		return
@@ -166,7 +166,7 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 	c.Action = objects.CUSTOMER_EAT
 
 	// Wait for food so we dont eat the table xd
-	if !SleepWhileRunning(l, 3*time.Second, l.GetIsRunning()) {
+	if !SleepWhileChecking(l, 3*time.Second, l.GetIsRunning()) {
 		l.UnreserveObject(table)
 		l.UnreserveObject(chair)
 		return
@@ -190,7 +190,7 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 	)
 
 	// Wait while checking for exit
-	if !SleepWhileRunning(l, 25*time.Second, l.GetIsRunning()) {
+	if !SleepWhileChecking(l, 25*time.Second, l.GetIsRunning()) {
 		l.UnreserveObject(table)
 		l.UnreserveObject(chair)
 		return
@@ -275,12 +275,12 @@ func Leave(l interfaces.CafeLocation, c *objects.Customer) {
 	end := NewCafePoint(l.Cafe().PlayerStart, l)
 	_, distance, _ := Path(start, end)
 
-	if !SleepWhileRunning(l, time.Duration(distance)*time.Second, l.GetIsRunning()) {
+	if !SleepWhileChecking(l, time.Duration(distance)*time.Second, l.GetIsRunning()) {
 		return
 	}
 
 	// Delete customer from customers
-	if !SleepWhileRunning(l, 5*time.Second, l.GetIsRunning()) {
+	if !SleepWhileChecking(l, 5*time.Second, l.GetIsRunning()) {
 		return
 	}
 

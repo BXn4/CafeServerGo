@@ -10,13 +10,22 @@ import (
 // pin
 func FireWaiter(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
-	index, err := strconv.Atoi(req.Args[2])
+	id, err := strconv.Atoi(req.Args[2])
 	if err != nil {
 		return err
 	}
-	index -= 1
 
-	// TODO: Make waiter leave
+	println("-------------------------------------")
+	println("waiter fired: ", id)
+	println("-------------------------------------")
+
+	var index int
+	for i, w := range c.Location.Cafe().Waiters {
+		if w.ID == id {
+			w.StopWorking()
+			index = i
+		}
+	}
 
 	c.Location.Cafe().Waiters = append(c.Location.Cafe().Waiters[:index], c.Location.Cafe().Waiters[index+1:]...)
 

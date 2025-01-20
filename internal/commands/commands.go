@@ -49,6 +49,8 @@ func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameMan
 		c.SendSystemResponse(responses.LOGOUT)
 
 	/* COMMANDS */
+	case requests.C2S_PING:
+		SendPing(req, c, gm)
 	case requests.LOGIN:
 		RoomList(req, c, gm)
 	case requests.C2S_VERSION_CHECK:

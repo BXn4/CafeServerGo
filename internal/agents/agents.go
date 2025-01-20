@@ -10,13 +10,10 @@ func AgentCycle(l interfaces.CafeLocation) {
 
 	l.ClearReservedObjects()
 
-	if !SleepWhileRunning(l, 10*time.Second, l.GetIsRunning()) {
-		return
-	}
-
 	// Spawn waiters
 	for i, w := range l.Cafe().Waiters {
 		// Spawn waiter
+		w.IsWorking = true
 		w.ID = i + 1
 		SpawnWaiter(l, w)
 	}
@@ -42,8 +39,9 @@ func AgentCycle(l interfaces.CafeLocation) {
 	// IterateWaiters
 	waiters := l.Cafe().Waiters
 	for _, waiter := range waiters {
+
 		go func() {
-			for l.IsRunning() {
+			for waiter.IsWorking {
 				IterateWaiter(l, waiter)
 			}
 			waiter.CurrentCounter = nil
@@ -53,7 +51,7 @@ func AgentCycle(l interfaces.CafeLocation) {
 
 }
 
-func SleepWhileRunning(l interfaces.CafeLocation, d time.Duration, isRunning *bool) bool {
+func SleepWhileChecking(l interfaces.CafeLocation, d time.Duration, isRunning *bool) bool {
 	startTime := time.Now()
 	tick := time.NewTicker(100 * time.Millisecond)
 	defer tick.Stop()

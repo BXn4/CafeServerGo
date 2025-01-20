@@ -90,6 +90,7 @@ const (
 	C2S_FASTFOOD_NPC
 	C2S_EMAIL_VERIFICATION
 	C2S_ROOMLIST
+	C2S_PING
 )
 
 func LookupRequestKind(kindStr string) RequestKind {
@@ -174,6 +175,7 @@ func LookupRequestKind(kindStr string) RequestKind {
 		"ffn": C2S_FASTFOOD_NPC,
 		"emv": C2S_EMAIL_VERIFICATION,
 		"rlu": C2S_ROOMLIST,
+		"pin": C2S_PING,
 	}
 
 	if val, ok := kindLookup[kindStr]; ok {

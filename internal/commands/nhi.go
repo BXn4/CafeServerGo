@@ -16,15 +16,41 @@ func HireWaiter(req *requests.Request, c *client.Client, gm *managers.GameManage
 	avatar := objects.NewRandomAvatar()
 	avatar.Gender = npcGender
 	avatar.Name = req.Args[2]
+
+	println("----------------------------------------------")
+	println("generating id... ")
+	println("----------------------------------------------")
+
+	// find new waiter id
+	newID := 1
+	changed := true
+	for changed {
+		changed = false
+		for _, w := range c.Location.Cafe().Waiters {
+			if newID == w.ID {
+				newID++
+				changed = true
+			}
+		}
+	}
+	println("----------------------------------------------")
+	println("generated id")
+	println("----------------------------------------------")
+
+	// create new waiter
 	newWaiter := &objects.Waiter{
-		ID:       len(c.Location.Cafe().Waiters) + 1,
-		Name:     req.Args[2],
-		Priority: 50,
-		Avatar:   avatar,
+		ID:        newID,
+		Name:      req.Args[2],
+		Priority:  50,
+		Avatar:    avatar,
+		IsWorking: true,
 	}
 	c.Location.Cafe().Waiters = append(c.Location.Cafe().Waiters, newWaiter)
 
 	// Spawn
+	println("-------------------------------------")
+	println("waiter spawned: ", newID)
+	println("-------------------------------------")
 	agents.SpawnWaiter(c.Location, newWaiter)
 
 	// Start waiter cylce
