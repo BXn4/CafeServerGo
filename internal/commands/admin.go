@@ -41,7 +41,9 @@ func setAchivement(p *objects.Player, args []string) error {
 		return err
 	}
 
-	p.Achievement[achivementID] = proggression
+	if _, ok := p.Achievement[achivementID]; ok {
+		p.Achievement[achivementID] = proggression
+	}
 
 	return nil
 }
