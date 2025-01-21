@@ -2,9 +2,11 @@ package database
 
 import (
 	"cafego/internal/objects"
+	"cafego/internal/types/daos"
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 
@@ -90,7 +92,7 @@ func ConvertCafeDAOToCafe(cafeDAO CafeDAO) (*objects.Cafe, error) {
 	}
 
 	// Parse waiters
-	var daos []WaiterDAO
+	var daos []daos.WaiterDAO
 	if err := json.Unmarshal([]byte(cafeDAO.Waiters), &daos); err != nil {
 		return nil, err
 	}
@@ -138,4 +140,75 @@ func (db *CafeDB) GetCafeByPlayerID(player_id int) (*objects.Cafe, error) {
 	}
 
 	return cafe, nil
+}
+
+func (db *CafeDB) SaveCafe(cafe *objects.Cafe) {
+	db.mu.Lock()
+	defer db.mu.Unlock()
+
+	// Build tiles
+	var tiles []string
+	for i, row := range cafe.Tiles {
+		for j := range len(row) {
+			tiles = append(tiles, strconv.Itoa(cafe.Tiles[i][j]))
+		}
+	}
+
+	// Build objs
+	objs := []string{}
+	for _, obj := range cafe.Objects {
+		objs = append(objs, obj.JSON())
+	}
+
+	// Build fridge inventory
+	fridgeInv := []string{}
+	for i, v := range cafe.FridgeInventory {
+		fridgeInv = append(fridgeInv, fmt.Sprintf("%v+%v", i, v))
+	}
+
+	// Build furniture inventory
+	furnitureInv := []string{}
+	for i, v := range cafe.FurnitureInventory {
+		furnitureInv = append(furnitureInv, fmt.Sprintf("%v+%v", i, v))
+	}
+
+	// Build waiters
+	waiters := []string{}
+	for _, w := range cafe.Waiters {
+		waiters = append(waiters, w.JSON())
+	}
+
+	result, err := db.conn.Exec(
+		" UPDATE cafe SET "+
+			"rating = ?,"+
+			"luxury = ?,"+
+			"expansion_id = ?,"+
+			"tiles = ?,"+
+			"objects = ?,"+
+			"fridge_inv = ?,"+
+			"furniture_inv = ?,"+
+			"waiters = ? "+
+			"WHERE player_id = ?",
+		cafe.Rating,
+		cafe.Luxury,
+		cafe.ExpansionID,
+		strings.Join(tiles, "+"),
+		"["+strings.Join(objs, ", ")+"]",
+		strings.Join(fridgeInv, "#"),
+		strings.Join(furnitureInv, "#"),
+		"["+strings.Join(waiters, ", ")+"]",
+		cafe.ID,
+	)
+
+	if err != nil {
+		fmt.Printf("Cant save cafe: %v\n", err)
+		return
+	}
+
+	// Check how many rows were affected
+	_, err = result.RowsAffected()
+	if err != nil {
+		log.Fatal("Error fetching rows affected:", err)
+	}
+
 }

@@ -102,6 +102,7 @@ func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameMana
 		stove.FancyIng = usingFancy != 0
 
 	} else {
+
 		stove.DishID = dishID
 		currentTime := time.Now().UTC()
 		stove.StartedAt = &currentTime

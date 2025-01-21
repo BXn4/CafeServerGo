@@ -4,7 +4,10 @@ import (
 	"cafego/internal/objects"
 	"database/sql"
 	"fmt"
+	"log"
+	"strconv"
 	_ "strconv"
+	"strings"
 	_ "strings"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -21,6 +24,7 @@ type PlayerDAO struct {
 	OpenJobs            int    `json:"open_jobs" form:"open_jobs" gorm:"column:open_jobs"`
 	PlayedWheel         bool   `json:"played_wheel" form:"played_wheel" gorm:"column:played_wheel"`
 	AllowFriendRequests bool   `json:"allow_friend_requests" form:"allow_friend_requests" gorm:"column:allow_friend_requests"`
+	Friends             string `json:"friends" form:"friends" gorm:"column:friends"`
 	AllowEmails         bool   `json:"allow_emails" form:"allow_emails" gorm:"column:allow_emails"`
 	EmailVerified       bool   `json:"email_verified" form:"email_verified" gorm:"column:email_verified"`
 	NewGifts            int    `json:"new_gifts" form:"new_gifts" gorm:"column:new_gifts"`
@@ -57,6 +61,7 @@ func ConvertPlayerDAOToPlayer(playerDAO PlayerDAO) (*objects.Player, error) {
 	player.Position = []int{0, 0}
 	player.Gifts = playerDAO.Gifts
 
+	player.ParseFriends(playerDAO.Friends)
 	player.ParseMastery(playerDAO.Mastery)
 	player.ParseAchievement(playerDAO.Achievement)
 
@@ -94,6 +99,7 @@ func (db *CafeDB) GetPlayerByName(name string) (*objects.Player, error) {
 		&playerDAO.OpenJobs,
 		&playerDAO.PlayedWheel,
 		&playerDAO.AllowFriendRequests,
+		&playerDAO.Friends,
 		&playerDAO.AllowEmails,
 		&playerDAO.EmailVerified,
 		&playerDAO.NewGifts,
@@ -143,6 +149,7 @@ func (db *CafeDB) GetPlayer(id int) (*objects.Player, error) {
 		&playerDAO.OpenJobs,
 		&playerDAO.PlayedWheel,
 		&playerDAO.AllowFriendRequests,
+		&playerDAO.Friends,
 		&playerDAO.AllowEmails,
 		&playerDAO.EmailVerified,
 		&playerDAO.NewGifts,
@@ -172,4 +179,71 @@ func (db *CafeDB) GetPlayer(id int) (*objects.Player, error) {
 	}
 
 	return player, nil
+}
+
+func (db *CafeDB) SavePlayer(player *objects.Player) {
+	db.mu.Lock()
+	defer db.mu.Unlock()
+
+	friendsStr := []string{}
+	for _, f := range player.Friends {
+		friendsStr = append(friendsStr, strconv.Itoa(f))
+	}
+
+	println("CASH PLAYER SAVE: ", player.Cash, uint(player.Cash))
+
+	result, err := db.conn.Exec(
+		" UPDATE player SET "+
+			"cash = ?,"+
+			"gold = ?,"+
+			"xp = ?,"+
+			"instant_cookings = ?,"+
+			"open_jobs = ?,"+
+			"played_wheel = ?,"+
+			"open_jobs = ?,"+
+			"played_wheel = ?,"+
+			"allow_friend_requests = ?,"+
+			"friends = ?,"+
+			"new_gifts = ?,"+
+			"gender = ?,"+
+			"top_color = ?,"+
+			"skin_color = ?,"+
+			"hair_color = ?,"+
+			"legs_color = ?,"+
+			"mastery = ?,"+
+			"achievement = ?,"+
+			"gifts = ? "+
+			"WHERE id = ?",
+		uint(player.Cash),
+		player.Gold,
+		player.XP,
+		player.InstantCookings,
+		player.OpenJobs,
+		player.PlayedWheel,
+		player.OpenJobs,
+		player.PlayedWheel,
+		player.AllowFriendRequests,
+		strings.Join(friendsStr, "#"),
+		player.NewGifts,
+		player.Avatar.Gender,
+		player.Avatar.TopColor,
+		player.Avatar.SkinColor,
+		player.Avatar.HairColor,
+		player.Avatar.LegsColor,
+		player.BuildMastery(),
+		player.BuildAchievement(),
+		player.Gifts,
+		player.ID,
+	)
+
+	if err != nil {
+		fmt.Printf("Cant save player: %v\n", err)
+		return
+	}
+
+	// Check how many rows were affected
+	_, err = result.RowsAffected()
+	if err != nil {
+		log.Fatal("Error fetching rows affected:", err)
+	}
 }

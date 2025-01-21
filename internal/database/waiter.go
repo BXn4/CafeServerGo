@@ -2,18 +2,12 @@ package database
 
 import (
 	"cafego/internal/objects"
+	"cafego/internal/types/daos"
 	"strconv"
 	"strings"
 )
 
-type WaiterDAO struct {
-	ID       int    `json:"waiter_id"`
-	Name     string `json:"name"`
-	Priority int    `json:"priority"`
-	Avatar   string `json:"avatar"`
-}
-
-func ConvertWaiterDAOToWaiter(dao *WaiterDAO) (*objects.Waiter, error) {
+func ConvertWaiterDAOToWaiter(dao *daos.WaiterDAO) (*objects.Waiter, error) {
 	var waiter objects.Waiter
 
 	// Fill simple waiter data

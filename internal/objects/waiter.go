@@ -1,5 +1,11 @@
 package objects
 
+import (
+	"cafego/internal/types/daos"
+	"encoding/json"
+	"fmt"
+)
+
 const (
 	WAITER_INSERT Action = iota
 	WAITER_MOVE_TO_COUNTER
@@ -42,4 +48,21 @@ func (w *Waiter) StopWorking() {
 	if w.CurrentCustomer != nil {
 		w.CurrentCustomer.AssignedWaiter = -1
 	}
+}
+
+func (w *Waiter) JSON() string {
+
+	dao := daos.WaiterDAO{
+		ID:       w.ID,
+		Name:     w.Name,
+		Priority: w.Priority,
+		Avatar:   w.Avatar.String(),
+	}
+
+	b, err := json.Marshal(dao)
+	if err != nil {
+		fmt.Println(err)
+		return ""
+	}
+	return string(b)
 }

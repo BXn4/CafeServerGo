@@ -103,6 +103,10 @@ func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameMan
 		err = FireWaiter(req, c, gm)
 	case requests.C2S_CAFE_ACHIEVEMENT_LIST:
 		err = SendAchivements(req, c, gm)
+	case requests.C2S_NPC_CUSTOMIZE:
+		err = WaiterCustomize(req, c, gm)
+	case requests.C2S_BUDDY_INGAME:
+		err = SendFriendRequest(req, c, gm)
 
 	default:
 		log.Printf("[NOT IMPLEMENTED]: %v\n", req.Args[0])

@@ -25,7 +25,9 @@ func (gm *GameManager) RemoveLocation(id int) {
 	for i, lc := range gm.locations {
 		if lc.Cafe().ID == id {
 			// This removes the location by id by not changing the others memory addresses
-      delete(gm.locations, i)
+			gm.db.SaveCafe(lc.cafe)
+			fmt.Printf("Saved %v cafe to db\n", lc.cafe.ID)
+			delete(gm.locations, i)
 			return
 		}
 	}
@@ -54,7 +56,7 @@ func (gm *GameManager) AddLocation(id int) *LoadedLocation {
 		return nil
 	}
 	cafe := NewLoadedLocation(cafeObj, gm)
-
+	fmt.Printf("Loaded %v cafe from db\n", cafe.cafe.ID)
 	gm.locations[id] = cafe
 
 	return cafe
@@ -65,7 +67,7 @@ func (gm *GameManager) AddLocation(id int) *LoadedLocation {
 // |========================================|
 
 func (gm *GameManager) getLocationByID(id int) (*LoadedLocation, error) {
-  cafe, ok := gm.locations[id]
+	cafe, ok := gm.locations[id]
 	if ok {
 		return cafe, nil
 	}

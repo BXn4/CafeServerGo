@@ -10,6 +10,7 @@ CREATE TABLE player (
     open_jobs TINYINT UNSIGNED DEFAULT 0,
     played_wheel TINYINT (1) DEFAULT 0,
     allow_friend_requests TINYINT (1) DEFAULT 1,
+    friends TEXT DEFAULT "",
     allow_emails TINYINT (1) DEFAULT 0,
     email_verified TINYINT (1) DEFAULT 1,
     new_gifts TINYINT UNSIGNED DEFAULT 0,
@@ -40,14 +41,6 @@ CREATE TABLE cafe (
     furniture_inv text DEFAULT '602+5#603+10',
     waiters LONGTEXT DEFAULT '[{"waiter_id": 0, "name": "James", "gender": 2, "priority": 50, "avatar": "James+2+1002$0#1022$2#1042$6#1052$0#1062$0#1082$0"}]',
     CONSTRAINT cafe_ibfk_1 FOREIGN KEY (player_id) REFERENCES player (id)
-);
-
-CREATE TABLE friend (player1_id INT NOT NULL, player2_id INT NOT NULL);
-
-CREATE TABLE friend_request (
-    player1_id INT NOT NULL,
-    player2_id INT NOT NULL,
-    status TINYINT (1) DEFAULT 0
 );
 
 --- Data

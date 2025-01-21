@@ -26,6 +26,10 @@ func (gm *GameManager) DisconnectClient(id int) {
 			continue
 		}
 		if c.Player.ID == id {
+
+			// Save player to db
+			gm.db.SavePlayer(gm.clients[i].Player)
+
 			// Remove client by re-slicing
 			gm.clients = append(gm.clients[:i], gm.clients[i+1:]...)
 			return

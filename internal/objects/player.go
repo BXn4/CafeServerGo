@@ -18,6 +18,7 @@ type Player struct {
 	OpenJobs            int
 	PlayedWheel         bool
 	AllowFriendRequests bool
+	Friends             []int
 	AllowEmails         bool
 	EmailVerified       bool
 	NewGifts            int
@@ -64,6 +65,22 @@ func (p *Player) ParseMastery(mastery string) {
 			log.Printf("Cant parse mastery timesCooked to int: %v", err)
 		}
 		p.Mastery[dishID] = timesCooked
+	}
+}
+
+func (p *Player) ParseFriends(friends string) {
+	ids := strings.Split(friends, "#")
+	p.Friends = []int{}
+
+	for _, idStr := range ids {
+		if idStr == "" {
+			continue
+		}
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			log.Printf("Cant parse friends id to int: %v", err)
+		}
+		p.Friends = append(p.Friends, id)
 	}
 }
 
@@ -195,4 +212,22 @@ func (p *Player) GetDishMasteryDuration(dishID int) int {
 	} else {
 		return int(math.Round(float64(baseDuration)*0.95) * 60)
 	}
+}
+
+func (p *Player) AddFriend(id int) {
+	p.Friends = append(p.Friends, id)
+}
+
+func (p *Player) DeleteFriend(id int) {
+	index := -1
+	for i, f := range p.Friends {
+		if f == id {
+			index = i
+		}
+	}
+	if index == -1 {
+		return
+	}
+	p.Friends = append(p.Friends[:index], p.Friends[index+1:]...)
+
 }

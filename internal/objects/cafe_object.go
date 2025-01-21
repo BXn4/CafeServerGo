@@ -173,6 +173,15 @@ func (c *CafeObject) String() string {
 	return strings.Join(args, "+")
 }
 
+func (c *CafeObject) JSON() string {
+	b, err := json.Marshal(c)
+	if err != nil {
+		fmt.Println(err)
+		return ""
+	}
+	return string(b)
+}
+
 func (c *CafeObject) GetNormalizedRotation() [2]int {
 	if c.Rotation == Up {
 		return [2]int{1, 0}
