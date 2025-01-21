@@ -107,6 +107,8 @@ func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameMan
 		err = WaiterCustomize(req, c, gm)
 	case requests.C2S_BUDDY_INGAME:
 		err = SendFriendRequest(req, c, gm)
+	case requests.C2S_EDITOR_BUY_FLOOR:
+		err = BuyFloor(req, c, gm)
 
 	default:
 		log.Printf("[NOT IMPLEMENTED]: %v\n", req.Args[0])

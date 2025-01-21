@@ -276,3 +276,22 @@ func (c *Cafe) GetMinimumRating(rating int) int {
 
 	return rating
 }
+
+func (c *Cafe) GetOldTiles(startX int, startY int, endX int, endY int, tileID int) (int, map[[2]int]int) {
+	counts := 0
+	oldTiles := make(map[[2]int]int)
+
+	for y := startY; y <= endY; y++ {
+		for x := startX; x <= endX; x++ {
+			oldTile := c.Tiles[y][x]
+
+			if oldTile != tileID {
+				key := [2]int{y, x}
+				oldTiles[key]++
+				counts++
+			}
+		}
+	}
+
+	return counts, oldTiles
+}
