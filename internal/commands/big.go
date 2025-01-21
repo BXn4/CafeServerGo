@@ -107,6 +107,7 @@ func SendFriendRequest(req *requests.Request, c *client.Client, gm *managers.Gam
 			)
 		} else {
 			// if player offline
+			c.DB.DeleteFriend(toPlayerID, fromPlayer.ID)
 		}
 
 	}

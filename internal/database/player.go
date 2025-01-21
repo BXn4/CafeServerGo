@@ -247,3 +247,47 @@ func (db *CafeDB) SavePlayer(player *objects.Player) {
 		log.Fatal("Error fetching rows affected:", err)
 	}
 }
+
+func (db *CafeDB) DeleteFriend(playerID, friendID int) {
+	db.mu.Lock()
+	defer db.mu.Unlock()
+
+	friendIDStr := strconv.Itoa(friendID)
+
+	// Get friends
+	row := db.conn.QueryRow("SELECT friends FROM player WHERE id = ?", playerID)
+	var friendsRaw string
+	err := row.Scan(&friendsRaw)
+
+	// Delete friend
+	friends := strings.Split(friendsRaw, "#")
+	index := -1
+	for i, f := range friends {
+		if f == friendIDStr {
+			index = i
+		}
+	}
+	if index == -1 {
+		return
+	}
+
+	newFriends := append(friends[:index], friends[index+1:]...)
+
+	// Update friends
+	result, err := db.conn.Exec(
+		" UPDATE player SET friends = ? WHERE id = ?",
+		strings.Join(newFriends, "#"),
+		playerID,
+	)
+
+	if err != nil {
+		fmt.Printf("Cant save friends: %v\n", err)
+		return
+	}
+
+	// Check how many rows were affected
+	_, err = result.RowsAffected()
+	if err != nil {
+		log.Fatal("Error fetching rows affected:", err)
+	}
+}
