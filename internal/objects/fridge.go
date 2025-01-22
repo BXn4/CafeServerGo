@@ -1,6 +1,8 @@
 package objects
 
 func (c *Cafe) AddToFridge(id, amount int) {
+
+	println("added to fridge: ", id, amount)
 	_, ok := c.FridgeInventory[id]
 	if ok {
 		c.FridgeInventory[id] += amount

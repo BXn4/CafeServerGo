@@ -18,7 +18,7 @@ func UseGift(req *requests.Request, c *client.Client, gm *managers.GameManager) 
 		return err
 	}
 
-	gift := c.Player.Gifts[0]
+	gift := c.Player.Gifts[slot]
 	c.Player.RemoveGift(slot)
 
 	item, err := utils.GetItem(gift.ID)
@@ -37,12 +37,7 @@ func UseGift(req *requests.Request, c *client.Client, gm *managers.GameManager) 
 		}
 
 		// Add to fridge
-		_, ok := c.Location.Cafe().FridgeInventory[item.ID]
-		if ok {
-			c.Location.Cafe().FridgeInventory[item.ID] += gift.Amount
-		} else {
-			c.Location.Cafe().FridgeInventory[item.ID] = gift.Amount
-		}
+		c.Location.Cafe().AddToFridge(item.ID, gift.Amount)
 
 		// Send response
 		c.SendExtensionResponse("gus", "-1", "0", req.Args[2], strId, strAmount)
