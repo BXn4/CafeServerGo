@@ -30,7 +30,7 @@ func (p CafePoint) Key() cafeKey {
 }
 
 func (p CafePoint) inBounds() bool {
-	return !(p.x < 0 || p.y < 0 || p.x > p.l.Cafe().Size || p.y > p.l.Cafe().Size)
+	return !(p.x <= 0 || p.y <= 0 || p.x >= p.l.Cafe().Size || p.y >= p.l.Cafe().Size)
 }
 
 func (p *CafePoint) Neighbors() []*CafePoint {
