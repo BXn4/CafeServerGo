@@ -59,7 +59,13 @@ func ConvertPlayerDAOToPlayer(playerDAO PlayerDAO) (*objects.Player, error) {
 	player.NewGifts = playerDAO.NewGifts
 	player.Username = playerDAO.Username
 	player.Position = []int{0, 0}
-	player.Gifts = playerDAO.Gifts
+
+	// Parse gifts
+	gifts, err := objects.ParseGifts(playerDAO.Gifts)
+	if err != nil {
+		return nil, err
+	}
+	player.Gifts = gifts
 
 	player.ParseFriends(playerDAO.Friends)
 	player.ParseMastery(playerDAO.Mastery)

@@ -109,6 +109,14 @@ func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameMan
 		err = SendFriendRequest(req, c, gm)
 	case requests.C2S_EDITOR_BUY_FLOOR:
 		err = BuyFloor(req, c, gm)
+	case requests.C2S_WHEELOFFORTUNE:
+		err = WheelOfFortune(req, c, gm)
+	case requests.C2S_GIFT_PLAYERGIFTS:
+		err = SendPlayerGifts(req, c, gm)
+	case requests.C2S_GIFT_REMOVE:
+		err = RemoveGift(req, c, gm)
+	case requests.C2S_GIFT_USE:
+		err = UseGift(req, c, gm)
 
 	default:
 		log.Printf("[NOT IMPLEMENTED]: %v\n", req.Args[0])

@@ -39,7 +39,7 @@ func SellObject(req *requests.Request, c *client.Client, gm *managers.GameManage
 	}
 
 	// If the object id is not valid
-	objectInfo, err := utils.GetObject(objID)
+	objectInfo, err := utils.GetItem(objID)
 	if err != nil {
 		return fmt.Errorf("Invalid object ID: %w", err)
 	}

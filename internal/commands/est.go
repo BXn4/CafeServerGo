@@ -59,7 +59,7 @@ func StoreObject(req *requests.Request, c *client.Client, gm *managers.GameManag
 	} else {
 		c.Location.Cafe().FurnitureInventory[int(obj.Kind)] = 1
 	}
-	objectInfo, err := utils.GetObject(int(obj.Kind))
+	objectInfo, err := utils.GetItem(int(obj.Kind))
 	if err != nil {
 		return nil
 	}

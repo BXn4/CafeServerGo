@@ -29,7 +29,7 @@ type Player struct {
 	Achievement         map[int]int
 	WorkTimeLeft        int
 	SeekingJob          bool
-	Gifts               string
+	Gifts               []*Gift
 }
 
 func (player *Player) String() string {
@@ -46,6 +46,12 @@ func (player *Player) String() string {
 		player.Avatar.String(),
 	}
 	return strings.Join(params, "+")
+}
+func (p *Player) GetLevel() int {
+	if p.XP < 90 {
+		return int(math.Pow(math.Floor(float64(p.XP)/10), 1/2))
+	}
+	return int(math.Pow(math.Floor(float64(p.XP)/5), 1/3.72))
 }
 
 func (p *Player) ParseMastery(mastery string) {

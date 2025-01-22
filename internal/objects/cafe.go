@@ -171,30 +171,6 @@ func (c *Cafe) GetPlayerStart() []int {
 	return nil
 }
 
-func (c *Cafe) GetFridgeMaxCapacity() int {
-	fridgeCount := 0
-
-	for _, obj := range c.Objects {
-		if obj.IsFridge() {
-			fridgeCount++
-		}
-	}
-	return fridgeCount * 50
-}
-
-func (c *Cafe) GetFridgeFreeSpace() int {
-	freeSpace := c.GetFridgeMaxCapacity()
-
-	for ingredientID := range c.FridgeInventory {
-		// Fancy does not take space in the fridge inventory. Fancys starts at ID 1401
-		if ingredientID < 1401 {
-			freeSpace -= 1
-		}
-	}
-
-	return freeSpace
-}
-
 // Returns the tables and the chairs around it
 // the chairs should face the right direction
 func (c *Cafe) GetEatingSpaces() (tablesAndChairs map[*CafeObject][]*CafeObject) {

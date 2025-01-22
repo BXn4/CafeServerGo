@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"os"
+	"strings"
 )
 
 type Wod struct {
@@ -46,7 +47,6 @@ var itemCollection map[string][]Wod
 func ReadAndCacheItems() error {
 	xmlFile, err := os.Open("./data/CafeItems.xml")
 	if err != nil {
-
 		return fmt.Errorf("Error opening file: %v", err)
 	}
 	defer xmlFile.Close()
@@ -62,7 +62,7 @@ func ReadAndCacheItems() error {
 	itemCollection = make(map[string][]Wod)
 	var loadedCount int
 	for _, wod := range result.Wods {
-		itemCollection[wod.Group] = append(itemCollection[wod.Group], wod)
+		itemCollection[strings.ToLower(wod.Group)] = append(itemCollection[strings.ToLower(wod.Group)], wod)
 		loadedCount++
 	}
 
@@ -71,7 +71,32 @@ func ReadAndCacheItems() error {
 	return nil
 }
 
-func GetObject(id int) (Wod, error) {
+func GetItems(s string) ([]Wod, error) {
+	category := s
+	if s == "fancy" {
+		category = "ingredient"
+	}
+	items, ok := itemCollection[strings.ToLower(category)]
+	if !ok {
+		return nil, fmt.Errorf("Item category with name %v not exist", category)
+
+	}
+
+	// Filter items for fancy
+	if s == "fancy" {
+		newItems := []Wod{}
+		for _, w := range items {
+			if w.Category == "fancy" {
+				newItems = append(newItems, w)
+			}
+		}
+		items = newItems
+	}
+
+	return items, nil
+}
+
+func GetItem(id int) (Wod, error) {
 	for _, wods := range itemCollection {
 		for _, wod := range wods {
 			if id == wod.ID {
@@ -83,7 +108,7 @@ func GetObject(id int) (Wod, error) {
 }
 
 func GetIngredient(id int) (Wod, error) {
-	for _, item := range itemCollection["Ingredient"] {
+	for _, item := range itemCollection["ingredient"] {
 		if id == item.ID {
 			return item, nil
 		}
@@ -92,7 +117,7 @@ func GetIngredient(id int) (Wod, error) {
 }
 
 func GetFancyIngredient(id int) (Wod, error) {
-	for _, item := range itemCollection["Ingredient"] {
+	for _, item := range itemCollection["ingredient"] {
 		if id == item.ID && item.Category == "fancy" {
 			return item, nil
 		}
@@ -101,7 +126,7 @@ func GetFancyIngredient(id int) (Wod, error) {
 }
 
 func GetTile(id int) (Wod, error) {
-	for _, item := range itemCollection["Tile"] {
+	for _, item := range itemCollection["tile"] {
 		if id == item.ID {
 			return item, nil
 		}
@@ -110,7 +135,7 @@ func GetTile(id int) (Wod, error) {
 }
 
 func GetWall(id int) (Wod, error) {
-	for _, item := range itemCollection["Wall"] {
+	for _, item := range itemCollection["wall"] {
 		if id == item.ID {
 			return item, nil
 		}
@@ -119,7 +144,7 @@ func GetWall(id int) (Wod, error) {
 }
 
 func GetDoor(id int) (Wod, error) {
-	for _, item := range itemCollection["Door"] {
+	for _, item := range itemCollection["door"] {
 		if id == item.ID {
 			return item, nil
 		}
@@ -128,7 +153,7 @@ func GetDoor(id int) (Wod, error) {
 }
 
 func GetStove(id int) (Wod, error) {
-	for _, item := range itemCollection["Stove"] {
+	for _, item := range itemCollection["stove"] {
 		if id == item.ID {
 			return item, nil
 		}
@@ -137,7 +162,7 @@ func GetStove(id int) (Wod, error) {
 }
 
 func GetCounter(id int) (Wod, error) {
-	for _, item := range itemCollection["Counter"] {
+	for _, item := range itemCollection["counter"] {
 		if id == item.ID {
 			return item, nil
 		}
@@ -146,7 +171,7 @@ func GetCounter(id int) (Wod, error) {
 }
 
 func GetFridge(id int) (Wod, error) {
-	for _, item := range itemCollection["Fridge"] {
+	for _, item := range itemCollection["fridge"] {
 		if id == item.ID {
 			return item, nil
 		}
@@ -155,7 +180,7 @@ func GetFridge(id int) (Wod, error) {
 }
 
 func GetTable(id int) (Wod, error) {
-	for _, item := range itemCollection["Table"] {
+	for _, item := range itemCollection["table"] {
 		if id == item.ID {
 			return item, nil
 		}
@@ -164,7 +189,7 @@ func GetTable(id int) (Wod, error) {
 }
 
 func GetDeco(id int) (Wod, error) {
-	for _, item := range itemCollection["Deco"] {
+	for _, item := range itemCollection["deco"] {
 		if id == item.ID {
 			return item, nil
 		}
@@ -173,7 +198,7 @@ func GetDeco(id int) (Wod, error) {
 }
 
 func GetChair(id int) (Wod, error) {
-	for _, item := range itemCollection["Chair"] {
+	for _, item := range itemCollection["chair"] {
 		if id == item.ID {
 			return item, nil
 		}
@@ -182,7 +207,7 @@ func GetChair(id int) (Wod, error) {
 }
 
 func GetWallobject(id int) (Wod, error) {
-	for _, item := range itemCollection["Wallobject"] {
+	for _, item := range itemCollection["wallobject"] {
 		if id == item.ID {
 			return item, nil
 		}
@@ -191,7 +216,7 @@ func GetWallobject(id int) (Wod, error) {
 }
 
 func GetDish(id int) (Wod, error) {
-	for _, item := range itemCollection["Dish"] {
+	for _, item := range itemCollection["dish"] {
 		if id == item.ID {
 			return item, nil
 		}
@@ -200,7 +225,7 @@ func GetDish(id int) (Wod, error) {
 }
 
 func GetVendingmachine(id int) (Wod, error) {
-	for _, item := range itemCollection["Vendingmachine"] {
+	for _, item := range itemCollection["vendingmachine"] {
 		if id == item.ID {
 			return item, nil
 		}
@@ -209,7 +234,7 @@ func GetVendingmachine(id int) (Wod, error) {
 }
 
 func GetExpansion(id int) (Wod, error) {
-	for _, item := range itemCollection["Expansion"] {
+	for _, item := range itemCollection["expansion"] {
 		if id == item.ID {
 			return item, nil
 		}
@@ -218,7 +243,7 @@ func GetExpansion(id int) (Wod, error) {
 }
 
 func GetAchievement(id int) (Wod, error) {
-	for _, item := range itemCollection["Achievement"] {
+	for _, item := range itemCollection["achievement"] {
 		if id == item.ID {
 			return item, nil
 		}
@@ -227,7 +252,7 @@ func GetAchievement(id int) (Wod, error) {
 }
 
 func GetCoop(id int) (Wod, error) {
-	for _, item := range itemCollection["Coop"] {
+	for _, item := range itemCollection["coop"] {
 		if id == item.ID {
 			return item, nil
 		}
@@ -236,7 +261,7 @@ func GetCoop(id int) (Wod, error) {
 }
 
 func GetFastfood(id int) (Wod, error) {
-	for _, item := range itemCollection["Fastfood"] {
+	for _, item := range itemCollection["fastfood"] {
 		if id == item.ID {
 			return item, nil
 		}
