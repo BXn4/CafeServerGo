@@ -49,7 +49,7 @@ func UseGift(req *requests.Request, c *client.Client, gm *managers.GameManager) 
 			if !obj.IsCounter() {
 				continue
 			}
-			if obj.DishID == -1 {
+			if obj.GetDishID() == -1 {
 				counter = obj
 				break
 			}
@@ -62,12 +62,12 @@ func UseGift(req *requests.Request, c *client.Client, gm *managers.GameManager) 
 		}
 
 		// Set counter
-		counter.DishID = item.ID
-		counter.DishAmount = gift.Amount
+		counter.SetDishID(item.ID)
+		counter.SetDishAmount(gift.Amount)
 
 		// Convert counter pos to string
-		posX := strconv.Itoa(counter.Pos[0])
-		posY := strconv.Itoa(counter.Pos[1])
+		posX := strconv.Itoa(counter.GetPos()[0])
+		posY := strconv.Itoa(counter.GetPos()[1])
 
 		c.SendExtensionResponse("gus", "-1", "0", req.Args[2], strId, strAmount, posX, posY)
 	}

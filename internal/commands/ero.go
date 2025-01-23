@@ -3,7 +3,7 @@ package commands
 import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
-	"cafego/internal/objects"
+	"cafego/internal/types/cafetypes"
 	"cafego/internal/types/requests"
 	"strconv"
 )
@@ -37,7 +37,7 @@ func RotateObject(req *requests.Request, c *client.Client, gm *managers.GameMana
 		c.SendExtensionResponse("ero", "-1", "39", strconv.Itoa(objX), strconv.Itoa(objY))
 		return nil
 	}
-	obj.Rotation = objects.CafeObjectRotation(objRotation)
+	obj.SetRotation(cafetypes.CafeObjectRotation(objRotation))
 	c.SendExtensionResponse("ero", "-1", "0", strconv.Itoa(objX), strconv.Itoa(objY), strconv.Itoa(objRotation))
 	return nil
 }

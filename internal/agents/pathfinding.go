@@ -18,7 +18,7 @@ type CafePoint struct {
 	y int
 }
 
-func NewCafePoint(pos []int, l interfaces.CafeLocation) *CafePoint {
+func NewCafePoint(pos [2]int, l interfaces.CafeLocation) *CafePoint {
 	return &CafePoint{
 		x: pos[0],
 		y: pos[1],
@@ -36,7 +36,7 @@ func (p CafePoint) inBounds() bool {
 func (p *CafePoint) Neighbors() []*CafePoint {
 	// Check if object
 	for _, object := range p.l.Cafe().Objects {
-		if object.Pos[0] == p.x && object.Pos[1] == p.y {
+		if object.GetPos()[0] == p.x && object.GetPos()[1] == p.y {
 			return []*CafePoint{}
 		}
 	}
@@ -74,7 +74,7 @@ func (p *CafePoint) Neighbors() []*CafePoint {
 				continue
 			}
 
-			if object.Pos[0] == neighbor.x && object.Pos[1] == neighbor.y {
+			if object.GetPos()[0] == neighbor.x && object.GetPos()[1] == neighbor.y {
 				empty = false
 				break
 			}

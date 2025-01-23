@@ -98,16 +98,16 @@ func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameMana
 			}
 		}
 
-		stove.DishID = dishID
-		stove.FancyIng = usingFancy != 0
+		stove.SetDishID(dishID)
+		stove.SetFancyIng(usingFancy != 0)
 
 	} else {
 
-		stove.DishID = dishID
+		stove.SetDishID(dishID)
 		currentTime := time.Now().UTC()
-		stove.StartedAt = &currentTime
-		finishesAt := stove.StartedAt.Add(time.Duration(cookingTime) * time.Second)
-		stove.FinishesAt = &finishesAt
+		stove.SetStartedAt(&currentTime)
+		finishesAt := stove.GetStartedAt().Add(time.Duration(cookingTime) * time.Second)
+		stove.SetFinishesAt(&finishesAt)
 	}
 
 	c.Location.Broadcast(

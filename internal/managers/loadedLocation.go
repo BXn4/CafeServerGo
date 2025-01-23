@@ -101,7 +101,7 @@ func (lc *LoadedLocation) Join(playerID int, conn net.Conn) {
 	lc.announce(playerID, "juj", "-1", "0", c.(*client.Client).Player.String())
 
 	// Add to players in cafe
-	println("Added player to occupants: ", playerID)
+	log.Printf("Added player to occupants: %v", playerID)
 	lc.occupants[playerID] = conn
 
 	// Send cafe data
@@ -154,9 +154,9 @@ func (lc *LoadedLocation) Leave(playerID int) {
 }
 
 func (lc *LoadedLocation) ClearReservedObjects() {
-	for _, obj := range lc.cafe.Objects {
+	for _, obj := range lc.reservedObjs {
 		if obj.IsChair() {
-			obj.DishID = -1
+			obj.SetDishID(-1)
 		}
 	}
 	lc.reservedObjs = []*objects.CafeObject{}
@@ -169,7 +169,7 @@ func (lc *LoadedLocation) GetDirtySpace() *objects.CafeObject {
 
 	chairIndex := -1
 	for i, o := range lc.reservedObjs {
-		if o.IsChair() && o.DishID == -2 {
+		if o.IsChair() && o.GetDishID() == -2 {
 			chairIndex = i
 		}
 	}
@@ -184,7 +184,7 @@ func (lc *LoadedLocation) GetDirtySpace() *objects.CafeObject {
 			continue
 		}
 		nr := chair.GetNormalizedRotation()
-		if o.Pos[0] == chair.Pos[0]+nr[0] && o.Pos[1] == chair.Pos[1]+nr[1] {
+		if o.GetPos()[0] == chair.GetPos()[0]+nr[0] && o.GetPos()[1] == chair.GetPos()[1]+nr[1] {
 			// Unreserve chair
 			lc.reservedObjs = append(lc.reservedObjs[:chairIndex], lc.reservedObjs[chairIndex+1:]...)
 			if chairIndex < j {
@@ -207,7 +207,7 @@ func (lc *LoadedLocation) GetReservedObject(x, y int) *objects.CafeObject {
 	defer lc.mu.Unlock()
 
 	for _, o := range lc.reservedObjs {
-		if o.Pos[0] == x && o.Pos[1] == y {
+		if o.GetPos()[0] == x && o.GetPos()[1] == y {
 			return o
 		}
 	}
@@ -221,7 +221,7 @@ func (lc *LoadedLocation) ReserveObject(obj *objects.CafeObject) bool {
 
 	// Check if object is reserved
 	for _, o := range lc.reservedObjs {
-		if o.Pos[0] == obj.Pos[0] && o.Pos[1] == obj.Pos[1] {
+		if o.GetPos() == obj.GetPos() {
 			return false
 		}
 	}
@@ -239,7 +239,7 @@ func (lc *LoadedLocation) UnreserveObject(obj *objects.CafeObject) {
 	// Search object index
 	index := -1
 	for i, o := range lc.reservedObjs {
-		if o.Pos[0] == obj.Pos[0] && o.Pos[1] == obj.Pos[1] {
+		if o.GetPos() == obj.GetPos() {
 			index = i
 			break
 		}

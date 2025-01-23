@@ -14,6 +14,8 @@ func AgentCycle(l interfaces.CafeLocation) {
 	for i, w := range l.Cafe().Waiters {
 		// Spawn waiter
 		w.IsWorking = true
+		w.CurrentCounter = nil
+		w.CurrentCustomer = nil
 		w.ID = i + 1
 		SpawnWaiter(l, w)
 	}

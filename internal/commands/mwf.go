@@ -25,9 +25,6 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 	}
 
 	reward := rand.Intn(16)
-	reward = 4 // debug
-	// level := c.Player.GetLevel()
-
 	rewardStr := strconv.Itoa(reward)
 
 	switch reward {
@@ -56,11 +53,12 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 		idStr := strconv.Itoa(dec.ID)
 
 		// Add won decoration to inventory
-		if _, ok := c.Location.Cafe().FurnitureInventory[dec.ID]; ok {
-			c.Location.Cafe().FurnitureInventory[dec.ID]++
-		} else {
-			c.Location.Cafe().FurnitureInventory[dec.ID] = 1
+		mycafe, err := c.DB.GetCafeByPlayerID(c.Player.ID)
+		if err != nil {
+			return nil
 		}
+		mycafe.AddFurnitures(dec.ID, 1)
+
 		c.SendExtensionResponse("mwf", "-1", "0", rewardStr, idStr+"+1")
 	case 4:
 		fallthrough
@@ -117,17 +115,59 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 	case 6:
 		fallthrough
 	case 14:
-		//TODO
-		break
+		amount := (rand.Intn(150-60+1) + 60) * c.Player.GetLevel()
+		c.Player.XP += amount
+		amountStr := strconv.Itoa(amount)
+		c.SendExtensionResponse("mwf", "-1", "0", rewardStr, "1905+"+amountStr)
 	case 8:
-		//TODO
-		break
+		amount := rand.Intn(5) + 1
+		amountStr := strconv.Itoa(amount)
+		c.Player.Gold += amount
+		c.SendExtensionResponse("mwf", "-1", "0", rewardStr, "1902+"+amountStr)
 	case 10:
-		//TODO
-		break
+		val := rand.Intn(int(99 - c.Player.NewGifts))
+		ingredientCount := utils.If(val > 3, 3, val)
+		ingredients, err := utils.GetItems("ingredient")
+		if err != nil {
+			return err
+		}
+		ingredientsStr := []string{}
+		for i := 0; i < ingredientCount; i++ {
+			// Get fancy and amount
+			choice := rand.Intn(len(ingredients))
+			ingredient := ingredients[choice]
+			amount := rand.Intn(10) + 1
+
+			// Add won ingredient to gifts
+			c.Player.AddGift(ingredient.ID, amount, -1)
+
+			// Add to won ingredient list
+			dishStr := fmt.Sprintf("%v+%v", ingredient.ID, amount)
+			ingredientsStr = append(ingredientsStr, dishStr)
+		}
+		c.SendExtensionResponse("mwf", "-1", "0", rewardStr, strings.Join(ingredientsStr, "#"))
+
 	case 12:
-		//TODO
-		break
+		// Get all decoration
+		decors, err := utils.GetItems("deco")
+		if err != nil {
+			return err
+		}
+
+		// Select won decor
+		choice := rand.Intn(len(decors))
+		decor := decors[choice]
+
+		// Add won decoration to inventory
+		mycafe, err := c.DB.GetCafeByPlayerID(c.Player.ID)
+		if err != nil {
+			return nil
+		}
+		mycafe.AddFurnitures(decor.ID, 1)
+
+		// Send msg
+		idStr := strconv.Itoa(decor.ID)
+		c.SendExtensionResponse("mwf", "-1", "0", rewardStr, idStr+"+1")
 	}
 
 	return nil

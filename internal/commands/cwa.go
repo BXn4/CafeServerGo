@@ -27,7 +27,7 @@ func CafeWalk(req *requests.Request, c *client.Client, gm *managers.GameManager)
 		c.SendExtensionResponse("cwa", "-1", "23")
 	}
 
-	c.Player.Position = []int{posX, posY}
+	c.Player.Position = [2]int{posX, posY}
 
 	c.Location.Broadcast("cwa", "-1", "0", strconv.Itoa(c.Player.ID), "0", req.Args[2], req.Args[3])
 

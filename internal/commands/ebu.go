@@ -91,13 +91,13 @@ func BuyObject(req *requests.Request, c *client.Client, gm *managers.GameManager
 		}
 		oldDoor := c.Location.Cafe().GetObjectByPos(oldDoorPos[0], oldDoorPos[1])
 		// If the old door have luxury value, remove it from the Cafe
-		obj, err := utils.GetDoor(int(oldDoor.Kind))
+		obj, err := utils.GetDoor(int(oldDoor.GetKind()))
 		if err != nil {
 			return nil
 		}
 		c.Location.Cafe().Luxury -= (obj.Cash / 4000) + (obj.Gold * 2)
 		// KIND = ID!!!
-		c.Location.Cafe().FurnitureInventory[int(oldDoor.Kind)] = 1
+		c.Location.Cafe().FurnitureInventory[int(oldDoor.GetKind())] = 1
 		c.Location.Cafe().AddNewObject(objX, objY, objID, objRotation)
 		c.Location.Cafe().RemoveObject(oldDoorPos[0], oldDoorPos[1])
 	} else {

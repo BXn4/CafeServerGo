@@ -9,7 +9,7 @@ func NewMarketplace() (*Cafe, error) {
 	cafe := &Cafe{
 		ID:          -1,
 		PlayerID:    -1,
-		PlayerStart: []int{1, 2},
+		PlayerStart: [2]int{1, 2},
 		OwnerName:   "Marketplace",
 		Background:  MarketplaceBackground,
 		Rating:      0,

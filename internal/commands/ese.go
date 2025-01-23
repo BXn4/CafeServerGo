@@ -54,7 +54,7 @@ func SellObject(req *requests.Request, c *client.Client, gm *managers.GameManage
 		// If the player is not sending from inventory, remove luxury
 		c.Location.Cafe().Luxury -= (objectInfo.Cash / 4000) + (objectInfo.Gold * 2)
 
-		c.Location.Cafe().RemoveObject(obj.Pos[0], obj.Pos[1])
+		c.Location.Cafe().RemoveObject(obj.GetPos()[0], obj.GetPos()[1])
 	} else {
 		// If the player wants to send more than they have
 		if c.Location.Cafe().FurnitureInventory[objID] < sellAmount {

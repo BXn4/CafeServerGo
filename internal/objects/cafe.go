@@ -1,9 +1,12 @@
 package objects
 
 import (
+	"cafego/internal/types/cafetypes"
+	"cafego/internal/types/daos"
 	"cafego/internal/utils"
 	"encoding/json"
 	"fmt"
+	"log"
 	"math"
 	"strconv"
 	"strings"
@@ -20,7 +23,7 @@ const (
 type Cafe struct {
 	ID                 int
 	PlayerID           int
-	PlayerStart        []int
+	PlayerStart        [2]int
 	OwnerName          string
 	Rating             int
 	Luxury             int
@@ -48,9 +51,12 @@ func (c *Cafe) AsResponse() []string {
 	}
 
 	var objs []string
-	for _, v := range c.Objects {
-		objs = append(objs, v.String())
+	for _, obj := range c.Objects {
+		str := obj.String()
+		objs = append(objs, str)
 	}
+
+	log.Printf("OBJECTS: %v", strings.Join(objs, "#"))
 
 	args := []string{
 		strconv.Itoa(c.ID),
@@ -90,18 +96,33 @@ func (cafe *Cafe) ParseTiles(rawTiles string) error {
 }
 
 func (cafe *Cafe) ParseObjectsFromJSON(rawObjects string) error {
-	var objs []CafeObject
-	if err := json.Unmarshal([]byte(rawObjects), &objs); err != nil {
+	var daos []*daos.CafeObjectDAO
+	if err := json.Unmarshal([]byte(rawObjects), &daos); err != nil {
 		return err
 	}
-	for _, obj := range objs {
+	for _, dao := range daos {
+
+		obj := &CafeObject{
+			kind:     dao.Kind,
+			pos:      dao.Pos,
+			rotation: dao.Rotation,
+
+			dishID:     dao.DishID,
+			dishStatus: dao.DishStatus,
+			dishAmount: dao.DishAmount,
+
+			fancyIng:   dao.FancyIng,
+			startedAt:  dao.StartedAt,
+			finishesAt: dao.FinishesAt,
+		}
+
 		if obj.IsDoor() {
-			cafe.PlayerStart = []int{
-				utils.If(obj.Pos[0] == 0, 1, obj.Pos[0]),
-				utils.If(obj.Pos[1] == 0, 1, obj.Pos[1]),
+			cafe.PlayerStart = [2]int{
+				utils.If(obj.GetPos()[0] == 0, 1, obj.GetPos()[0]),
+				utils.If(obj.GetPos()[1] == 0, 1, obj.GetPos()[1]),
 			}
 		}
-		cafe.Objects = append(cafe.Objects, &obj)
+		cafe.Objects = append(cafe.Objects, obj)
 	}
 	return nil
 }
@@ -120,9 +141,9 @@ func (cafe *Cafe) ParseObjects(rawObjects string) error {
 		}
 
 		if obj.IsDoor() {
-			cafe.PlayerStart = []int{
-				utils.If(obj.Pos[0] == 0, 1, obj.Pos[0]),
-				utils.If(obj.Pos[1] == 0, 1, obj.Pos[1]),
+			cafe.PlayerStart = [2]int{
+				utils.If(obj.GetPos()[0] == 0, 1, obj.GetPos()[0]),
+				utils.If(obj.GetPos()[1] == 0, 1, obj.GetPos()[1]),
 			}
 		}
 
@@ -133,7 +154,7 @@ func (cafe *Cafe) ParseObjects(rawObjects string) error {
 
 func (cafe *Cafe) GetObjectByPos(posX int, posY int) *CafeObject {
 	for _, obj := range cafe.Objects {
-		if obj.Pos[0] == posX && obj.Pos[1] == posY {
+		if obj.GetPos()[0] == posX && obj.GetPos()[1] == posY {
 			return obj
 		}
 	}
@@ -150,7 +171,7 @@ func (cafe *Cafe) AddNewObject(posX int, posY int, objID int, objRotation int) e
 }
 func (cafe *Cafe) RemoveObject(posX int, posY int) error {
 	for i, object := range cafe.Objects {
-		if object.Pos[0] == posX && object.Pos[1] == posY {
+		if object.GetPos()[0] == posX && object.GetPos()[1] == posY {
 			cafe.Objects = append(cafe.Objects[:i], cafe.Objects[i+1:]...)
 			return nil
 		}
@@ -162,8 +183,8 @@ func (c *Cafe) GetPlayerStart() []int {
 	for _, obj := range c.Objects {
 		if obj.IsDoor() {
 			PlayerStart := []int{
-				utils.If(obj.Pos[0] == 0, 1, obj.Pos[0]),
-				utils.If(obj.Pos[1] == 0, 1, obj.Pos[1]),
+				utils.If(obj.GetPos()[0] == 0, 1, obj.GetPos()[0]),
+				utils.If(obj.GetPos()[1] == 0, 1, obj.GetPos()[1]),
 			}
 			return PlayerStart
 		}
@@ -180,7 +201,7 @@ func (c *Cafe) GetEatingSpaces() (tablesAndChairs map[*CafeObject][]*CafeObject)
 	var chairs []*CafeObject
 	var tables []*CafeObject
 	for _, obj := range c.Objects {
-		if obj.IsChair() && obj.DishID == -1 {
+		if obj.IsChair() && obj.GetDishID() == -1 {
 			chairs = append(chairs, obj)
 		}
 		if obj.IsTable() {
@@ -194,21 +215,21 @@ func (c *Cafe) GetEatingSpaces() (tablesAndChairs map[*CafeObject][]*CafeObject)
 		for _, chair := range chairs {
 
 			// Check if char beside the table
-			diffX := float64(table.Pos[0] - chair.Pos[0])
-			diffY := float64(table.Pos[1] - chair.Pos[1])
+			diffX := float64(table.GetPos()[0] - chair.GetPos()[0])
+			diffY := float64(table.GetPos()[1] - chair.GetPos()[1])
 			if math.Abs(diffX)+math.Abs(diffY) > 1 {
 				continue
 			}
 
 			// Check if chair faces the table
 			facingTable := false
-			if chair.Rotation == Right && int(diffY) == 1 {
+			if chair.GetRotation() == cafetypes.Right && int(diffY) == 1 {
 				facingTable = true
-			} else if chair.Rotation == Left && int(diffY) == -1 {
+			} else if chair.GetRotation() == cafetypes.Left && int(diffY) == -1 {
 				facingTable = true
-			} else if chair.Rotation == Down && int(diffX) == -1 {
+			} else if chair.GetRotation() == cafetypes.Down && int(diffX) == -1 {
 				facingTable = true
-			} else if chair.Rotation == Up && int(diffX) == 1 {
+			} else if chair.GetRotation() == cafetypes.Up && int(diffX) == 1 {
 				facingTable = true
 			}
 

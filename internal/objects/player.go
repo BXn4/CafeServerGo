@@ -24,7 +24,7 @@ type Player struct {
 	NewGifts            int
 	Username            string
 	Avatar              Avatar
-	Position            []int
+	Position            [2]int
 	Mastery             map[int]int
 	Achievement         map[int]int
 	WorkTimeLeft        int

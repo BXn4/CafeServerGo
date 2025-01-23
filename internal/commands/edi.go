@@ -26,9 +26,9 @@ func EditorMode(req *requests.Request, c *client.Client, gm *managers.GameManage
 		if c.Location.Cafe().GetObjectByPos(c.Player.Position[0], c.Player.Position[1]) != nil {
 			for _, object := range c.Location.Cafe().Objects {
 				if object.IsDoor() {
-					newStartPos := []int{
-						utils.If(object.Pos[0] == 0, 1, object.Pos[0]),
-						utils.If(object.Pos[1] == 0, 1, object.Pos[1]),
+					newStartPos := [2]int{
+						utils.If(object.GetPos()[0] == 0, 1, object.GetPos()[0]),
+						utils.If(object.GetPos()[1] == 0, 1, object.GetPos()[1]),
 					}
 					c.Location.Cafe().PlayerStart = newStartPos
 					c.Player.Position = newStartPos

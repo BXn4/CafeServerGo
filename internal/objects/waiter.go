@@ -35,7 +35,7 @@ type Waiter struct {
 	Name            string
 	Priority        int
 	Avatar          Avatar
-	Pos             []int
+	Pos             [2]int
 	Dish            int
 	Action          Action
 	CurrentCounter  *CafeObject

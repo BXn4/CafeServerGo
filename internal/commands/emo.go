@@ -45,8 +45,7 @@ func MoveObject(req *requests.Request, c *client.Client, gm *managers.GameManage
 		return nil
 	}
 
-	obj.Pos[0] = newObjX
-	obj.Pos[1] = newObjY
+	obj.SetPosXY(newObjX, newObjY)
 
 	c.SendExtensionResponse("emo", "-1", "0", strconv.Itoa(oldObjX), strconv.Itoa(oldObjY), strconv.Itoa(newObjX), strconv.Itoa(newObjX))
 	return nil

@@ -40,7 +40,7 @@ func StoveDeliver(req *requests.Request, c *client.Client, gm *managers.GameMana
 	counter := c.Location.Cafe().GetObjectByPos(counterX, counterY)
 
 	// Get dish
-	dish, err := utils.GetDish(stove.DishID)
+	dish, err := utils.GetDish(stove.GetDishID())
 	if err != nil {
 		return err
 	}
@@ -48,7 +48,7 @@ func StoveDeliver(req *requests.Request, c *client.Client, gm *managers.GameMana
 	dishAmount := c.Player.GetDishMasteryServings(dish.ID)
 	dishXP := c.Player.GetDishMasteryXP(dish.ID)
 
-	if stove.FancyIng {
+	if stove.GetFancyIng() {
 		/*
 			var _loc1_:int = Math.max(this.MIN_FANCY_SUBTRAHEND,Math.min(this.MAX_FANCY_SUBTRAHEND,int(this.getDuration() / 60 / 3)));
 			return this.getMasterdServings() * (CafeConstants.fancyFactorServings - _loc1_) / 100;
@@ -73,18 +73,18 @@ func StoveDeliver(req *requests.Request, c *client.Client, gm *managers.GameMana
 		print(dishAmount)
 	}
 
-	if counter.DishID == stove.DishID {
-		counter.DishAmount += dishAmount
+	if counter.GetDishID() == stove.GetDishID() {
+		counter.AddDishAmount(dishAmount)
 	} else {
-		counter.DishID = stove.DishID
-		counter.DishAmount += dishAmount
+		counter.SetDishID(stove.GetDishID())
+		counter.AddDishAmount(dishAmount)
 	}
 
 	// Reset stove
-	stove.DishID = -2 // Dirty
-	stove.FancyIng = false
-	stove.StartedAt = nil
-	stove.FinishesAt = nil
+	stove.SetDishID(-2) // Dirty
+	stove.SetFancyIng(false)
+	stove.SetStartedAt(nil)
+	stove.SetFinishesAt(nil)
 
 	// Increase xp
 	c.Player.XP += c.Player.GetDishMasteryXP(dish.ID)

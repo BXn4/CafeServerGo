@@ -38,10 +38,10 @@ func Clean(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 		} else {
 			status = "0"
 			c.Player.Cash -= 15
-			obj.DishID = -1
+			obj.SetDishID(-1)
 		}
 	} else {
-		obj.DishID = -1
+		obj.SetDishID(-1)
 		status = "0"
 	}
 

@@ -58,7 +58,7 @@ func ConvertPlayerDAOToPlayer(playerDAO PlayerDAO) (*objects.Player, error) {
 	player.EmailVerified = playerDAO.EmailVerified
 	player.NewGifts = playerDAO.NewGifts
 	player.Username = playerDAO.Username
-	player.Position = []int{0, 0}
+	player.Position = [2]int{0, 0}
 
 	// Parse gifts
 	gifts, err := objects.ParseGifts(playerDAO.Gifts)

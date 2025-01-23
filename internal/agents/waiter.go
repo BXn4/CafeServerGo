@@ -14,7 +14,7 @@ import (
 func SpawnWaiter(l interfaces.CafeLocation, w *objects.Waiter) {
 
 	// Set waiter starter position
-	w.Pos = []int{
+	w.Pos = [2]int{
 		l.Cafe().PlayerStart[0],
 		l.Cafe().PlayerStart[1],
 	}
@@ -75,7 +75,7 @@ func TakePlates(l interfaces.CafeLocation, w *objects.Waiter) {
 	w.CurrentCounter = nil
 
 	// Move to dirty plates
-	if !MoveWaiter(l, w, space.Pos, objects.CLEAN, time.Duration(500)*time.Millisecond) {
+	if !MoveWaiter(l, w, space.GetPos(), objects.CLEAN, time.Duration(500)*time.Millisecond) {
 		return
 	}
 
@@ -83,7 +83,7 @@ func TakePlates(l interfaces.CafeLocation, w *objects.Waiter) {
 	for _, object := range l.Cafe().Objects {
 		if object.IsCounter() {
 
-			if !MoveWaiter(l, w, space.Pos, objects.WAITER_MOVE_TO_COUNTER, time.Second) {
+			if !MoveWaiter(l, w, space.GetPos(), objects.WAITER_MOVE_TO_COUNTER, time.Second) {
 				return
 			}
 
@@ -96,7 +96,7 @@ func TakePlates(l interfaces.CafeLocation, w *objects.Waiter) {
 	if !SleepWhileChecking(l, time.Second, &w.IsWorking) {
 		return
 	}
-	space.DishID = -1
+	space.SetDishID(-1)
 
 	// Wait until it puts back to counter
 	if !SleepWhileChecking(l, time.Second*3, &w.IsWorking) {
@@ -113,7 +113,7 @@ func ServeFood(l interfaces.CafeLocation, w *objects.Waiter) {
 	}
 
 	//var distance int
-	if w.CurrentCounter == nil || w.CurrentCounter.DishID == -1 {
+	if w.CurrentCounter == nil || w.CurrentCounter.GetDishID() == -1 {
 		// --- Get random counter (prioritizes counter with food) -------------------------------
 		counter, _ := GetRandomCounter(l)
 		if counter == nil {
@@ -123,18 +123,22 @@ func ServeFood(l interfaces.CafeLocation, w *objects.Waiter) {
 		// If counter has food change it
 		if w.CurrentCounter == nil {
 			w.CurrentCounter = counter
-		} else if counter.DishID != -1 && w.CurrentCounter.DishID == -1 {
+		} else if counter.GetDishID() != -1 && w.CurrentCounter.GetDishID() == -1 {
 			w.CurrentCounter = counter
 		}
 
 		// --- Move to counter ------------------------------------
-		if !MoveWaiter(l, w, w.CurrentCounter.Pos, objects.MOVE_TO_COUNTER, 500*time.Millisecond) {
+		if !MoveWaiter(l, w, w.CurrentCounter.GetPos(), objects.MOVE_TO_COUNTER, 500*time.Millisecond) {
 			return
 		}
 	}
 
-	//
-	if w.CurrentCounter.DishID == -1 {
+	// If could not found counter (DONT TOUCH IT !!! IT WORKS!!!)
+	if w.CurrentCounter == nil {
+		return
+	}
+	// If counter is empty
+	if w.CurrentCounter.GetDishID() == -1 {
 		return
 	}
 
@@ -156,10 +160,10 @@ func ServeFood(l interfaces.CafeLocation, w *objects.Waiter) {
 	customer.AssignedWaiter = w.ID
 
 	// Take dish from counter prematurely so
-	savedDish := w.CurrentCounter.DishID
-	w.CurrentCounter.DishAmount -= 1
-	if w.CurrentCounter.DishAmount <= 0 {
-		w.CurrentCounter.DishID = -1
+	savedDish := w.CurrentCounter.GetDishID()
+	w.CurrentCounter.SetDishAmount(w.CurrentCounter.GetDishAmount() - 1)
+	if w.CurrentCounter.GetDishAmount() <= 0 {
+		w.CurrentCounter.SetDishID(-1)
 	}
 
 	// --- Feed customer --------------------------
@@ -171,7 +175,7 @@ func ServeFood(l interfaces.CafeLocation, w *objects.Waiter) {
 	customer.Dish = savedDish
 
 	// Move back to counter
-	if !MoveWaiter(l, w, w.CurrentCounter.Pos, objects.MOVE_TO_COUNTER, 750*time.Millisecond) {
+	if !MoveWaiter(l, w, w.CurrentCounter.GetPos(), objects.MOVE_TO_COUNTER, 750*time.Millisecond) {
 		return
 	}
 	w.CurrentCounter = nil
@@ -191,11 +195,11 @@ func GetRandomCounter(l interfaces.CafeLocation) (*objects.CafeObject, int) {
 		counters = append(counters, object)
 
 		// Check if counter with food
-		if object.DishID >= 0 {
+		if object.GetDishID() >= 0 {
 
 			// Check if blocked
 			start := NewCafePoint(l.Cafe().PlayerStart, l)
-			end := NewCafePoint(object.Pos, l)
+			end := NewCafePoint(object.GetPos(), l)
 			_, distance, found := Path(start, end)
 
 			// If found path there return it
@@ -213,7 +217,7 @@ func GetRandomCounter(l interfaces.CafeLocation) (*objects.CafeObject, int) {
 
 		// Search path
 		start := NewCafePoint(l.Cafe().PlayerStart, l)
-		end := NewCafePoint(rc.Pos, l)
+		end := NewCafePoint(rc.GetPos(), l)
 		_, distance, found := Path(start, end)
 
 		// If found path return
@@ -228,7 +232,7 @@ func GetRandomCounter(l interfaces.CafeLocation) (*objects.CafeObject, int) {
 
 // This searches for a path and moves it if possible
 // returns if found path and length of the found path
-func MoveWaiter(l interfaces.CafeLocation, w *objects.Waiter, pos []int, action objects.Action, duration time.Duration) bool {
+func MoveWaiter(l interfaces.CafeLocation, w *objects.Waiter, pos [2]int, action objects.Action, duration time.Duration) bool {
 
 	// Get length of path
 	start := NewCafePoint(w.Pos, l)

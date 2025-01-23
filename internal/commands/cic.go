@@ -36,8 +36,8 @@ func InstantCook(req *requests.Request, c *client.Client, gm *managers.GameManag
 	}
 
 	currentTime := time.Now().UTC()
-	stove.StartedAt = &currentTime
-	stove.FinishesAt = &currentTime
+	stove.SetStartedAt(&currentTime)
+	stove.SetFinishesAt(&currentTime)
 
 	c.Location.Broadcast("cic", "-1", "0", strconv.Itoa(objX), strconv.Itoa(objY))
 

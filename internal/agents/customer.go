@@ -36,7 +36,7 @@ func SpawnCustomer(l interfaces.CafeLocation) *objects.Customer {
 	customer := &objects.Customer{
 		ID:             l.GetUniqueCustomerID(),
 		Avatar:         objects.NewRandomAvatar(),
-		Pos:            []int{l.Cafe().PlayerStart[0], l.Cafe().PlayerStart[1]},
+		Pos:            [2]int{l.Cafe().PlayerStart[0], l.Cafe().PlayerStart[1]},
 		Dish:           -1,
 		Action:         objects.CUSTOMER_INSERT,
 		IsThirsty:      false,
@@ -95,8 +95,8 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 	args := []string{
 		strconv.Itoa(c.ID),
 		strconv.Itoa(objects.CUSTOMER_WALK_TO_CHAIR),
-		strconv.Itoa(chair.Pos[0]),
-		strconv.Itoa(chair.Pos[1]),
+		strconv.Itoa(chair.GetPos()[0]),
+		strconv.Itoa(chair.GetPos()[1]),
 	}
 	if !l.IsRunning() {
 		l.UnreserveObject(table)
@@ -118,8 +118,8 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 	args = []string{
 		strconv.Itoa(c.ID),
 		strconv.Itoa(int(c.Action)),
-		strconv.Itoa(chair.Pos[0]),
-		strconv.Itoa(chair.Pos[1]),
+		strconv.Itoa(chair.GetPos()[0]),
+		strconv.Itoa(chair.GetPos()[1]),
 	}
 	if !l.IsRunning() {
 		l.UnreserveObject(table)
@@ -129,8 +129,8 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 	l.Broadcast("nac", "-1", "0", strings.Join(args, "+"))
 
 	// Set position to chair
-	c.Pos[0] = chair.Pos[0]
-	c.Pos[1] = chair.Pos[1]
+	c.Pos[0] = chair.GetPos()[0]
+	c.Pos[1] = chair.GetPos()[1]
 
 	// Reset assigned waiter and food
 	c.AssignedWaiter = -1
@@ -213,7 +213,7 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 	l.Cafe().Rating++
 
 	// Dirty dishes
-	chair.DishID = -2 // Dirty
+	chair.SetDishID(-2) // Dirty
 
 	// --- Leave happy ------------------------
 	//LeaveComplete(l, c)
@@ -240,7 +240,7 @@ func GetAvailableEatingSpace(l interfaces.CafeLocation) (*objects.CafeObject, *o
 		// Loop through all chairs and if approachable return them
 		for _, chair := range chairs {
 			start := NewCafePoint(l.Cafe().PlayerStart, l)
-			end := NewCafePoint(chair.Pos, l)
+			end := NewCafePoint(chair.GetPos(), l)
 			_, distance, found := Path(start, end)
 			if found {
 				l.ReserveObject(chair)

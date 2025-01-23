@@ -35,17 +35,17 @@ func StoveDeliverInfo(req *requests.Request, c *client.Client, gm *managers.Game
 			continue
 		}
 
-		if stove.DishID == object.DishID {
+		if stove.GetDishID() == object.GetDishID() {
 			counter = object
 			break
-		} else if object.DishID == -1 {
+		} else if object.GetDishID() == -1 {
 			counter = object
 		}
 	}
 
 	// Set args
-	counterX := utils.If(counter != nil, counter.Pos[0], -1)
-	counterY := utils.If(counter != nil, counter.Pos[1], -1)
+	counterX := utils.If(counter != nil, counter.GetPos()[0], -1)
+	counterY := utils.If(counter != nil, counter.GetPos()[1], -1)
 	status := utils.If(counter != nil, "0", "37")
 
 	/*

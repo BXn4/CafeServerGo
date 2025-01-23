@@ -1,13 +1,5 @@
 package objects
 
-/*
-
-class WaiterTask:
-    CLEAN = 0
-    SERVE = 1
-
-*/
-
 type CustomerAction int
 
 const (
@@ -24,7 +16,7 @@ const (
 type Customer struct {
 	ID             int
 	Avatar         Avatar
-	Pos            []int
+	Pos            [2]int
 	Dish           int
 	Action         CustomerAction
 	IsThirsty      bool
