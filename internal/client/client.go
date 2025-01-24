@@ -48,16 +48,10 @@ func (c *Client) Disconnect() {
 	defer c.Conn.Close()
 
 	if c.Player != nil {
-		c.Location.Leave(c.Player.ID) // Leaves the current room
-		c.ClientManager.DisconnectClient(c.Player.ID)
-
-		// If the player exist, leave the player.
-		// With flash, when the client sends policy file request, the client disconnects after it
-
+		id := c.Player.ID
+		c.ClientManager.DisconnectClient(id)
 	}
-	if c.Location != nil {
-		return
-	}
+
 }
 
 func (c *Client) NextRequest() (*requests.Request, error) {

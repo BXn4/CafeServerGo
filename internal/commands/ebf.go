@@ -66,9 +66,6 @@ func BuyFloor(req *requests.Request, c *client.Client, gm *managers.GameManager)
 	for tile, amount := range oldTiles {
 		existingTileID := c.Location.Cafe().Tiles[tile[0]][tile[1]]
 
-		fmt.Println("TILE ID: ", existingTileID)
-		fmt.Println("AMOUNT: ", c.Location.Cafe().FurnitureInventory[existingTileID])
-
 		// Add replaced tile to inventory
 		if c.Location.Cafe().FurnitureInventory[existingTileID] != 0 {
 			c.Location.Cafe().FurnitureInventory[existingTileID] += amount

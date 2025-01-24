@@ -53,11 +53,21 @@ func (lc *LoadedLocation) Announce(playerID int, args ...string) {
 	lc.announce(playerID, args...)
 }
 
+func (lc *LoadedLocation) IsEmpty() bool {
+	lc.mu.Lock()
+	defer lc.mu.Unlock()
+	return len(lc.occupants) == 0
+}
+
 func (lc *LoadedLocation) IsRunning() bool {
+	lc.mu.Lock()
+	defer lc.mu.Unlock()
 	return lc.running
 }
 
 func (lc *LoadedLocation) GetIsRunning() *bool {
+	lc.mu.Lock()
+	defer lc.mu.Unlock()
 	return &lc.running
 }
 
@@ -65,13 +75,27 @@ func (lc *LoadedLocation) SetRunning(b bool) {
 	lc.mu.Lock()
 	defer lc.mu.Unlock()
 	lc.running = b
+
 	// Change waiter switch
 	for _, w := range lc.cafe.Waiters {
 		w.IsWorking = b
 	}
 
 	// Start agent cycle
+	if b {
+		go agents.AgentCycle(lc)
+	}
+}
 
+func (lc *LoadedLocation) setRunning(b bool) {
+	lc.running = b
+
+	// Change waiter switch
+	for _, w := range lc.cafe.Waiters {
+		w.IsWorking = b
+	}
+
+	// Start agent cycle
 	if b {
 		go agents.AgentCycle(lc)
 	}
@@ -94,14 +118,12 @@ func (lc *LoadedLocation) Join(playerID int, conn net.Conn) {
 	}
 
 	// Set position of player
-	c.(*client.Client).Player.Position[0] = lc.cafe.PlayerStart[0]
-	c.(*client.Client).Player.Position[1] = lc.cafe.PlayerStart[1]
+	c.(*client.Client).Player.Position = [2]int{lc.cafe.PlayerStart[0], lc.cafe.PlayerStart[1]}
 
 	// Send everyone the joined player
 	lc.announce(playerID, "juj", "-1", "0", c.(*client.Client).Player.String())
 
 	// Add to players in cafe
-	log.Printf("Added player to occupants: %v", playerID)
 	lc.occupants[playerID] = conn
 
 	// Send cafe data
@@ -113,7 +135,6 @@ func (lc *LoadedLocation) Join(playerID int, conn net.Conn) {
 
 	// Get all players in location
 	for id := range lc.occupants {
-		log.Printf("PLAYERS IN CAFE: %v\n", id)
 		c, err := lc.gm.GetClient(id)
 		if err != nil {
 			log.Printf("Cant get client with id: %v\n", id)
@@ -123,32 +144,27 @@ func (lc *LoadedLocation) Join(playerID int, conn net.Conn) {
 		playersStr = append(playersStr, c.(*client.Client).Player.String())
 	}
 
-	args = []string{
-		"jul", "-1", "0",
-		strings.Join(playersStr, "$"),
-	}
-
 	// Send it to joined player
-	lc.send(playerID, args...)
+	lc.send(playerID, "jul", "-1", "0", strings.Join(playersStr, "$"))
 }
 
-func (lc *LoadedLocation) Leave(playerID int) {
+// Leaves the location and broadcasts leave to every one
+func (lc *LoadedLocation) Leave(id int) {
+
 	lc.mu.Lock()
 	defer lc.mu.Unlock()
 
-	idStr := strconv.Itoa(playerID)
+	idStr := strconv.Itoa(id)
 
-	lc.announce(playerID, "juq", "-1", "0", idStr)
+	// Send leave to everyone
+	lc.announce(id, "juq", "-1", "0", idStr)
 
-	delete(lc.occupants, playerID)
+	// Delete from occupants
+	delete(lc.occupants, id)
 
 	// If there are no players at the location and the location is not the marketplace
 	if len(lc.occupants) == 0 && !(lc.cafe.ID < 0) {
-		lc.running = false
-		// If owner is not online
-		if player, _ := lc.gm.GetClient(lc.cafe.PlayerID); player == nil {
-			lc.gm.RemoveLocation(lc.cafe.ID) // Delete cafe from manager
-		}
+		lc.setRunning(false)
 	}
 
 }

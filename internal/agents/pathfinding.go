@@ -1,7 +1,7 @@
 package agents
 
 import (
-	"cafego/internal/interfaces"
+	"cafego/internal/objects"
 	"container/heap"
 	_ "fmt"
 	"math"
@@ -13,16 +13,16 @@ type cafeKey struct {
 }
 
 type CafePoint struct {
-	l interfaces.CafeLocation
-	x int
-	y int
+	cafe *objects.Cafe
+	x    int
+	y    int
 }
 
-func NewCafePoint(pos [2]int, l interfaces.CafeLocation) *CafePoint {
+func NewCafePoint(pos [2]int, cafe *objects.Cafe) *CafePoint {
 	return &CafePoint{
-		x: pos[0],
-		y: pos[1],
-		l: l,
+		x:    pos[0],
+		y:    pos[1],
+		cafe: cafe,
 	}
 }
 func (p CafePoint) Key() cafeKey {
@@ -30,12 +30,12 @@ func (p CafePoint) Key() cafeKey {
 }
 
 func (p CafePoint) inBounds() bool {
-	return !(p.x <= 0 || p.y <= 0 || p.x >= p.l.Cafe().Size || p.y >= p.l.Cafe().Size)
+	return !(p.x <= 0 || p.y <= 0 || p.x >= p.cafe.Size || p.y >= p.cafe.Size)
 }
 
 func (p *CafePoint) Neighbors() []*CafePoint {
 	// Check if object
-	for _, object := range p.l.Cafe().Objects {
+	for _, object := range p.cafe.Objects {
 		if object.GetPos()[0] == p.x && object.GetPos()[1] == p.y {
 			return []*CafePoint{}
 		}
@@ -54,9 +54,9 @@ func (p *CafePoint) Neighbors() []*CafePoint {
 	// Adds neighbours that are inside bounds
 	for _, direction := range directions {
 		np := &CafePoint{
-			x: p.x + direction[0],
-			y: p.y + direction[1],
-			l: p.l,
+			x:    p.x + direction[0],
+			y:    p.y + direction[1],
+			cafe: p.cafe,
 		}
 		if np.inBounds() {
 			neighbors = append(neighbors, np)
@@ -66,9 +66,8 @@ func (p *CafePoint) Neighbors() []*CafePoint {
 	// Check if there are no objects at that position
 	var finalNeighbors []*CafePoint
 	for _, neighbor := range neighbors {
-		//println("neighbor: ", neighbor.x, neighbor.y)
 		empty := true
-		for _, object := range p.l.Cafe().Objects {
+		for _, object := range p.cafe.Objects {
 
 			if object.IsCounter() || object.IsChair() {
 				continue

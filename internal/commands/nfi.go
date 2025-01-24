@@ -15,10 +15,6 @@ func FireWaiter(req *requests.Request, c *client.Client, gm *managers.GameManage
 		return err
 	}
 
-	println("-------------------------------------")
-	println("waiter fired: ", id)
-	println("-------------------------------------")
-
 	var index int
 	for i, w := range c.Location.Cafe().Waiters {
 		if w.ID == id {

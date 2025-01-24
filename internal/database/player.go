@@ -6,9 +6,8 @@ import (
 	"fmt"
 	"log"
 	"strconv"
-	_ "strconv"
 	"strings"
-	_ "strings"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -91,8 +90,10 @@ func (db *CafeDB) GetPlayerByName(name string) (*objects.Player, error) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
+	// Prepare query
 	row := db.conn.QueryRow("SELECT * FROM player WHERE username = ? OR email = ?", name, name)
 
+	// Scan rows
 	var playerDAO PlayerDAO
 	err := row.Scan(
 		&playerDAO.ID,
@@ -124,7 +125,7 @@ func (db *CafeDB) GetPlayerByName(name string) (*objects.Player, error) {
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("ID NOT FOUND")
+			return nil, fmt.Errorf("NAME: %v NOT FOUND", name)
 		}
 		return nil, fmt.Errorf("SQL ERR: %v", err)
 	}
@@ -196,8 +197,6 @@ func (db *CafeDB) SavePlayer(player *objects.Player) {
 		friendsStr = append(friendsStr, strconv.Itoa(f))
 	}
 
-	println("CASH PLAYER SAVE: ", player.Cash, uint(player.Cash))
-
 	result, err := db.conn.Exec(
 		" UPDATE player SET "+
 			"cash = ?,"+
@@ -238,7 +237,7 @@ func (db *CafeDB) SavePlayer(player *objects.Player) {
 		player.Avatar.LegsColor,
 		player.BuildMastery(),
 		player.BuildAchievement(),
-		player.Gifts,
+		objects.BuildGifts(player.Gifts),
 		player.ID,
 	)
 
@@ -296,4 +295,46 @@ func (db *CafeDB) DeleteFriend(playerID, friendID int) {
 	if err != nil {
 		log.Fatal("Error fetching rows affected:", err)
 	}
+}
+
+func (db *CafeDB) GetDailyLogin(playerID int) (*time.Time, error) {
+	db.mu.Lock()
+	defer db.mu.Unlock()
+
+	row := db.conn.QueryRow("SELECT daily_login FROM player WHERE id = ?", playerID)
+	var dailyLoginStr string
+
+	err := row.Scan(&dailyLoginStr)
+
+	if err != nil {
+		return nil, err
+	}
+
+	dailyLogin, err := time.Parse("2025-01-23 22:09:07", dailyLoginStr)
+
+	return &dailyLogin, nil
+}
+
+func (db *CafeDB) ResetDailyLogin(playerID int) error {
+	db.mu.Lock()
+	defer db.mu.Unlock()
+
+	// Update friends
+	result, err := db.conn.Exec(
+		"UPDATE player SET daily_login = ? WHERE id = ?",
+		time.Now(),
+		playerID,
+	)
+
+	if err != nil {
+		return fmt.Errorf("Cant reset daily_login: %v\n", err)
+	}
+
+	// Check how many rows were affected
+	_, err = result.RowsAffected()
+	if err != nil {
+		log.Fatal("Error fetching rows affected:", err)
+	}
+
+	return nil
 }

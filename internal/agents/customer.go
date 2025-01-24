@@ -21,13 +21,11 @@ func SpawnCustomer(l interfaces.CafeLocation) *objects.Customer {
 		spawnInterval = rand.Intn(10) + 10
 	} else if rating <= 150 && rating < 350 {
 		spawnInterval = rand.Intn(3) + 5
-	} else if rating <= 150 && rating < 350 {
+	} else if rating <= 350 && rating < 500 {
 		spawnInterval = rand.Intn(2) + 4
 	} else {
 		spawnInterval = rand.Intn(4) + 1
 	}
-
-	//spawnInterval = 2
 
 	if !SleepWhileChecking(l, time.Duration(spawnInterval)*time.Second, l.GetIsRunning()) {
 		return nil
@@ -239,8 +237,8 @@ func GetAvailableEatingSpace(l interfaces.CafeLocation) (*objects.CafeObject, *o
 
 		// Loop through all chairs and if approachable return them
 		for _, chair := range chairs {
-			start := NewCafePoint(l.Cafe().PlayerStart, l)
-			end := NewCafePoint(chair.GetPos(), l)
+			start := NewCafePoint(l.Cafe().PlayerStart, l.Cafe())
+			end := NewCafePoint(chair.GetPos(), l.Cafe())
 			_, distance, found := Path(start, end)
 			if found {
 				l.ReserveObject(chair)
@@ -271,8 +269,8 @@ func Leave(l interfaces.CafeLocation, c *objects.Customer) {
 	)
 
 	// Move to exit
-	start := NewCafePoint(c.Pos, l)
-	end := NewCafePoint(l.Cafe().PlayerStart, l)
+	start := NewCafePoint(c.Pos, l.Cafe())
+	end := NewCafePoint(l.Cafe().PlayerStart, l.Cafe())
 	_, distance, _ := Path(start, end)
 
 	if !SleepWhileChecking(l, time.Duration(distance)*time.Second, l.GetIsRunning()) {

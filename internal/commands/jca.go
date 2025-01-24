@@ -23,9 +23,16 @@ func JoinCafe(req *requests.Request, c *client.Client, gm *managers.GameManager)
 	c.SendExtensionResponse("jca", "-1", "0")
 
 	// Leave cafe if already in one
-  if c.Location != nil {
-    c.Location.Leave(c.Player.ID)
-  }
+	if c.Location != nil {
+		c.Location.Leave(c.Player.ID)
+		println("HERE 1")
+
+		// Remove location if empty and owner is offline
+		if c.Location.IsEmpty() && !gm.IsOnline(c.Location.Cafe().ID) && c.Location.Cafe().ID > 0 {
+
+			gm.RemoveLocation(c.Location.Cafe().ID)
+		}
+	}
 
 	// Join location
 	location.Join(c.Player.ID, c.Conn)
@@ -35,4 +42,3 @@ func JoinCafe(req *requests.Request, c *client.Client, gm *managers.GameManager)
 
 	return nil
 }
-

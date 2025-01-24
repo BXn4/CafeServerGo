@@ -46,6 +46,9 @@ type CafeLocation interface {
 	Owner() (*objects.Player, error)
 
 	//
+	IsEmpty() bool
+
+	//
 	GetUniqueCustomerID() int
 
 	//

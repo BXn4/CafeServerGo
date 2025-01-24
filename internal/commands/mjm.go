@@ -14,10 +14,6 @@ func JoinMarketplace(req *requests.Request, c *client.Client, gm *managers.GameM
 		return nil
 	}
 
-	for _, v := range req.Args {
-		println(v)
-	}
-
 	// Gets cafe location
 	location := gm.AddLocation(-1)
 
@@ -27,6 +23,10 @@ func JoinMarketplace(req *requests.Request, c *client.Client, gm *managers.GameM
 	// Leave current cafe if there is one
 	if c.Location != nil {
 		c.Location.Leave(c.Player.ID)
+		println("HERE 2")
+		if c.Location.IsEmpty() && !gm.IsOnline(c.Location.Cafe().ID) && c.Location.Cafe().ID > 0 {
+			gm.RemoveLocation(c.Location.Cafe().ID)
+		}
 	}
 
 	// Join cafe

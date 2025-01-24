@@ -7,6 +7,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Player struct {
@@ -30,6 +31,7 @@ type Player struct {
 	WorkTimeLeft        int
 	SeekingJob          bool
 	Gifts               []*Gift
+	DailyLogin          time.Time
 }
 
 func (player *Player) String() string {
@@ -102,6 +104,8 @@ func (p *Player) ParseAchievement(achivement string) {
 		if err != nil {
 			log.Printf("Cant parse achievement to int: %v", err)
 		}
+		println("ACH:", achivementID)
+
 		progression, err := strconv.Atoi(parts[1])
 		if err != nil {
 			log.Printf("Cant parse achievement progress to int: %v", err)
@@ -127,6 +131,7 @@ func (p *Player) BuildAchievement() string {
 	for achivement, progress := range p.Achievement {
 		pair := fmt.Sprintf("%d+%d", achivement-2001, progress)
 		pairs = append(pairs, pair)
+
 	}
 
 	return strings.Join(pairs, "#")

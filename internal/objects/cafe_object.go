@@ -335,11 +335,19 @@ func (c *CafeObject) SetDishAmount(amount int) {
 	c.dishAmount = amount
 }
 
-func (c *CafeObject) AddDishAmount(amount int) {
+func (c *CafeObject) AddDishAmount(amount int) bool {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
+	if c.dishAmount+amount < 0 {
+		return false
+	}
 	c.dishAmount += amount
+
+	if c.dishAmount == 0 {
+		c.dishID = -1
+	}
+	return true
 }
 
 func (c *CafeObject) SetFancyIng(fancying bool) {

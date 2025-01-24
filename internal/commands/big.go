@@ -67,10 +67,7 @@ func SendFriendRequest(req *requests.Request, c *client.Client, gm *managers.Gam
 		}
 
 		// Add friends
-		println(toPlayer.ID, " added friend: ", fromPlayer.ID)
 		toPlayer.AddFriend(fromPlayer.ID)
-
-		println(fromPlayer.ID, " added friend: ", toPlayer.ID)
 		fromPlayer.AddFriend(toPlayer.ID)
 
 		// Send messages
