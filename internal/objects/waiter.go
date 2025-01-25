@@ -3,7 +3,8 @@ package objects
 import (
 	"cafego/internal/types/daos"
 	"encoding/json"
-	"fmt"
+
+	"github.com/charmbracelet/log"
 )
 
 const (
@@ -46,7 +47,7 @@ type Waiter struct {
 func (w *Waiter) StopWorking() {
 	w.IsWorking = false
 	if w.CurrentCustomer != nil {
-		w.CurrentCustomer.AssignedWaiter = -1
+		w.CurrentCustomer.SetAssignedWaiter(-1)
 	}
 }
 
@@ -61,7 +62,7 @@ func (w *Waiter) JSON() string {
 
 	b, err := json.Marshal(dao)
 	if err != nil {
-		fmt.Println(err)
+		log.Errorf("%v", err)
 		return ""
 	}
 	return string(b)

@@ -6,12 +6,13 @@ import (
 	"cafego/internal/objects"
 	"cafego/internal/types/responses"
 	_ "cafego/internal/utils"
-	"log"
 	"net"
 	"slices"
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/charmbracelet/log"
 )
 
 // --- LoadedLocation ----------------------------------------------------------
@@ -276,7 +277,7 @@ func (lc *LoadedLocation) GetUniqueCustomerID() int {
 
 	var ids []int
 	for _, customer := range lc.cafe.Customers {
-		ids = append(ids, customer.ID)
+		ids = append(ids, customer.GetID())
 	}
 
 	id := 101
@@ -308,7 +309,7 @@ func (lc *LoadedLocation) RemoveCustomer(id int) {
 	index := -1
 	customers := lc.Cafe().Customers
 	for i := range customers {
-		if customers[i].ID == id {
+		if customers[i].GetID() == id {
 			index = i
 		}
 	}
@@ -326,7 +327,7 @@ func (lc *LoadedLocation) RemoveCustomer(id int) {
 // |========================================|
 func (lc *LoadedLocation) send(id int, args ...string) {
 	msg := responses.WrapExtensionResponse(args...)
-	log.Printf("[SENT TO %v] %s\n", id, msg)
+	log.Debugf("[SENT TO %v] %s", id, msg)
 	lc.occupants[id].Write([]byte(msg))
 }
 
@@ -338,7 +339,7 @@ func (lc *LoadedLocation) send(id int, args ...string) {
 func (lc *LoadedLocation) broadcast(args ...string) {
 
 	msg := responses.WrapExtensionResponse(args...)
-	log.Printf("[BROADCAST] %s\n", msg)
+	log.Debugf("[BROADCAST] %s", msg)
 
 	for _, o := range lc.occupants {
 		o.Write([]byte(msg))
@@ -353,7 +354,7 @@ func (lc *LoadedLocation) broadcast(args ...string) {
 func (lc *LoadedLocation) announce(playerID int, args ...string) {
 
 	msg := responses.WrapExtensionResponse(args...)
-	log.Printf("[ANNOUNCE] %s\n", msg)
+	log.Debugf("[ANNOUNCE] %s", msg)
 	for oid, o := range lc.occupants {
 		if oid == playerID {
 			continue

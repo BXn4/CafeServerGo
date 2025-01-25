@@ -9,8 +9,8 @@ import (
 )
 
 func (db *CafeDB) Authenticate(name string, pass string) (int, error) {
-	db.mu.Lock()
-	defer db.mu.Unlock()
+	// db.mu.Lock()
+	// defer db.mu.Unlock()
 
 	row := db.conn.QueryRow("SELECT password, is_banned, username FROM player WHERE username=? OR email=?", name, name)
 

@@ -15,13 +15,12 @@ func Login(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 
 	// Check credentials
 	statusCode, err := c.DB.Authenticate(name, password)
-	if err != nil {
-		return err
-	}
 
 	// Check if already logged in log him/her out
-	if searched, _ := gm.GetClientByName(name); searched != nil {
-		statusCode = 15
+	if err == nil {
+		if searched, _ := gm.GetClientByName(name); searched != nil {
+			statusCode = 15
+		}
 	}
 
 	statusCodeStr := strconv.Itoa(statusCode)
@@ -37,7 +36,10 @@ func Login(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 	}
 
 	// Send room list (rlu)
-	RoomList(req, c, gm)
+	err = RoomList(req, c, gm)
+	if err != nil {
+		return err
+	}
 
 	// Send user info (gui)
 	err = UserInfo(req, c, gm)

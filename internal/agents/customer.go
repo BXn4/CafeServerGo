@@ -4,11 +4,12 @@ import (
 	"cafego/internal/interfaces"
 	"cafego/internal/objects"
 	"cafego/internal/utils"
-	"log"
 	"math/rand"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/charmbracelet/log"
 )
 
 // Spawns a custommer at the location
@@ -31,27 +32,27 @@ func SpawnCustomer(l interfaces.CafeLocation) *objects.Customer {
 		return nil
 	}
 
-	customer := &objects.Customer{
-		ID:             l.GetUniqueCustomerID(),
-		Avatar:         objects.NewRandomAvatar(),
-		Pos:            [2]int{l.Cafe().PlayerStart[0], l.Cafe().PlayerStart[1]},
-		Dish:           -1,
-		Action:         objects.CUSTOMER_INSERT,
-		IsThirsty:      false,
-		AssignedWaiter: -2,
-	}
+	customer := objects.NewCustomer(
+		l.GetUniqueCustomerID(),
+		objects.NewRandomAvatar(),
+		[2]int{l.Cafe().PlayerStart[0], l.Cafe().PlayerStart[1]},
+		-1,
+		objects.CUSTOMER_INSERT,
+		false,
+		-2,
+	)
 
 	l.AddCustomer(customer)
 
 	// Send customer info
-	strID := strconv.Itoa(customer.ID)
+	strID := strconv.Itoa(customer.GetID())
 	args := []string{
 		strID,
 		"0",  // NPC type (0: Customer)
 		"0",  // Favourite = Waiters priority ???
 		"-1", // DishID (unnecessary for waiters)
-		utils.If(customer.IsThirsty, "1", "0"),
-		customer.Avatar.String(),
+		utils.If(customer.IsThirsty(), "1", "0"),
+		customer.GetAvatar().String(),
 	}
 	// Send customer info + spawn
 	l.Broadcast("nav", "-1", "0", strings.Join(args, "+"))
@@ -91,7 +92,7 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 
 	// --- Walk to chair ---------------------------
 	args := []string{
-		strconv.Itoa(c.ID),
+		strconv.Itoa(c.GetID()),
 		strconv.Itoa(objects.CUSTOMER_WALK_TO_CHAIR),
 		strconv.Itoa(chair.GetPos()[0]),
 		strconv.Itoa(chair.GetPos()[1]),
@@ -112,10 +113,10 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 	// --- Sit down ---------------------------
 
 	// Send
-	c.Action = objects.CUSTOMER_SIT_DOWN
+	c.SetAction(objects.CUSTOMER_SIT_DOWN)
 	args = []string{
-		strconv.Itoa(c.ID),
-		strconv.Itoa(int(c.Action)),
+		strconv.Itoa(c.GetID()),
+		strconv.Itoa(int(c.GetAction())),
 		strconv.Itoa(chair.GetPos()[0]),
 		strconv.Itoa(chair.GetPos()[1]),
 	}
@@ -127,16 +128,15 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 	l.Broadcast("nac", "-1", "0", strings.Join(args, "+"))
 
 	// Set position to chair
-	c.Pos[0] = chair.GetPos()[0]
-	c.Pos[1] = chair.GetPos()[1]
+	c.SetPos(chair.GetPos())
 
 	// Reset assigned waiter and food
-	c.AssignedWaiter = -1
-	c.Dish = -1
+	c.SetAssignedWaiter(-1)
+	c.SetDish(-1)
 
 	// --- Wait for assigned waiter ----------------------
 	startTime = time.Now()
-	for c.AssignedWaiter == -1 {
+	for c.GetAssignedWaiter() == -1 {
 		if !l.IsRunning() { // We return if program is not running
 			l.UnreserveObject(table)
 			l.UnreserveObject(chair)
@@ -154,14 +154,14 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 
 	// --- Wait until food is placed ----------------------
 	// startTime = time.Now()
-	for c.Dish == -1 {
+	for c.GetDish() == -1 {
 		if !l.IsRunning() { // We return if program is not running
 			return
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
 
-	c.Action = objects.CUSTOMER_EAT
+	c.SetAction(objects.CUSTOMER_EAT)
 
 	// Wait for food so we dont eat the table xd
 	if !SleepWhileChecking(l, 3*time.Second, l.GetIsRunning()) {
@@ -172,10 +172,10 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 
 	// --- Eat food ---------------------------
 	args = []string{
-		strconv.Itoa(c.ID),
-		strconv.Itoa(int(c.Action)),
-		strconv.Itoa(int(c.Pos[0])),
-		strconv.Itoa(int(c.Pos[1])),
+		strconv.Itoa(c.GetID()),
+		strconv.Itoa(int(c.GetAction())),
+		strconv.Itoa(int(c.GetPos()[0])),
+		strconv.Itoa(int(c.GetPos()[1])),
 	}
 	if !l.IsRunning() {
 		l.UnreserveObject(table)
@@ -201,9 +201,9 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 		return
 	}
 
-	dishInfo, err := utils.GetDish(c.Dish)
+	dishInfo, err := utils.GetDish(c.GetDish())
 	if err != nil {
-		log.Printf("Cant find dish! %v\n", c.Dish)
+		log.Printf("Cant find dish! %v\n", c.GetDish())
 		return
 	}
 	player.Cash += dishInfo.IncomePerServing
@@ -253,12 +253,12 @@ func GetAvailableEatingSpace(l interfaces.CafeLocation) (*objects.CafeObject, *o
 func Leave(l interfaces.CafeLocation, c *objects.Customer) {
 
 	// This will tell the waiter to not serve leaving customers
-	c.Action = objects.CUSTOMER_LEAVE
+	c.SetAction(objects.CUSTOMER_LEAVE)
 
 	// Send leave
 	args := []string{
-		strconv.Itoa(c.ID),
-		strconv.Itoa(int(c.Action)),
+		strconv.Itoa(c.GetID()),
+		strconv.Itoa(int(c.GetAction())),
 	}
 	if !l.IsRunning() { // We return if program is not running
 		return
@@ -269,7 +269,7 @@ func Leave(l interfaces.CafeLocation, c *objects.Customer) {
 	)
 
 	// Move to exit
-	start := NewCafePoint(c.Pos, l.Cafe())
+	start := NewCafePoint(c.GetPos(), l.Cafe())
 	end := NewCafePoint(l.Cafe().PlayerStart, l.Cafe())
 	_, distance, _ := Path(start, end)
 
@@ -282,5 +282,5 @@ func Leave(l interfaces.CafeLocation, c *objects.Customer) {
 		return
 	}
 
-	l.RemoveCustomer(c.ID)
+	l.RemoveCustomer(c.GetID())
 }

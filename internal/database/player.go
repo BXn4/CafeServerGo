@@ -4,10 +4,11 @@ import (
 	"cafego/internal/objects"
 	"database/sql"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/charmbracelet/log"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -87,14 +88,15 @@ func ConvertPlayerDAOToPlayer(playerDAO PlayerDAO) (*objects.Player, error) {
 }
 
 func (db *CafeDB) GetPlayerByName(name string) (*objects.Player, error) {
-	db.mu.Lock()
-	defer db.mu.Unlock()
+	// db.mu.Lock()
+	// defer db.mu.Unlock()
 
 	// Prepare query
 	row := db.conn.QueryRow("SELECT * FROM player WHERE username = ? OR email = ?", name, name)
 
 	// Scan rows
 	var playerDAO PlayerDAO
+	var av string
 	err := row.Scan(
 		&playerDAO.ID,
 		&playerDAO.Email,
@@ -111,6 +113,7 @@ func (db *CafeDB) GetPlayerByName(name string) (*objects.Player, error) {
 		&playerDAO.EmailVerified,
 		&playerDAO.NewGifts,
 		&playerDAO.Username,
+		&av,
 		&playerDAO.Gender,
 		&playerDAO.TopColor,
 		&playerDAO.SkinColor,
@@ -139,12 +142,13 @@ func (db *CafeDB) GetPlayerByName(name string) (*objects.Player, error) {
 }
 
 func (db *CafeDB) GetPlayer(id int) (*objects.Player, error) {
-	db.mu.Lock()
-	defer db.mu.Unlock()
+	// db.mu.Lock()
+	// defer db.mu.Unlock()
 
 	row := db.conn.QueryRow("SELECT * FROM player WHERE id = ?", id)
 
 	var playerDAO PlayerDAO
+	var av string
 	err := row.Scan(
 		&playerDAO.ID,
 		&playerDAO.Email,
@@ -161,6 +165,7 @@ func (db *CafeDB) GetPlayer(id int) (*objects.Player, error) {
 		&playerDAO.EmailVerified,
 		&playerDAO.NewGifts,
 		&playerDAO.Username,
+		&av,
 		&playerDAO.Gender,
 		&playerDAO.TopColor,
 		&playerDAO.SkinColor,
@@ -189,8 +194,8 @@ func (db *CafeDB) GetPlayer(id int) (*objects.Player, error) {
 }
 
 func (db *CafeDB) SavePlayer(player *objects.Player) {
-	db.mu.Lock()
-	defer db.mu.Unlock()
+	// db.mu.Lock()
+	// defer db.mu.Unlock()
 
 	friendsStr := []string{}
 	for _, f := range player.Friends {
@@ -254,8 +259,8 @@ func (db *CafeDB) SavePlayer(player *objects.Player) {
 }
 
 func (db *CafeDB) DeleteFriend(playerID, friendID int) {
-	db.mu.Lock()
-	defer db.mu.Unlock()
+	// db.mu.Lock()
+	// defer db.mu.Unlock()
 
 	friendIDStr := strconv.Itoa(friendID)
 
@@ -298,8 +303,8 @@ func (db *CafeDB) DeleteFriend(playerID, friendID int) {
 }
 
 func (db *CafeDB) GetDailyLogin(playerID int) (*time.Time, error) {
-	db.mu.Lock()
-	defer db.mu.Unlock()
+	// db.mu.Lock()
+	// defer db.mu.Unlock()
 
 	row := db.conn.QueryRow("SELECT daily_login FROM player WHERE id = ?", playerID)
 	var dailyLoginStr string
@@ -316,8 +321,8 @@ func (db *CafeDB) GetDailyLogin(playerID int) (*time.Time, error) {
 }
 
 func (db *CafeDB) ResetDailyLogin(playerID int) error {
-	db.mu.Lock()
-	defer db.mu.Unlock()
+	// db.mu.Lock()
+	// defer db.mu.Unlock()
 
 	// Update friends
 	result, err := db.conn.Exec(

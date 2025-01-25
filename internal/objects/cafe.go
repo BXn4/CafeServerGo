@@ -6,10 +6,11 @@ import (
 	"cafego/internal/utils"
 	"encoding/json"
 	"fmt"
-	"log"
 	"math"
 	"strconv"
 	"strings"
+
+	"github.com/charmbracelet/log"
 )
 
 type CafeBackground string
@@ -56,7 +57,7 @@ func (c *Cafe) AsResponse() []string {
 		objs = append(objs, str)
 	}
 
-	log.Printf("OBJECTS: %v", strings.Join(objs, "#"))
+	log.Debugf("OBJECTS: %v", strings.Join(objs, "#"))
 
 	args := []string{
 		strconv.Itoa(c.ID),

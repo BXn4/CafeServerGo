@@ -3,11 +3,12 @@ package agents
 import (
 	"cafego/internal/interfaces"
 	"cafego/internal/objects"
-	"log"
 	"math/rand"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/charmbracelet/log"
 )
 
 // Spawns a waiter at the location
@@ -41,7 +42,7 @@ func SpawnWaiter(l interfaces.CafeLocation, w *objects.Waiter) {
 	}
 
 	// --- Spawn waiter ----------
-	log.Printf("WAITER SPAWNED: %v\n", w.ID)
+	log.Debugf("WAITER SPAWNED: %v\n", w.ID)
 
 }
 
@@ -144,7 +145,7 @@ func ServeFood(l interfaces.CafeLocation, w *objects.Waiter) {
 	// Get sitting customer without waiter
 	var customer *objects.Customer
 	for _, c := range l.Cafe().Customers {
-		if c.Action == objects.CUSTOMER_SIT_DOWN && c.AssignedWaiter == -1 {
+		if c.GetAction() == objects.CUSTOMER_SIT_DOWN && c.GetAssignedWaiter() == -1 {
 			customer = c
 			break
 		}
@@ -156,7 +157,7 @@ func ServeFood(l interfaces.CafeLocation, w *objects.Waiter) {
 	}
 
 	// Assign itself as its waiter
-	customer.AssignedWaiter = w.ID
+	customer.SetAssignedWaiter(w.ID)
 
 	// Take dish from counter prematurely so
 	savedDish := w.CurrentCounter.GetDishID()
@@ -166,12 +167,12 @@ func ServeFood(l interfaces.CafeLocation, w *objects.Waiter) {
 	}
 
 	// --- Feed customer --------------------------
-	if !MoveWaiter(l, w, customer.Pos, objects.FEED, 750*time.Millisecond) {
+	if !MoveWaiter(l, w, customer.GetPos(), objects.FEED, 750*time.Millisecond) {
 		return
 	}
 
 	// Set food to customer
-	customer.Dish = savedDish
+	customer.SetDish(savedDish)
 
 	// Move back to counter
 	if !MoveWaiter(l, w, w.CurrentCounter.GetPos(), objects.MOVE_TO_COUNTER, 750*time.Millisecond) {

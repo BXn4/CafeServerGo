@@ -4,7 +4,8 @@ import (
 	"bufio"
 	"cafego/internal/database"
 	"cafego/internal/interfaces"
-	"log"
+
+	"github.com/charmbracelet/log"
 
 	"cafego/internal/objects"
 	"cafego/internal/types/requests"
@@ -62,7 +63,7 @@ func (c *Client) NextRequest() (*requests.Request, error) {
 		c.Disconnect()
 		return nil, errors.New(fmt.Sprintf("Error while reading msq: %s\n", err.Error()))
 	}
-	log.Printf("[RECEIVED] %s\n", message)
+	log.Debugf("[RECEIVED] %s", message)
 
 	// Parse request
 	req, err := requests.ParseRequest(strings.Trim(message, "\x00"))
@@ -76,12 +77,12 @@ func (c *Client) NextRequest() (*requests.Request, error) {
 
 func (c *Client) SendSystemResponse(args ...string) {
 	msg := responses.WrapSystemResponse(args...)
-	log.Printf("[SENT] %s\n", msg)
+	log.Debugf("[SENT] %s", msg)
 	c.Conn.Write([]byte(msg))
 }
 
 func (c *Client) SendExtensionResponse(args ...string) {
 	msg := responses.WrapExtensionResponse(args...)
-	log.Printf("[SENT] %s\n", msg)
+	log.Debugf("[SENT] %s", msg)
 	c.Conn.Write([]byte(msg))
 }

@@ -7,8 +7,9 @@ import (
 	"cafego/internal/managers"
 	"cafego/internal/utils"
 	"fmt"
-	"log"
 	"net"
+
+	"github.com/charmbracelet/log"
 )
 
 // Config
@@ -46,8 +47,7 @@ func (s *CafeServer) Run() {
 	// Set up MariaDB connection
 	db, err := database.ConnectToDB(s.dbConfig)
 	if err != nil {
-		println(err.Error())
-		log.Fatal(err)
+		log.Errorf("%v", err)
 	}
 	defer db.Close()
 	fmt.Printf("Server connected to database...\n")
@@ -76,5 +76,6 @@ func (s *CafeServer) Run() {
 
 		go commands.HandleClient(c, s.gm)
 	}
+	// TODO: Save all and free memory
 
 }

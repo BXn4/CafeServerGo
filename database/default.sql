@@ -5,7 +5,7 @@ CREATE TABLE player (
     password VARCHAR(255) NOT NULL,
     cash INT UNSIGNED DEFAULT 2000,
     gold INT UNSIGNED DEFAULT 11,
-    xp INT UNSIGNED DEFAULT 0,
+    xp INT UNSIGNED DEFAULT 999999, -- 0,
     instant_cookings INT UNSIGNED DEFAULT 0,
     open_jobs TINYINT UNSIGNED DEFAULT 0,
     played_wheel TINYINT (1) DEFAULT 0,
@@ -15,11 +15,14 @@ CREATE TABLE player (
     email_verified TINYINT (1) DEFAULT 1,
     new_gifts TINYINT UNSIGNED DEFAULT 0,
     username VARCHAR(50) NOT NULL,
+    avatar TEXT DEFAULT "",
+    -- TODO: DELETE
     gender TINYINT (1) UNSIGNED DEFAULT 2,
     top_color TINYINT UNSIGNED DEFAULT 2,
     skin_color TINYINT UNSIGNED DEFAULT 2,
     hair_color TINYINT UNSIGNED DEFAULT 3,
     legs_color TINYINT UNSIGNED DEFAULT 4,
+    -- TODO: delete
     is_banned TINYINT (1) DEFAULT 0 NOT NULL,
     mastery TEXT DEFAULT '1201+1#1202+0#1203+2#1204+2#1205+0#1206+0#1207+0#1208+0#1209+0#1210+0#1211+0#1212+0#1213+0#1214+0#1215+0#1216+0#1217+0#1218+0#1219+0#1220+0#1221+0#1222+0#1223+0#1224+0#1225+0#1226+0#1227+0#1228+0#1229+0#1230+0#1231+0#1232+0#1233+0#1234+0#1235+0#1236+0#1237+0#1238+0#1239+0#1240+0#1241+0#1242+0#1243+0#1244+0#1245+0#1246+0#1247+0#1248+0#1249+0#1250+0#1251+0#1252+0#1253+0#1254+0#1255+0',
     achievement TEXT DEFAULT '2001+0#2002+0#2003+0#2004+0#2005+0#2006+0#2007+0#2008+0#2009+0#2010+0#2011+0#2012+0#2013+0#2014+0#2015+0#2016+0#2017+0#2018+0#2019+0#2020+0#2021+0#2022+0#2023+0#2024+0#2025+0#2026+0#2027+0#2028+0#2029+0#2030+0',
@@ -46,17 +49,9 @@ CREATE TABLE cafe (
 --- Data
 --- Dummy1
 INSERT INTO
-    player (
-        id,
-        email,
-        password,
-        xp,
-        cash,
-        username,
-        is_banned
-    )
+    player (id, email, password, xp, cash, username)
 VALUES
-    (1, 'a@a.a', '1234', 99999999, 120999, 'bence', 0);
+    (1, 'a@a.a', '1234', 99999999, 120999, 'bence');
 
 INSERT INTO
     cafe (id, player_id, owner_name)
@@ -65,17 +60,9 @@ VALUES
 
 --- Dummy2
 INSERT INTO
-    player (
-        id,
-        email,
-        password,
-        xp,
-        cash,
-        username,
-        is_banned
-    )
+    player (id, email, password, xp, cash, username)
 VALUES
-    (2, 'b@b.b', '1234', 99999999, 120999, 'bence2', 0);
+    (2, 'b@b.b', '1234', 99999999, 120999, 'bence2');
 
 INSERT INTO
     cafe (id, player_id, owner_name)

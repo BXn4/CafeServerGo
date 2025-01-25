@@ -6,9 +6,10 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
+
+	"github.com/charmbracelet/log"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -108,8 +109,8 @@ func ConvertCafeDAOToCafe(cafeDAO CafeDAO) (*objects.Cafe, error) {
 }
 
 func (db *CafeDB) GetCafeByPlayerID(player_id int) (*objects.Cafe, error) {
-	db.mu.Lock()
-	defer db.mu.Unlock()
+	// db.mu.Lock()
+	// defer db.mu.Unlock()
 
 	row := db.conn.QueryRow("SELECT * FROM cafe WHERE player_id = ?", player_id)
 
@@ -143,8 +144,8 @@ func (db *CafeDB) GetCafeByPlayerID(player_id int) (*objects.Cafe, error) {
 }
 
 func (db *CafeDB) SaveCafe(cafe *objects.Cafe) {
-	db.mu.Lock()
-	defer db.mu.Unlock()
+	// db.mu.Lock()
+	// defer db.mu.Unlock()
 
 	// Build tiles
 	var tiles []string

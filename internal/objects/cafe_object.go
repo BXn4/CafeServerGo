@@ -10,6 +10,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/charmbracelet/log"
 )
 
 type CafeObject struct {
@@ -197,7 +199,7 @@ func (c *CafeObject) JSON() string {
 
 	b, err := json.Marshal(obj)
 	if err != nil {
-		fmt.Println(err)
+		log.Errorf("%v", err)
 		return ""
 	}
 	return string(b)

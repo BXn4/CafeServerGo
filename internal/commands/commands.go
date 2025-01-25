@@ -5,7 +5,8 @@ import (
 	"cafego/internal/managers"
 	"cafego/internal/types/requests"
 	"cafego/internal/types/responses"
-	"log"
+
+	"github.com/charmbracelet/log"
 )
 
 func HandleClient(c *client.Client, gm *managers.GameManager) {
@@ -22,7 +23,7 @@ func HandleClient(c *client.Client, gm *managers.GameManager) {
 		// Handle requests
 		err = HandleRequest(req, c, gm)
 		if err != nil {
-			log.Printf("[WARNING] %v request: %s\n", req.Args[0], err.Error())
+			log.Warnf("%v request: %s", req.Args[0], err.Error())
 			continue
 		}
 
@@ -117,9 +118,12 @@ func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameMan
 		err = RemoveGift(req, c, gm)
 	case requests.C2S_GIFT_USE:
 		err = UseGift(req, c, gm)
-
+	case requests.C2S_CREATE_AVATAR:
+		err = CreateAvatar(req, c, gm)
+	case requests.C2S_REGISTER:
+		err = Register(req, c, gm)
 	default:
-		log.Printf("[NOT IMPLEMENTED]: %v\n", req.Args[0])
+		log.Infof("[NOT IMPLEMENTED]: %v\n", req.Args[0])
 	}
 
 	return err

@@ -3,11 +3,12 @@ package objects
 import (
 	"cafego/internal/utils"
 	"fmt"
-	"log"
 	"math"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/charmbracelet/log"
 )
 
 type Player struct {
@@ -104,7 +105,6 @@ func (p *Player) ParseAchievement(achivement string) {
 		if err != nil {
 			log.Printf("Cant parse achievement to int: %v", err)
 		}
-		println("ACH:", achivementID)
 
 		progression, err := strconv.Atoi(parts[1])
 		if err != nil {
@@ -127,7 +127,6 @@ func (p *Player) BuildMastery() string {
 
 func (p *Player) BuildAchievement() string {
 	var pairs []string
-	println("ACHIVMENTS len: ", len(p.Achievement))
 	for achivement, progress := range p.Achievement {
 		pair := fmt.Sprintf("%d+%d", achivement-2001, progress)
 		pairs = append(pairs, pair)

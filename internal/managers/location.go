@@ -4,7 +4,8 @@ import (
 	"cafego/internal/database"
 	"cafego/internal/objects"
 	"fmt"
-	"log"
+
+	"github.com/charmbracelet/log"
 )
 
 func (gm *GameManager) SetCafeDB(db *database.CafeDB) {

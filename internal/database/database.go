@@ -1,9 +1,9 @@
 package database
 
 import (
+	"cafego/internal/objects"
 	"database/sql"
 	"fmt"
-	_ "log"
 	"sync"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -45,4 +45,37 @@ func ConnectToDB(config *DBConfig) (*CafeDB, error) {
 
 func (db *CafeDB) Close() {
 	db.conn.Close()
+}
+
+func (db *CafeDB) CreateAccount(name, email, password string, avatar objects.Avatar) (*objects.Player, error) {
+
+	var id int
+	// Create player and get id
+	err := db.conn.QueryRow("INSERT INTO player ( email, password, username, avatar) VALUES (?,?,?,?) RETURNING id",
+		email,
+		password,
+		name,
+		avatar.String(),
+	).Scan(&id)
+	if err != nil {
+		return nil, fmt.Errorf("Cant create player: %v", err)
+	}
+
+	// Create cafe
+	_, err = db.conn.Exec("INSERT INTO cafe ( id, player_id, owner_name) VALUES (?,?,?)",
+		id,
+		id,
+		name,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("Cant create cafe: %v", err)
+	}
+
+	// Parse player
+	player, err := db.GetPlayer(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return player, nil
 }

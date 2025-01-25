@@ -41,9 +41,6 @@ func HireWaiter(req *requests.Request, c *client.Client, gm *managers.GameManage
 	c.Location.Cafe().Waiters = append(c.Location.Cafe().Waiters, newWaiter)
 
 	// Spawn
-	println("-------------------------------------")
-	println("waiter spawned: ", newID)
-	println("-------------------------------------")
 	agents.SpawnWaiter(c.Location, newWaiter)
 
 	// Start waiter cylce

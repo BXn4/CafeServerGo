@@ -1,6 +1,6 @@
 package objects
 
-import "log"
+import "github.com/charmbracelet/log"
 
 func (c *Cafe) AddFurnitures(id, amount int) {
 

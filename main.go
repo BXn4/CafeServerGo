@@ -7,8 +7,14 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/charmbracelet/log"
 	"github.com/joho/godotenv"
 )
+
+func init() {
+	// log.SetLevel(log.DebugLevel)
+	log.SetLevel(log.ErrorLevel)
+}
 
 func main() {
 	// Read .env file

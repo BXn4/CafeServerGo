@@ -24,9 +24,6 @@ func LoginRewards(req *requests.Request, c *client.Client, gm *managers.GameMana
 	asd := (time.Now().Add(-24 * time.Hour))
 	dailyLogin = &asd
 
-	println("DAILY_TIME: ", dailyLogin.String())
-	println("NOW_TIME: ", time.Now().String())
-
 	// Check if time passed by daily login
 	timePassed := time.Now().Sub(*dailyLogin)
 	isDaily := timePassed >= 24*time.Hour
@@ -79,28 +76,20 @@ func LoginRewards(req *requests.Request, c *client.Client, gm *managers.GameMana
 	passiveIncome := 0
 	soldDishes := 0
 	maxDishSellCount := int(passedSeconds / float64(customerSpawnTime))
-	println("maxDishSellCount: ", maxDishSellCount)
 	for i := 0; i < maxDishSellCount; i++ {
 		// Get counter
 		counter, _ := agents.GetRandomCounter(mycafe)
-
-		println("lbu DEBUG 1")
 
 		// If cant find counter break
 		if counter == nil {
 			break
 		}
 
-		println("lbu DEBUG 2")
-
 		// If no food return
 		savedID := counter.GetDishID()
-		println("savedID:", savedID)
 		if savedID <= 0 {
 			break
 		}
-
-		println("lbu DEBUG 3")
 
 		// If cant sell more continue
 		if !counter.AddDishAmount(-1) {
@@ -108,23 +97,17 @@ func LoginRewards(req *requests.Request, c *client.Client, gm *managers.GameMana
 		}
 		soldDishes++
 
-		println("lbu DEBUG 4")
-
 		// Get dish info
 		wod, err := utils.GetDish(savedID)
 		if err != nil {
 			return err
 		}
 
-		println("lbu DEBUG 5")
-
 		// Add to passive income
 		passiveIncome += wod.Cash
 	}
 
 	soldDishesStr := strconv.Itoa(soldDishes)
-	println("PASSIVE INCOME: ", passiveIncome)
-	println("SOLD DISHES: ", soldDishes)
 
 	// Add passive income to args
 	args = append(args, fmt.Sprintf("1901+%v", passiveIncome))
@@ -133,7 +116,7 @@ func LoginRewards(req *requests.Request, c *client.Client, gm *managers.GameMana
 	c.DB.SaveCafe(mycafe)
 
 	// Send response
-	println("Sending DAILY REWARD response!!!!")
+
 	c.SendExtensionResponse("lbu", "-1", "0", strings.Join(args, "#"), soldDishesStr)
 	return nil
 }

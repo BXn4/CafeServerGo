@@ -5,8 +5,9 @@ import (
 	"cafego/internal/managers"
 	"cafego/internal/types/requests"
 	"cafego/internal/utils"
-	"log"
 	"strconv"
+
+	"github.com/charmbracelet/log"
 )
 
 // edit - C2S_EDITOR_MODE
