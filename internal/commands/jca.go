@@ -34,7 +34,7 @@ func JoinCafe(req *requests.Request, c *client.Client, gm *managers.GameManager)
 	}
 
 	// Join location
-	location.Join(c.Player.ID, c.Conn)
+	location.Join(c.Player.ID, c.Writer)
 
 	// Save location
 	c.Location = location

@@ -29,7 +29,7 @@ func (gm *GameManager) RemoveLocation(id int) {
 		if lc.cafe.ID == id {
 			// This removes the location by id by not changing the others memory addresses
 			gm.db.SaveCafe(lc.Cafe())
-			log.Printf("Saved %v cafe to db\n", lc.cafe.ID)
+			log.Debugf("Saved %v cafe to db\n", lc.cafe.ID)
 			delete(gm.locations, i)
 			return
 		}

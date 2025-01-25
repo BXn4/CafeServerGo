@@ -68,6 +68,10 @@ func SpawnCustomer(l interfaces.CafeLocation) *objects.Customer {
 // Does one iteration of the customer tasks
 func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 
+	if c == nil {
+		return
+	}
+
 	var table *objects.CafeObject
 	var chair *objects.CafeObject
 	var distanceToChair int
@@ -197,13 +201,13 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 	// --- Add rewards to player ------------
 	player, err := l.Owner()
 	if err != nil {
-		log.Printf("Cant find owner!")
+		log.Errorf("Cant find owner!")
 		return
 	}
 
 	dishInfo, err := utils.GetDish(c.GetDish())
 	if err != nil {
-		log.Printf("Cant find dish! %v\n", c.GetDish())
+		log.Errorf("Cant find dish! %v\n", c.GetDish())
 		return
 	}
 	player.Cash += dishInfo.IncomePerServing

@@ -16,7 +16,7 @@ func HandleClient(c *client.Client, gm *managers.GameManager) {
 		// Read next request
 		req, err := c.NextRequest()
 		if err != nil {
-			log.Printf("Failed to read request: %s\n", err.Error())
+			log.Errorf("Failed to read request: %s\n", err.Error())
 			break
 		}
 
@@ -123,7 +123,7 @@ func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameMan
 	case requests.C2S_REGISTER:
 		err = Register(req, c, gm)
 	default:
-		log.Infof("[NOT IMPLEMENTED]: %v\n", req.Args[0])
+		log.Infof("NOT IMPLEMENTED: %v", req.Args[0])
 	}
 
 	return err

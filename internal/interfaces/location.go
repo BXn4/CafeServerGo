@@ -1,15 +1,15 @@
 package interfaces
 
 import (
+	"bufio"
 	"cafego/internal/objects"
-	"net"
 )
 
 // This is a wrapper for a cafe
 // so we can handle the players inside more easily
 type CafeLocation interface {
 	// Add the player to the location by id
-	Join(id int, conn net.Conn)
+	Join(id int, writer *bufio.Writer)
 
 	// Disconnects the player by id
 	Leave(id int)

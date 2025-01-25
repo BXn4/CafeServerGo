@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/charmbracelet/log"
 )
 
 type Wod struct {
@@ -50,13 +52,13 @@ func ReadAndCacheItems() error {
 		return fmt.Errorf("Error opening file: %v", err)
 	}
 	defer xmlFile.Close()
-	fmt.Println("Successfully Opened CafeItems.xml")
+	log.Infof("Successfully Opened CafeItems.xml")
 
 	var result Data
 	decoder := xml.NewDecoder(xmlFile)
 	err = decoder.Decode(&result)
 	if err != nil {
-		return fmt.Errorf("Error decoding XML: %v\n", err)
+		return fmt.Errorf("Error decoding XML: %v", err)
 	}
 
 	itemCollection = make(map[string][]Wod)
@@ -66,8 +68,8 @@ func ReadAndCacheItems() error {
 		loadedCount++
 	}
 
-	fmt.Printf("Successfully loaded %d WOD entries\n", loadedCount)
-	fmt.Println("Filtered and grouped WOD entries")
+	log.Infof("Successfully loaded %d WOD entries", loadedCount)
+	log.Infof("Filtered and grouped WOD entries")
 	return nil
 }
 

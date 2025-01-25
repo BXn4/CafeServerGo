@@ -1,12 +1,12 @@
 package managers
 
 import (
+	"bufio"
 	"cafego/internal/agents"
 	"cafego/internal/client"
 	"cafego/internal/objects"
 	"cafego/internal/types/responses"
 	_ "cafego/internal/utils"
-	"net"
 	"slices"
 	"strconv"
 	"strings"
@@ -18,7 +18,7 @@ import (
 // --- LoadedLocation ----------------------------------------------------------
 type LoadedLocation struct {
 	cafe         *objects.Cafe
-	occupants    map[int]net.Conn
+	occupants    map[int]*bufio.Writer
 	mu           sync.Mutex
 	gm           *GameManager
 	running      bool
@@ -29,12 +29,14 @@ func NewLoadedLocation(cafe *objects.Cafe, gm *GameManager) *LoadedLocation {
 	return &LoadedLocation{
 		cafe:      cafe,
 		gm:        gm,
-		occupants: make(map[int]net.Conn),
+		occupants: make(map[int]*bufio.Writer),
 		running:   false,
 	}
 }
 
 func (lc *LoadedLocation) Cafe() *objects.Cafe {
+	lc.mu.Lock()
+	defer lc.mu.Unlock()
 	return lc.cafe
 }
 
@@ -102,7 +104,7 @@ func (lc *LoadedLocation) setRunning(b bool) {
 	}
 }
 
-func (lc *LoadedLocation) Join(playerID int, conn net.Conn) {
+func (lc *LoadedLocation) Join(playerID int, writer *bufio.Writer) {
 	lc.mu.Lock()
 	defer lc.mu.Unlock()
 
@@ -125,7 +127,7 @@ func (lc *LoadedLocation) Join(playerID int, conn net.Conn) {
 	lc.announce(playerID, "juj", "-1", "0", c.(*client.Client).Player.String())
 
 	// Add to players in cafe
-	lc.occupants[playerID] = conn
+	lc.occupants[playerID] = writer
 
 	// Send cafe data
 	args := []string{"sgc", "-1", "0"}
@@ -327,8 +329,9 @@ func (lc *LoadedLocation) RemoveCustomer(id int) {
 // |========================================|
 func (lc *LoadedLocation) send(id int, args ...string) {
 	msg := responses.WrapExtensionResponse(args...)
-	log.Debugf("[SENT TO %v] %s", id, msg)
+	log.Logf(log.Level(-3), "to %v: %s", id, msg)
 	lc.occupants[id].Write([]byte(msg))
+	lc.occupants[id].Flush()
 }
 
 // |========================================|
@@ -339,10 +342,11 @@ func (lc *LoadedLocation) send(id int, args ...string) {
 func (lc *LoadedLocation) broadcast(args ...string) {
 
 	msg := responses.WrapExtensionResponse(args...)
-	log.Debugf("[BROADCAST] %s", msg)
+	log.Logf(log.Level(-1), "%s", msg)
 
 	for _, o := range lc.occupants {
 		o.Write([]byte(msg))
+		o.Flush()
 	}
 }
 
@@ -354,11 +358,12 @@ func (lc *LoadedLocation) broadcast(args ...string) {
 func (lc *LoadedLocation) announce(playerID int, args ...string) {
 
 	msg := responses.WrapExtensionResponse(args...)
-	log.Debugf("[ANNOUNCE] %s", msg)
+	log.Logf(log.Level(-2), "%s", msg)
 	for oid, o := range lc.occupants {
 		if oid == playerID {
 			continue
 		}
 		o.Write([]byte(msg))
+		o.Flush()
 	}
 }

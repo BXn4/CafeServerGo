@@ -30,7 +30,7 @@ func JoinMarketplace(req *requests.Request, c *client.Client, gm *managers.GameM
 	}
 
 	// Join cafe
-	location.Join(c.Player.ID, c.Conn)
+	location.Join(c.Player.ID, c.Writer)
 
 	// Save location
 	c.Location = location

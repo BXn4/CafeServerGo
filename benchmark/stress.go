@@ -25,7 +25,7 @@ func RandString(n int) string {
 
 func main() {
 	var wg sync.WaitGroup
-	for i := 0; i < 10000; i++ {
+	for i := 0; i < 100; i++ {
 		wg.Add(1)
 		go mimicPlayer(&wg)
 	}
@@ -92,6 +92,7 @@ func mimicPlayer(wg *sync.WaitGroup) error {
 
 	// Register account
 	id := createAccount(conn, reader)
+
 	println(id)
 
 	// Move around for 1 minute
@@ -105,10 +106,10 @@ func mimicPlayer(wg *sync.WaitGroup) error {
 		moveAround(conn)
 
 		// Join own cafe ("%xt%CafeEx%jca%1%1%1%")
-		// conn.Write([]byte("%xt%CafeEx%jca%1%" + id + "%" + id + "%" + END_CHAR))
+		conn.Write([]byte("%xt%CafeEx%jca%1%" + id + "%" + id + "%" + END_CHAR))
 
 		// Move around
-		// moveAround(conn)
+		moveAround(conn)
 	}
 
 	return nil

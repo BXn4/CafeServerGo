@@ -42,7 +42,7 @@ func SpawnWaiter(l interfaces.CafeLocation, w *objects.Waiter) {
 	}
 
 	// --- Spawn waiter ----------
-	log.Debugf("WAITER SPAWNED: %v\n", w.ID)
+	log.Debugf("WAITER SPAWNED: %v", w.ID)
 
 }
 

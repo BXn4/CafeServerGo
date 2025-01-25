@@ -115,8 +115,6 @@ type Response struct {
 	Args []string
 }
 
-//TODO: This might need to change
-
 func WrapSystemResponse(args ...string) string {
 	return strings.Join(args, "") + "\x00"
 }
@@ -124,4 +122,3 @@ func WrapSystemResponse(args ...string) string {
 func WrapExtensionResponse(args ...string) string {
 	return "%xt%" + strings.Join(args, "%") + "%\x00"
 }
-
