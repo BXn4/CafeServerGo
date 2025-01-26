@@ -18,26 +18,26 @@ func EditorMode(req *requests.Request, c *client.Client, gm *managers.GameManage
 	}
 	// Do not allow to enter editor mode multiple times
 	// Not casuing any issue yet
-	if c.Location.Cafe().InEditorMode && status != 0 {
+	if c.Location.Cafe().InEditorMode() && status != 0 {
 		return nil
 	}
 	switch status {
 	case 0:
 		// If the player places an object where he stayed
 		if c.Location.Cafe().GetObjectByPos(c.Player.Position[0], c.Player.Position[1]) != nil {
-			for _, object := range c.Location.Cafe().Objects {
+			for _, object := range c.Location.Cafe().GetObjects() {
 				if object.IsDoor() {
 					newStartPos := [2]int{
 						utils.If(object.GetPos()[0] == 0, 1, object.GetPos()[0]),
 						utils.If(object.GetPos()[1] == 0, 1, object.GetPos()[1]),
 					}
-					c.Location.Cafe().PlayerStart = newStartPos
+					c.Location.Cafe().SetPlayerStart(newStartPos)
 					c.Player.Position = newStartPos
 					break
 				}
 			}
 		}
-		c.Location.Cafe().InEditorMode = false
+		c.Location.Cafe().SetInEditorMode(false)
 		c.Location.SetRunning(true)
 		log.Printf("SET RUNING TRUE")
 		c.SendExtensionResponse("edi", "-1", "0",
@@ -45,7 +45,8 @@ func EditorMode(req *requests.Request, c *client.Client, gm *managers.GameManage
 	case 1:
 		c.SendExtensionResponse("edi", "-1", "0",
 			strconv.Itoa(status), strconv.Itoa(c.Player.Position[0]), strconv.Itoa(c.Player.Position[1]), "") // <- Objects
-		c.Location.Cafe().InEditorMode = true
+		c.Location.Cafe().SetInEditorMode(true)
+		c.Location.Cafe().SetInEditorMode(true)
 		c.Location.SetRunning(false)
 		log.Printf("SET RUNING FALSE")
 	default:

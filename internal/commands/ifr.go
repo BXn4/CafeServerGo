@@ -18,11 +18,12 @@ func SendFridgeInventory(req *requests.Request, c *client.Client, gm *managers.G
 	if c.Location == nil {
 		cafe, err := c.DB.GetCafeByPlayerID(c.Player.ID)
 		if err != nil {
-			return err
+			return fmt.Errorf("\n\tCannot get player %v: %v", c.Player.ID, err)
 		}
-		fridge = cafe.FridgeInventory
+		fridge = cafe.GetFridgeInventory()
 		fridgeCap = cafe.GetFridgeMaxCapacity()
 	} else {
+		fridge = c.Location.Cafe().GetFridgeInventory()
 		fridgeCap = c.Location.Cafe().GetFridgeMaxCapacity()
 	}
 

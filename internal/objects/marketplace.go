@@ -7,15 +7,15 @@ import (
 func NewMarketplace() (*Cafe, error) {
 
 	cafe := &Cafe{
-		ID:          -1,
-		PlayerID:    -1,
-		PlayerStart: [2]int{1, 2},
-		OwnerName:   "Marketplace",
-		Background:  MarketplaceBackground,
-		Rating:      0,
-		Luxury:      -1,
-		ExpansionID: 4,
-		Size:        12,
+		id:          -1,
+		playerID:    -1,
+		playerStart: [2]int{1, 2},
+		ownerName:   "Marketplace",
+		background:  MarketplaceBackground,
+		rating:      0,
+		luxury:      -1,
+		expansionID: 4,
+		size:        12,
 	}
 
 	err := cafe.ParseTiles("7+7+7+7+7+7+7+7+7+7+7+7+7+3+3+3+3+3+3+3+3+3+3+3+7+3+3+3+3+3+3+3+3+3+3+3+7+3+3+3+3+3+3+3+3+3+3+3+7+3+3+3+7+7+7+3+3+3+3+3+7+3+3+3+7+7+7+3+3+3+3+3+7+3+3+3+7+7+7+3+3+3+3+3+7+3+3+3+3+3+3+3+3+3+3+3+7+3+3+3+3+3+3+3+3+3+3+3+7+3+3+3+3+3+3+3+3+3+3+3+7+3+3+3+3+3+3+3+3+3+3+3+7+3+3+3+3+3+3+3+3+3+3+3")

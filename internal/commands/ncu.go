@@ -19,7 +19,7 @@ func WaiterCustomize(req *requests.Request, c *client.Client, gm *managers.GameM
 		return err
 	}
 
-	for _, w := range c.Location.Cafe().Waiters {
+	for _, w := range c.Location.Cafe().GetWaiters() {
 		if w.ID == selectedWaiter {
 			w.Name = req.Args[3]
 			w.Priority = newPriority

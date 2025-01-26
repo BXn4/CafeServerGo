@@ -15,11 +15,11 @@ import (
 func SellIngredient(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	// Dont allow players to modify the packet and sending us MJM while in editor.
-	if c.Location.Cafe().InEditorMode {
+	if c.Location.Cafe().InEditorMode() {
 		return nil
 	}
 
-	if c.Location.Cafe().PlayerID != c.Player.ID {
+	if c.Location.Cafe().GetPlayerID() != c.Player.ID {
 		return errors.New("You dont own this cafe!")
 	}
 
@@ -43,18 +43,14 @@ func SellIngredient(req *requests.Request, c *client.Client, gm *managers.GameMa
 	}
 
 	// Check if amount is right
-	if count, ok := c.Location.Cafe().FridgeInventory[ingredientID]; !ok && count < sellAmount && sellAmount < 0 {
+	if count, ok := c.Location.Cafe().GetFridgeInventory()[ingredientID]; !ok && count < sellAmount && sellAmount < 0 {
 		return fmt.Errorf("Invalid ingredient amount: %v, current amount: %v", sellAmount, count)
 	}
 
 	// Calcualte money
 	c.Player.Cash += sellAmount * int(math.Round(float64(ingredientInfo.Cash)*0.2+float64(ingredientInfo.Gold)*0.2))
 
-	c.Location.Cafe().FridgeInventory[ingredientID] -= sellAmount
-	if c.Location.Cafe().FridgeInventory[ingredientID] == 0 {
-		// print("REMOVED!")
-		delete(c.Location.Cafe().FridgeInventory, ingredientID)
-	}
+	c.Location.Cafe().RemoveFromFridge(ingredientID, sellAmount)
 
 	c.SendExtensionResponse("sdi", "-1", "0", strconv.Itoa(ingredientID), strconv.Itoa(sellAmount))
 

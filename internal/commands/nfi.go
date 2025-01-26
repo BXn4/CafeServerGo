@@ -15,15 +15,7 @@ func FireWaiter(req *requests.Request, c *client.Client, gm *managers.GameManage
 		return err
 	}
 
-	var index int
-	for i, w := range c.Location.Cafe().Waiters {
-		if w.ID == id {
-			w.StopWorking()
-			index = i
-		}
-	}
-
-	c.Location.Cafe().Waiters = append(c.Location.Cafe().Waiters[:index], c.Location.Cafe().Waiters[index+1:]...)
+	c.Location.Cafe().RemoveWaiter(id)
 
 	c.SendExtensionResponse("nfi", "0", "0", req.Args[2])
 

@@ -14,11 +14,11 @@ import (
 func BuyFloor(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	// Dont allow players to modify the packet and sending us EBF while not in editor.
-	if !c.Location.Cafe().InEditorMode {
+	if !c.Location.Cafe().InEditorMode() {
 		return nil
 	}
 
-	cafeSize := c.Location.Cafe().Size
+	cafeSize := c.Location.Cafe().GetSize()
 
 	items, err := utils.MultiAtoi(req.Args[2:]...)
 	if err != nil {
@@ -41,7 +41,7 @@ func BuyFloor(req *requests.Request, c *client.Client, gm *managers.GameManager)
 	}
 
 	// If the player have some in their inventory, dont buy that amount
-	playerHave := c.Location.Cafe().FurnitureInventory[tileID]
+	playerHave := c.Location.Cafe().GetFurnitureInventory()[tileID]
 	buyAmount, oldTiles := c.Location.Cafe().GetOldTiles(startX, startY, endX, endY, tileID)
 	buyAmount = buyAmount - playerHave
 
@@ -64,17 +64,13 @@ func BuyFloor(req *requests.Request, c *client.Client, gm *managers.GameManager)
 
 	var oldTilesStr []string
 	for tile, amount := range oldTiles {
-		existingTileID := c.Location.Cafe().Tiles[tile[0]][tile[1]]
+		existingTileID := c.Location.Cafe().GetTiles()[tile[0]][tile[1]]
 
 		// Add replaced tile to inventory
-		if c.Location.Cafe().FurnitureInventory[existingTileID] != 0 {
-			c.Location.Cafe().FurnitureInventory[existingTileID] += amount
-		} else {
-			c.Location.Cafe().FurnitureInventory[existingTileID] = amount
-		}
+		c.Location.Cafe().AddFurnitures(existingTileID, amount)
 
 		// Replace tile
-		c.Location.Cafe().Tiles[tile[0]][tile[1]] = tileID
+		c.Location.Cafe().SetTile(tile[0], tile[1], tileID)
 		oldTilesStr = append(oldTilesStr, fmt.Sprintf("%v+%v", existingTileID, amount))
 	}
 

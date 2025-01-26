@@ -27,14 +27,13 @@ func JoinCafe(req *requests.Request, c *client.Client, gm *managers.GameManager)
 		c.Location.Leave(c.Player.ID)
 
 		// Remove location if empty and owner is offline
-		if c.Location.IsEmpty() && !gm.IsOnline(c.Location.Cafe().ID) && c.Location.Cafe().ID > 0 {
-
-			gm.RemoveLocation(c.Location.Cafe().ID)
+		if c.Location.IsEmpty() && !gm.IsOnline(c.Location.Cafe().GetID()) && c.Location.Cafe().GetID() > 0 {
+			gm.RemoveLocation(c.Location.Cafe().GetID())
 		}
 	}
 
 	// Join location
-	location.Join(c.Player.ID, c.Writer)
+	location.Join(c.Player.ID, c.ResponseQueue)
 
 	// Save location
 	c.Location = location

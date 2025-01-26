@@ -26,7 +26,7 @@ func MoveObject(req *requests.Request, c *client.Client, gm *managers.GameManage
 		return err
 	}
 	// Dont allow players to modify the packet and sending us ERO while not in editor.
-	if !c.Location.Cafe().InEditorMode {
+	if !c.Location.Cafe().InEditorMode() {
 		c.SendExtensionResponse("emo", "-1", "38", strconv.Itoa(oldObjX), strconv.Itoa(oldObjY))
 		return nil
 	}

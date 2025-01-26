@@ -4,32 +4,32 @@ import "github.com/charmbracelet/log"
 
 func (c *Cafe) AddFurnitures(id, amount int) {
 
-	if c.ID < 0 {
+	if c.id < 0 {
 		log.Printf("You tried to add something to the marketplaces furniture inventory")
 		return
 	}
 
-	_, ok := c.FurnitureInventory[id]
+	_, ok := c.furnitureInventory[id]
 	if ok {
-		c.FurnitureInventory[id] += amount
+		c.furnitureInventory[id] += amount
 	} else {
-		c.FurnitureInventory[id] = amount
+		c.furnitureInventory[id] = amount
 	}
 }
 
 func (c *Cafe) RemoveFurnitures(id, amount int) bool {
 
-	if c.ID < 0 {
+	if c.id < 0 {
 		log.Printf("You tried to remove something from the marketplaces furniture inventory")
 		return false
 	}
 
-	_, ok := c.FurnitureInventory[id]
+	_, ok := c.furnitureInventory[id]
 	if ok {
-		if c.FurnitureInventory[id]-amount < 0 {
+		if c.furnitureInventory[id]-amount < 0 {
 			return false
 		}
-		c.FurnitureInventory[id] -= amount
+		c.furnitureInventory[id] -= amount
 	} else {
 		return false
 	}

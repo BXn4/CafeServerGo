@@ -23,13 +23,11 @@ func (gm *GameManager) RemoveLocation(id int) {
 	gm.locationMutex.Lock()
 	defer gm.locationMutex.Unlock()
 
-	log.Printf("LOCATION IS BEING REMOVED: %v\n", id)
-
 	for i, lc := range gm.locations {
-		if lc.cafe.ID == id {
+		if lc.cafe.GetID() == id {
 			// This removes the location by id by not changing the others memory addresses
 			gm.db.SaveCafe(lc.Cafe())
-			log.Debugf("Saved %v cafe to db\n", lc.cafe.ID)
+			log.Debugf("Saved %v cafe to db\n", lc.cafe.GetID())
 			delete(gm.locations, i)
 			return
 		}
@@ -52,13 +50,13 @@ func (gm *GameManager) AddLocation(id int) *LoadedLocation {
 	cafeObj, err = gm.db.GetCafeByPlayerID(id)
 	if err != nil {
 		// BIG FUCK UP
-		log.Printf("[ERROR] Player with id %v has no cafe in database", id)
+		log.Errorf("Player with id %v has no cafe in database: %v", id, err)
 		return nil
 	}
 
 	//
 	loc := NewLoadedLocation(cafeObj, gm)
-	fmt.Printf("Loaded %v cafe from db\n", loc.cafe.ID)
+	fmt.Printf("Loaded %v cafe from db\n", loc.cafe.GetID())
 	gm.locations[id] = loc
 
 	return loc

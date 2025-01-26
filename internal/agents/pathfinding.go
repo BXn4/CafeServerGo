@@ -30,12 +30,12 @@ func (p CafePoint) Key() cafeKey {
 }
 
 func (p CafePoint) inBounds() bool {
-	return !(p.x <= 0 || p.y <= 0 || p.x >= p.cafe.Size || p.y >= p.cafe.Size)
+	return !(p.x <= 0 || p.y <= 0 || p.x >= p.cafe.GetSize() || p.y >= p.cafe.GetSize())
 }
 
 func (p *CafePoint) Neighbors() []*CafePoint {
 	// Check if object
-	for _, object := range p.cafe.Objects {
+	for _, object := range p.cafe.GetObjects() {
 		if object.GetPos()[0] == p.x && object.GetPos()[1] == p.y {
 			return []*CafePoint{}
 		}
@@ -67,7 +67,7 @@ func (p *CafePoint) Neighbors() []*CafePoint {
 	var finalNeighbors []*CafePoint
 	for _, neighbor := range neighbors {
 		empty := true
-		for _, object := range p.cafe.Objects {
+		for _, object := range p.cafe.GetObjects() {
 
 			if object.IsCounter() || object.IsChair() {
 				continue

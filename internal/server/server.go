@@ -48,6 +48,7 @@ func (s *CafeServer) Run() {
 	db, err := database.ConnectToDB(s.dbConfig)
 	if err != nil {
 		log.Errorf("%v", err)
+		return
 	}
 	defer db.Close()
 	log.Infof("Server connected to database...")
@@ -74,9 +75,8 @@ func (s *CafeServer) Run() {
 
 		c := client.New(conn, db, s.gm)
 		s.gm.AddClient(c)
-
+		c.Start()
 		go commands.HandleClient(c, s.gm)
-
 	}
 	// TODO: Save all and free memory
 

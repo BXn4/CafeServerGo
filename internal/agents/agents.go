@@ -11,7 +11,7 @@ func AgentCycle(l interfaces.CafeLocation) {
 	l.ClearReservedObjects()
 
 	// Spawn waiters
-	for i, w := range l.Cafe().Waiters {
+	for i, w := range l.Cafe().GetWaiters() {
 		// Spawn waiter
 		w.IsWorking = true
 		w.CurrentCounter = nil
@@ -22,7 +22,7 @@ func AgentCycle(l interfaces.CafeLocation) {
 
 	// Count chairs
 	var chairs []*objects.CafeObject
-	for _, obj := range l.Cafe().Objects {
+	for _, obj := range l.Cafe().GetObjects() {
 		if obj.IsChair() {
 			chairs = append(chairs, obj)
 		}
@@ -31,15 +31,15 @@ func AgentCycle(l interfaces.CafeLocation) {
 	// Spawn customers
 	go func() {
 		for l.IsRunning() {
-			if len(l.Cafe().Customers) < len(chairs) {
+			if len(l.Cafe().GetCustomers()) < len(chairs) {
 				go IterateCustomer(l, SpawnCustomer(l))
 			}
 		}
-		l.Cafe().Customers = []*objects.Customer{}
+		l.Cafe().SetCustomers([]*objects.Customer{})
 	}()
 
 	// IterateWaiters
-	waiters := l.Cafe().Waiters
+	waiters := l.Cafe().GetWaiters()
 	for _, waiter := range waiters {
 
 		go func() {

@@ -36,7 +36,7 @@ func (gm *GameManager) DisconnectClient(id int) {
 			if c.Location != nil {
 				c.Location.Leave(id)
 				// Check if empty, owner offline, not market
-				if c.Location.IsEmpty() && !gm.isOnline(c.Location.Cafe().ID) && c.Location.Cafe().ID > 0 {
+				if c.Location.IsEmpty() && !gm.isOnline(c.Location.Cafe().GetID()) && c.Location.Cafe().GetID() > 0 {
 					gm.RemoveLocation(id)
 				}
 

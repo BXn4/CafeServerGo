@@ -12,7 +12,7 @@ import (
 func StoveDeliver(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	// Dont allow players to modify the packet and sending us CSD while in editor.
-	if c.Location.Cafe().InEditorMode {
+	if c.Location.Cafe().InEditorMode() {
 		return nil
 	}
 

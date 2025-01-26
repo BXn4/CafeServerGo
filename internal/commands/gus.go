@@ -45,7 +45,7 @@ func UseGift(req *requests.Request, c *client.Client, gm *managers.GameManager) 
 
 		// Get empty counter
 		var counter *objects.CafeObject
-		for _, obj := range c.Location.Cafe().Objects {
+		for _, obj := range c.Location.Cafe().GetObjects() {
 			if !obj.IsCounter() {
 				continue
 			}

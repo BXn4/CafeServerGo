@@ -111,14 +111,41 @@ const (
 	S2C_PING      = "pin"
 )
 
-type Response struct {
-	Args []string
+type Response interface {
+	Args() []string
+	Wrap() string
 }
 
-func WrapSystemResponse(args ...string) string {
-	return strings.Join(args, "") + "\x00"
+// System response
+type SystemResponse struct {
+	args []string
 }
 
-func WrapExtensionResponse(args ...string) string {
-	return "%xt%" + strings.Join(args, "%") + "%\x00"
+func NewSystemResponse(args ...string) *SystemResponse {
+	return &SystemResponse{args: args}
+}
+
+func (r *SystemResponse) Wrap() string {
+	return strings.Join(r.args, "") + "\x00"
+}
+
+func (r *SystemResponse) Args() []string {
+	return r.args
+}
+
+// Extension response
+type ExtensionResponse struct {
+	args []string
+}
+
+func NewExtensionResponse(args ...string) *ExtensionResponse {
+	return &ExtensionResponse{args: args}
+}
+
+func (r *ExtensionResponse) Wrap() string {
+	return "%xt%" + strings.Join(r.args, "%") + "%\x00"
+}
+
+func (r *ExtensionResponse) Args() []string {
+	return r.args
 }

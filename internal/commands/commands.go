@@ -11,22 +11,16 @@ import (
 
 func HandleClient(c *client.Client, gm *managers.GameManager) {
 
-	for c.Alive() {
-
-		// Read next request
-		req, err := c.NextRequest()
-		if err != nil {
-			log.Errorf("Failed to read request: %s\n", err.Error())
-			break
+	for req := range c.RequestQueue {
+		if req == nil {
+			continue
 		}
-
 		// Handle requests
-		err = HandleRequest(req, c, gm)
+		err := HandleRequest(req, c, gm)
 		if err != nil {
 			log.Warnf("%v request: %s", req.Args[0], err.Error())
 			continue
 		}
-
 	}
 
 	c.Disconnect()

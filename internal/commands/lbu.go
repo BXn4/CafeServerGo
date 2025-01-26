@@ -59,7 +59,7 @@ func LoginRewards(req *requests.Request, c *client.Client, gm *managers.GameMana
 	}
 
 	// Calculate customer spawn time (we use max time so people dont try to cheat the system)
-	rating := mycafe.Rating
+	rating := mycafe.GetRating()
 	var customerSpawnTime int
 	if rating < 150 {
 		customerSpawnTime = 20
@@ -116,7 +116,7 @@ func LoginRewards(req *requests.Request, c *client.Client, gm *managers.GameMana
 	c.DB.SaveCafe(mycafe)
 
 	// Send response
-
 	c.SendExtensionResponse("lbu", "-1", "0", strings.Join(args, "#"), soldDishesStr)
+
 	return nil
 }

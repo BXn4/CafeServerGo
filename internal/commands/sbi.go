@@ -13,7 +13,7 @@ import (
 func BuyIngredient(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	// Dont allow players to modify the packet and sending us MJM while in editor.
-	if c.Location.Cafe().InEditorMode {
+	if c.Location.Cafe().InEditorMode() {
 		return nil
 	}
 
@@ -55,11 +55,7 @@ func BuyIngredient(req *requests.Request, c *client.Client, gm *managers.GameMan
 		}
 	}
 
-	if c.Location.Cafe().FridgeInventory[ingredientID] != 0 {
-		c.Location.Cafe().FridgeInventory[ingredientID] += ingredientAmount
-	} else {
-		c.Location.Cafe().FridgeInventory[ingredientID] = ingredientAmount
-	}
+	c.Location.Cafe().AddToFridge(ingredientID, ingredientAmount)
 
 	c.SendExtensionResponse("sbi", "-1", "0", strconv.Itoa(ingredientID), strconv.Itoa(ingredientAmount))
 

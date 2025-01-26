@@ -33,7 +33,7 @@ func SellObject(req *requests.Request, c *client.Client, gm *managers.GameManage
 	}
 
 	// Dont allow players to modify the packet and sending us ESE while not in editor.
-	if !c.Location.Cafe().InEditorMode {
+	if !c.Location.Cafe().InEditorMode() {
 		c.SendExtensionResponse("ese", "-1", "38", strconv.Itoa(objX), strconv.Itoa(objY))
 		return nil
 	}
@@ -52,17 +52,18 @@ func SellObject(req *requests.Request, c *client.Client, gm *managers.GameManage
 		}
 
 		// If the player is not sending from inventory, remove luxury
-		c.Location.Cafe().Luxury -= (objectInfo.Cash / 4000) + (objectInfo.Gold * 2)
+		c.Location.Cafe().AddLuxury(-(objectInfo.Cash / 4000) + (objectInfo.Gold * 2))
 
 		c.Location.Cafe().RemoveObject(obj.GetPos()[0], obj.GetPos()[1])
 	} else {
 		// If the player wants to send more than they have
-		if c.Location.Cafe().FurnitureInventory[objID] < sellAmount {
+		if c.Location.Cafe().GetFurnitureInventory()[objID] < sellAmount {
 			c.SendExtensionResponse("ese", "-1", "32", strconv.Itoa(objX), strconv.Itoa(objY))
 			return nil
 		}
 
-		c.Location.Cafe().FurnitureInventory[objID] -= sellAmount
+		c.Location.Cafe().RemoveFurnitures(objID, sellAmount)
+
 	}
 
 	c.Player.Cash += sellAmount * int(math.Round(float64(objectInfo.Cash)*0.2+float64(objectInfo.Gold)*0.2))

@@ -1,7 +1,6 @@
 package managers
 
 import (
-	"bufio"
 	"cafego/internal/agents"
 	"cafego/internal/client"
 	"cafego/internal/objects"
@@ -18,7 +17,7 @@ import (
 // --- LoadedLocation ----------------------------------------------------------
 type LoadedLocation struct {
 	cafe         *objects.Cafe
-	occupants    map[int]*bufio.Writer
+	occupants    map[int](chan<- responses.Response)
 	mu           sync.Mutex
 	gm           *GameManager
 	running      bool
@@ -29,14 +28,14 @@ func NewLoadedLocation(cafe *objects.Cafe, gm *GameManager) *LoadedLocation {
 	return &LoadedLocation{
 		cafe:      cafe,
 		gm:        gm,
-		occupants: make(map[int]*bufio.Writer),
+		occupants: make(map[int](chan<- responses.Response), 0),
 		running:   false,
 	}
 }
 
+// TODO: Change this its shiti design and throws nil pointer exception
+// when more clients want to use it
 func (lc *LoadedLocation) Cafe() *objects.Cafe {
-	lc.mu.Lock()
-	defer lc.mu.Unlock()
 	return lc.cafe
 }
 
@@ -80,7 +79,7 @@ func (lc *LoadedLocation) SetRunning(b bool) {
 	lc.running = b
 
 	// Change waiter switch
-	for _, w := range lc.cafe.Waiters {
+	for _, w := range lc.cafe.GetWaiters() {
 		w.IsWorking = b
 	}
 
@@ -94,7 +93,7 @@ func (lc *LoadedLocation) setRunning(b bool) {
 	lc.running = b
 
 	// Change waiter switch
-	for _, w := range lc.cafe.Waiters {
+	for _, w := range lc.cafe.GetWaiters() {
 		w.IsWorking = b
 	}
 
@@ -104,9 +103,11 @@ func (lc *LoadedLocation) setRunning(b bool) {
 	}
 }
 
-func (lc *LoadedLocation) Join(playerID int, writer *bufio.Writer) {
+func (lc *LoadedLocation) Join(playerID int, channel chan<- responses.Response) {
 	lc.mu.Lock()
 	defer lc.mu.Unlock()
+
+	log.Printf("--------------------------")
 
 	if !lc.running {
 		lc.running = true
@@ -121,13 +122,13 @@ func (lc *LoadedLocation) Join(playerID int, writer *bufio.Writer) {
 	}
 
 	// Set position of player
-	c.(*client.Client).Player.Position = [2]int{lc.cafe.PlayerStart[0], lc.cafe.PlayerStart[1]}
+	c.(*client.Client).Player.Position = lc.cafe.GetPlayerStart()
 
 	// Send everyone the joined player
 	lc.announce(playerID, "juj", "-1", "0", c.(*client.Client).Player.String())
 
 	// Add to players in cafe
-	lc.occupants[playerID] = writer
+	lc.occupants[playerID] = channel
 
 	// Send cafe data
 	args := []string{"sgc", "-1", "0"}
@@ -166,7 +167,7 @@ func (lc *LoadedLocation) Leave(id int) {
 	delete(lc.occupants, id)
 
 	// If there are no players at the location and the location is not the marketplace
-	if len(lc.occupants) == 0 && !(lc.cafe.ID < 0) {
+	if len(lc.occupants) == 0 && !(lc.cafe.GetID() < 0) {
 		lc.setRunning(false)
 	}
 
@@ -278,7 +279,7 @@ func (lc *LoadedLocation) GetUniqueCustomerID() int {
 	defer lc.mu.Unlock()
 
 	var ids []int
-	for _, customer := range lc.cafe.Customers {
+	for _, customer := range lc.cafe.GetCustomers() {
 		ids = append(ids, customer.GetID())
 	}
 
@@ -293,45 +294,24 @@ func (lc *LoadedLocation) AddCustomer(customer *objects.Customer) {
 	lc.mu.Lock()
 	defer lc.mu.Unlock()
 
-	lc.Cafe().Customers = append(lc.Cafe().Customers, customer)
+	lc.Cafe().AddCustomer(customer)
 }
 
 func (lc *LoadedLocation) Owner() (*objects.Player, error) {
-	c, err := lc.gm.GetClient(lc.cafe.ID)
+	c, err := lc.gm.GetClient(lc.cafe.GetID())
 	if err != nil {
 		return nil, err
 	}
 	return c.(*client.Client).Player, nil
 }
 
-func (lc *LoadedLocation) RemoveCustomer(id int) {
-	lc.mu.Lock()
-	defer lc.mu.Unlock()
-
-	index := -1
-	customers := lc.Cafe().Customers
-	for i := range customers {
-		if customers[i].GetID() == id {
-			index = i
-		}
-	}
-
-	if index == -1 {
-		// TODO error
-		return
-	}
-
-	lc.Cafe().Customers = append(lc.Cafe().Customers[:index], lc.Cafe().Customers[index+1:]...)
-}
-
 // |========================================|
 // | !!!  BEFORE USING THIS LOCK MUTEX  !!! |
 // |========================================|
 func (lc *LoadedLocation) send(id int, args ...string) {
-	msg := responses.WrapExtensionResponse(args...)
-	log.Logf(log.Level(-3), "to %v: %s", id, msg)
-	lc.occupants[id].Write([]byte(msg))
-	lc.occupants[id].Flush()
+	resp := responses.NewExtensionResponse(args...)
+	log.Logf(log.Level(-3), "to %v: %s", id, resp.Wrap())
+	lc.occupants[id] <- resp
 }
 
 // |========================================|
@@ -341,12 +321,10 @@ func (lc *LoadedLocation) send(id int, args ...string) {
 // This will send a message to everyone in the loaded cafe
 func (lc *LoadedLocation) broadcast(args ...string) {
 
-	msg := responses.WrapExtensionResponse(args...)
-	log.Logf(log.Level(-1), "%s", msg)
-
-	for _, o := range lc.occupants {
-		o.Write([]byte(msg))
-		o.Flush()
+	resp := responses.NewExtensionResponse(args...)
+	log.Logf(log.Level(-1), "%s", resp.Wrap())
+	for _, channel := range lc.occupants {
+		channel <- resp
 	}
 }
 
@@ -357,13 +335,12 @@ func (lc *LoadedLocation) broadcast(args ...string) {
 // Same as the Broadcast, just sending to the other players, and not sending it to the source
 func (lc *LoadedLocation) announce(playerID int, args ...string) {
 
-	msg := responses.WrapExtensionResponse(args...)
-	log.Logf(log.Level(-2), "%s", msg)
-	for oid, o := range lc.occupants {
-		if oid == playerID {
+	resp := responses.NewExtensionResponse(args...)
+	log.Logf(log.Level(-2), "%s", resp.Wrap())
+	for id, channel := range lc.occupants {
+		if id == playerID {
 			continue
 		}
-		o.Write([]byte(msg))
-		o.Flush()
+		channel <- resp
 	}
 }

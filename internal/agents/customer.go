@@ -15,7 +15,7 @@ import (
 // Spawns a custommer at the location
 func SpawnCustomer(l interfaces.CafeLocation) *objects.Customer {
 
-	rating := l.Cafe().Rating
+	rating := l.Cafe().GetRating()
 
 	var spawnInterval int
 	if rating < 150 {
@@ -35,7 +35,7 @@ func SpawnCustomer(l interfaces.CafeLocation) *objects.Customer {
 	customer := objects.NewCustomer(
 		l.GetUniqueCustomerID(),
 		objects.NewRandomAvatar(),
-		[2]int{l.Cafe().PlayerStart[0], l.Cafe().PlayerStart[1]},
+		[2]int{l.Cafe().GetPlayerStart()[0], l.Cafe().GetPlayerStart()[1]},
 		-1,
 		objects.CUSTOMER_INSERT,
 		false,
@@ -81,7 +81,7 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 	for table == nil || chair == nil {
 
 		if time.Since(startTime) >= 10*time.Second {
-			l.Cafe().Rating -= 2
+			l.Cafe().AddRating(-2)
 			Leave(l, c) // Leaves sad :(
 			return
 		}
@@ -147,7 +147,7 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 			return
 		}
 		if time.Since(startTime) >= 10*time.Second {
-			l.Cafe().Rating -= 2
+			l.Cafe().AddRating(-2)
 			Leave(l, c) // Leaves sad :(
 			l.UnreserveObject(table)
 			l.UnreserveObject(chair)
@@ -212,7 +212,7 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 	}
 	player.Cash += dishInfo.IncomePerServing
 	player.XP += dishInfo.XP
-	l.Cafe().Rating++
+	l.Cafe().AddRating(1)
 
 	// Dirty dishes
 	chair.SetDishID(-2) // Dirty
@@ -241,7 +241,7 @@ func GetAvailableEatingSpace(l interfaces.CafeLocation) (*objects.CafeObject, *o
 
 		// Loop through all chairs and if approachable return them
 		for _, chair := range chairs {
-			start := NewCafePoint(l.Cafe().PlayerStart, l.Cafe())
+			start := NewCafePoint([2]int(l.Cafe().GetPlayerStart()), l.Cafe())
 			end := NewCafePoint(chair.GetPos(), l.Cafe())
 			_, distance, found := Path(start, end)
 			if found {
@@ -274,7 +274,7 @@ func Leave(l interfaces.CafeLocation, c *objects.Customer) {
 
 	// Move to exit
 	start := NewCafePoint(c.GetPos(), l.Cafe())
-	end := NewCafePoint(l.Cafe().PlayerStart, l.Cafe())
+	end := NewCafePoint([2]int(l.Cafe().GetPlayerStart()), l.Cafe())
 	_, distance, _ := Path(start, end)
 
 	if !SleepWhileChecking(l, time.Duration(distance)*time.Second, l.GetIsRunning()) {
@@ -286,5 +286,5 @@ func Leave(l interfaces.CafeLocation, c *objects.Customer) {
 		return
 	}
 
-	l.RemoveCustomer(c.GetID())
+	l.Cafe().RemoveCustomer(c.GetID())
 }

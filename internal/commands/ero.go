@@ -23,7 +23,7 @@ func RotateObject(req *requests.Request, c *client.Client, gm *managers.GameMana
 		return err
 	}
 	// Dont allow players to modify the packet and sending us ERO while not in editor.
-	if !c.Location.Cafe().InEditorMode {
+	if !c.Location.Cafe().InEditorMode() {
 		c.SendExtensionResponse("ero", "-1", "38", strconv.Itoa(objX), strconv.Itoa(objY))
 		return nil
 	}

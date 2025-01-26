@@ -22,7 +22,7 @@ func HireWaiter(req *requests.Request, c *client.Client, gm *managers.GameManage
 	changed := true
 	for changed {
 		changed = false
-		for _, w := range c.Location.Cafe().Waiters {
+		for _, w := range c.Location.Cafe().GetWaiters() {
 			if newID == w.ID {
 				newID++
 				changed = true
@@ -38,7 +38,7 @@ func HireWaiter(req *requests.Request, c *client.Client, gm *managers.GameManage
 		Avatar:    avatar,
 		IsWorking: true,
 	}
-	c.Location.Cafe().Waiters = append(c.Location.Cafe().Waiters, newWaiter)
+	c.Location.Cafe().AddWaiter(newWaiter)
 
 	// Spawn
 	agents.SpawnWaiter(c.Location, newWaiter)

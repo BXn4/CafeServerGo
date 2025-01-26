@@ -25,7 +25,7 @@ func RandString(n int) string {
 
 func main() {
 	var wg sync.WaitGroup
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 1000; i++ {
 		wg.Add(1)
 		go mimicPlayer(&wg)
 	}
@@ -54,7 +54,6 @@ func createAccount(conn net.Conn, reader *bufio.Reader) string {
 		if err != nil {
 			return ""
 		}
-
 		if strings.HasPrefix(msg, "%xt%gui") {
 			id = strings.Split(msg, "%")[5]
 			break

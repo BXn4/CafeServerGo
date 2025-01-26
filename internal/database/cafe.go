@@ -31,30 +31,30 @@ type CafeDAO struct {
 func ConvertCafeDAOToCafe(cafeDAO CafeDAO) (*objects.Cafe, error) {
 
 	// Fill simple cafe object
-	var cafe objects.Cafe
-	cafe.ID = cafeDAO.ID
-	cafe.PlayerID = cafeDAO.PlayerID
-	cafe.Luxury = cafeDAO.Luxury
-	cafe.Rating = cafe.GetMinimumRating(cafeDAO.Rating)
-	cafe.ExpansionID = cafeDAO.ExpansionID
-	cafe.OwnerName = cafeDAO.OwnerName
-	cafe.Background = objects.DefaultBackground
+	cafe := objects.NewCafe(
+		cafeDAO.ID,
+		cafeDAO.PlayerID,
+		cafeDAO.OwnerName,
+		cafeDAO.Luxury,
+		cafeDAO.ExpansionID,
+	)
+	cafe.SetRating(cafe.GetMinimumRating(cafeDAO.Rating))
 
 	// Parse tiles
 	var err error
 	err = cafe.ParseTiles(cafeDAO.Tiles)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Cannot parse tiles: %v", err)
 	}
 
 	// Parse objects
 	err = cafe.ParseObjectsFromJSON(cafeDAO.Objects)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Cannot parse objects from json: %v", err)
 	}
 
 	// Parse fridge inventory
-	cafe.FridgeInventory = map[int]int{}
+	cafe.SetFridgeInventory(map[int]int{})
 	raw_frInv := strings.Split(cafeDAO.FridgeInventory, "#")
 	for _, item := range raw_frInv {
 
@@ -62,34 +62,36 @@ func ConvertCafeDAOToCafe(cafeDAO CafeDAO) (*objects.Cafe, error) {
 		data := strings.Split(item, "+")
 		id, err := strconv.Atoi(data[0])
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("Cannot convert data: %v", err)
 		}
 		count, err := strconv.Atoi(data[1])
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("Cannot convert count: %v", err)
 		}
 
 		// Add to fridge
-		cafe.FridgeInventory[id] = count
+		cafe.AddToFridge(id, count)
 	}
 
 	// Parse furniture inventory
-	cafe.FurnitureInventory = map[int]int{}
+	cafe.SetFurnitureInventory(map[int]int{})
+	log.Printf("FURNITURE INVENTORY: %v", cafeDAO.FurnitureInventory)
 	raw_fuInv := strings.Split(cafeDAO.FurnitureInventory, "#")
 	for _, item := range raw_fuInv {
+
 		// Parse item and count
 		data := strings.Split(item, "+")
 		id, err := strconv.Atoi(data[0])
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("Cannot convert furniture id: %v", err)
 		}
 		count, err := strconv.Atoi(data[1])
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("Cannot convert furniture count: %v", err)
 		}
 
 		// Add to furnitures
-		cafe.FurnitureInventory[id] = count
+		cafe.AddFurnitures(id, count)
 	}
 
 	// Parse waiters
@@ -102,15 +104,13 @@ func ConvertCafeDAOToCafe(cafeDAO CafeDAO) (*objects.Cafe, error) {
 		if err != nil {
 			return nil, err
 		}
-		cafe.Waiters = append(cafe.Waiters, waiter)
+		cafe.AddWaiter(waiter)
 	}
 
-	return &cafe, nil
+	return cafe, nil
 }
 
 func (db *CafeDB) GetCafeByPlayerID(player_id int) (*objects.Cafe, error) {
-	// db.mu.Lock()
-	// defer db.mu.Unlock()
 
 	row := db.conn.QueryRow("SELECT * FROM cafe WHERE player_id = ?", player_id)
 
@@ -132,50 +132,48 @@ func (db *CafeDB) GetCafeByPlayerID(player_id int) (*objects.Cafe, error) {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("ID NOT FOUND")
 		}
-		return nil, fmt.Errorf("SQL ERR: %v", err)
+		return nil, fmt.Errorf("\n\tSQL ERR: %v", err)
 	}
 
 	cafe, err := ConvertCafeDAOToCafe(cafeDAO)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("\n\tCannot convert CafeDAO to Cafe: %v", err)
 	}
 
 	return cafe, nil
 }
 
 func (db *CafeDB) SaveCafe(cafe *objects.Cafe) {
-	// db.mu.Lock()
-	// defer db.mu.Unlock()
 
 	// Build tiles
 	var tiles []string
-	for i, row := range cafe.Tiles {
+	for i, row := range cafe.GetTiles() {
 		for j := range len(row) {
-			tiles = append(tiles, strconv.Itoa(cafe.Tiles[i][j]))
+			tiles = append(tiles, strconv.Itoa(cafe.GetTiles()[i][j]))
 		}
 	}
 
 	// Build objs
 	objs := []string{}
-	for _, obj := range cafe.Objects {
+	for _, obj := range cafe.GetObjects() {
 		objs = append(objs, obj.JSON())
 	}
 
 	// Build fridge inventory
 	fridgeInv := []string{}
-	for i, v := range cafe.FridgeInventory {
+	for i, v := range cafe.GetFridgeInventory() {
 		fridgeInv = append(fridgeInv, fmt.Sprintf("%v+%v", i, v))
 	}
 
 	// Build furniture inventory
 	furnitureInv := []string{}
-	for i, v := range cafe.FurnitureInventory {
+	for i, v := range cafe.GetFurnitureInventory() {
 		furnitureInv = append(furnitureInv, fmt.Sprintf("%v+%v", i, v))
 	}
 
 	// Build waiters
 	waiters := []string{}
-	for _, w := range cafe.Waiters {
+	for _, w := range cafe.GetWaiters() {
 		waiters = append(waiters, w.JSON())
 	}
 
@@ -190,19 +188,19 @@ func (db *CafeDB) SaveCafe(cafe *objects.Cafe) {
 			"furniture_inv = ?,"+
 			"waiters = ? "+
 			"WHERE player_id = ?",
-		cafe.Rating,
-		cafe.Luxury,
-		cafe.ExpansionID,
+		cafe.GetRating(),
+		cafe.GetLuxury(),
+		cafe.GetExpansionID(),
 		strings.Join(tiles, "+"),
 		"["+strings.Join(objs, ", ")+"]",
 		strings.Join(fridgeInv, "#"),
 		strings.Join(furnitureInv, "#"),
 		"["+strings.Join(waiters, ", ")+"]",
-		cafe.ID,
+		cafe.GetID(),
 	)
 
 	if err != nil {
-		fmt.Printf("Cant save cafe: %v\n", err)
+		log.Errorf("Cant save cafe: %v\n", err)
 		return
 	}
 

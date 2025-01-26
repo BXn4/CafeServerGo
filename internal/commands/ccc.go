@@ -15,7 +15,7 @@ import (
 func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	// Dont allow players to modify the packet and sending us CCC while in editor.
-	if c.Location.Cafe().InEditorMode {
+	if c.Location.Cafe().InEditorMode() {
 		return nil
 	}
 
@@ -87,15 +87,12 @@ func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameMana
 		}
 
 		for ingredientID, ingredientAmount := range ingredientsMap {
-			fridgeInventoryAmount := c.Location.Cafe().FridgeInventory[ingredientID]
+			fridgeInventoryAmount := c.Location.Cafe().GetFridgeInventory()[ingredientID]
 			if ingredientAmount > fridgeInventoryAmount {
 				return fmt.Errorf("Player not have enough ingredient in the fridge")
 			}
 
-			c.Location.Cafe().FridgeInventory[ingredientID] -= ingredientAmount
-			if c.Location.Cafe().FridgeInventory[ingredientID] == 0 {
-				delete(c.Location.Cafe().FridgeInventory, ingredientID)
-			}
+			c.Location.Cafe().RemoveFromFridge(ingredientID, ingredientAmount)
 		}
 
 		stove.SetDishID(dishID)

@@ -4,15 +4,14 @@ import (
 	"bufio"
 	"cafego/internal/database"
 	"cafego/internal/interfaces"
+	"io"
+	"time"
 
 	"github.com/charmbracelet/log"
 
 	"cafego/internal/objects"
 	"cafego/internal/types/requests"
 	"cafego/internal/types/responses"
-	"errors"
-	"fmt"
-	"io"
 	"net"
 	"strings"
 )
@@ -25,6 +24,9 @@ type Client struct {
 	Location      interfaces.CafeLocation // Players current location
 	Player        *objects.Player         // Player object
 	ClientManager interfaces.ClientManager
+
+	RequestQueue  chan *requests.Request
+	ResponseQueue chan responses.Response
 }
 
 func New(conn net.Conn, dbc *database.CafeDB, cm interfaces.ClientManager) *Client {
@@ -33,6 +35,9 @@ func New(conn net.Conn, dbc *database.CafeDB, cm interfaces.ClientManager) *Clie
 		Writer:        bufio.NewWriter(conn),
 		DB:            dbc,
 		ClientManager: cm,
+
+		RequestQueue:  make(chan *requests.Request, 255),
+		ResponseQueue: make(chan responses.Response, 255),
 	}
 }
 
@@ -40,9 +45,9 @@ func (c *Client) ID() int {
 	return c.Player.ID
 }
 
-func (c *Client) Alive() bool {
-	peekedData, err := c.Reader.Peek(1)
-	return err != nil && err != io.EOF || len(peekedData) > 0
+func (c *Client) Start() {
+	go c.receiveRequests()
+	go c.sendResponses()
 }
 
 func (c *Client) Disconnect() {
@@ -52,36 +57,50 @@ func (c *Client) Disconnect() {
 	}
 }
 
-func (c *Client) NextRequest() (*requests.Request, error) {
-
-	// Read message
-	message, err := c.Reader.ReadString('\x00')
-	if err != nil {
-		c.Disconnect()
-		return nil, errors.New(fmt.Sprintf("Error while reading msq: %s", err.Error()))
-	}
-	log.Logf(log.Level(-5), "%s", message)
-
-	// Parse request
-	req, err := requests.ParseRequest(strings.Trim(message, "\x00"))
-	if err != nil {
-		c.Disconnect()
-		return nil, errors.New(fmt.Sprintf("Error parsing request: %s", err.Error()))
-	}
-
-	return req, nil
-}
-
 func (c *Client) SendSystemResponse(args ...string) {
-	msg := responses.WrapSystemResponse(args...)
-	log.Logf(log.Level(-3), "%s", msg)
-	c.Writer.Write([]byte(msg))
-	c.Writer.Flush()
+	resp := responses.NewSystemResponse(args...)
+	log.Logf(log.Level(-3), "%s", resp.Wrap())
+	c.ResponseQueue <- resp
 }
 
 func (c *Client) SendExtensionResponse(args ...string) {
-	msg := responses.WrapExtensionResponse(args...)
-	log.Logf(log.Level(-3), "%s", msg)
-	c.Writer.Write([]byte(msg))
-	c.Writer.Flush()
+	resp := responses.NewExtensionResponse(args...)
+	log.Logf(log.Level(-3), "%s", resp.Wrap())
+	c.ResponseQueue <- resp
+}
+
+func (c *Client) sendResponses() {
+	defer close(c.ResponseQueue)
+	for resp := range c.ResponseQueue {
+		if resp == nil {
+			continue
+		}
+		time.Sleep(10 * time.Millisecond)
+		c.Writer.Write([]byte(resp.Wrap()))
+		c.Writer.Flush()
+	}
+}
+
+func (c *Client) receiveRequests() {
+	defer close(c.RequestQueue)
+	for {
+
+		message, err := c.Reader.ReadString('\x00')
+		if err != nil {
+			if err == io.EOF {
+				continue
+			}
+			return
+		}
+		log.Logf(log.Level(-5), "%s", message)
+
+		// Parse request
+		req, err := requests.ParseRequest(strings.Trim(message, "\x00"))
+		if err != nil {
+			log.Error("Failed to parse request: %v", err)
+			continue
+		}
+
+		c.RequestQueue <- req
+	}
 }

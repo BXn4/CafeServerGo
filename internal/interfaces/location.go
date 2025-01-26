@@ -1,15 +1,15 @@
 package interfaces
 
 import (
-	"bufio"
 	"cafego/internal/objects"
+	"cafego/internal/types/responses"
 )
 
 // This is a wrapper for a cafe
 // so we can handle the players inside more easily
 type CafeLocation interface {
 	// Add the player to the location by id
-	Join(id int, writer *bufio.Writer)
+	Join(id int, channel chan<- responses.Response)
 
 	// Disconnects the player by id
 	Leave(id int)
@@ -53,9 +53,6 @@ type CafeLocation interface {
 
 	//
 	AddCustomer(*objects.Customer)
-
-	//
-	RemoveCustomer(id int)
 
 	//
 	SetRunning(bool)

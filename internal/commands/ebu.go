@@ -33,7 +33,7 @@ func BuyObject(req *requests.Request, c *client.Client, gm *managers.GameManager
 	}
 
 	// Dont allow players to modify the packet and sending us EBU while not in editor.
-	if !c.Location.Cafe().InEditorMode {
+	if !c.Location.Cafe().InEditorMode() {
 		// Need to send the ID, because the client parse it / these.
 		c.SendExtensionResponse("ebu", "-1", "38", strconv.Itoa(objX), strconv.Itoa(objY), strconv.Itoa(objID), strconv.Itoa(objRotation))
 		return nil
@@ -54,7 +54,7 @@ func BuyObject(req *requests.Request, c *client.Client, gm *managers.GameManager
 	}
 
 	// If the player does not have the object in their inventory, dont remove cash, gold
-	if c.Location.Cafe().FurnitureInventory[objID] != 0 {
+	if c.Location.Cafe().GetFurnitureInventory()[objID] != 0 {
 		if objectInfo.Cash != 0 && objectInfo.Cash > c.Player.Cash {
 			// Need to send the ID, because the client parse it / these.
 			c.SendExtensionResponse("ebu", "-1", "4", strconv.Itoa(objX), strconv.Itoa(objY), strconv.Itoa(objID), strconv.Itoa(objRotation))
@@ -73,21 +73,18 @@ func BuyObject(req *requests.Request, c *client.Client, gm *managers.GameManager
 
 	// Need to add back the old wall in the inventory
 	if objectInfo.Group == "Wall" {
-		oldWallID := c.Location.Cafe().Tiles[objX][objY]
+		oldWallID := c.Location.Cafe().GetTiles()[objX][objY]
 		// If the old wall have luxury value, remove it from the Cafe
-		c.Location.Cafe().Luxury -= (objectInfo.Cash / 4000) + (objectInfo.Gold * 2)
-		if c.Location.Cafe().FurnitureInventory[oldWallID] != 0 {
-			c.Location.Cafe().FurnitureInventory[oldWallID] += 1
-		} else {
-			c.Location.Cafe().FurnitureInventory[oldWallID] = 1
-		}
+		c.Location.Cafe().AddLuxury(-(objectInfo.Cash / 4000) + (objectInfo.Gold * 2))
+		c.Location.Cafe().AddFurnitures(oldWallID, 1)
+
 		// Add the new wall
-		c.Location.Cafe().Tiles[objX][objY] = objID
+		c.Location.Cafe().SetTile(objX, objY, objID)
 
 	} else if objectInfo.Group == "Door" {
 		oldDoorPos := []int{
-			utils.If(c.Location.Cafe().PlayerStart[0] == 1, 0, c.Location.Cafe().PlayerStart[0]),
-			utils.If(c.Location.Cafe().PlayerStart[1] == 1, 0, c.Location.Cafe().PlayerStart[1]),
+			utils.If(c.Location.Cafe().GetPlayerStart()[0] == 1, 0, c.Location.Cafe().GetPlayerStart()[0]),
+			utils.If(c.Location.Cafe().GetPlayerStart()[1] == 1, 0, c.Location.Cafe().GetPlayerStart()[1]),
 		}
 		oldDoor := c.Location.Cafe().GetObjectByPos(oldDoorPos[0], oldDoorPos[1])
 		// If the old door have luxury value, remove it from the Cafe
@@ -95,9 +92,9 @@ func BuyObject(req *requests.Request, c *client.Client, gm *managers.GameManager
 		if err != nil {
 			return nil
 		}
-		c.Location.Cafe().Luxury -= (obj.Cash / 4000) + (obj.Gold * 2)
+		c.Location.Cafe().AddLuxury(-(obj.Cash / 4000) + (obj.Gold * 2))
 		// KIND = ID!!!
-		c.Location.Cafe().FurnitureInventory[int(oldDoor.GetKind())] = 1
+		c.Location.Cafe().GetFurnitureInventory()[int(oldDoor.GetKind())] = 1
 		c.Location.Cafe().AddNewObject(objX, objY, objID, objRotation)
 		c.Location.Cafe().RemoveObject(oldDoorPos[0], oldDoorPos[1])
 	} else {
@@ -105,7 +102,7 @@ func BuyObject(req *requests.Request, c *client.Client, gm *managers.GameManager
 	}
 	// Works?
 	// 0 / 4000 + 0 * 2 = 0 (if not cost cash) (if not cost gold)
-	c.Location.Cafe().Luxury += (objectInfo.Cash / 4000) + (objectInfo.Gold * 2)
+	c.Location.Cafe().AddLuxury((objectInfo.Cash / 4000) + (objectInfo.Gold * 2))
 	c.SendExtensionResponse("ebu", "-1", "0", strconv.Itoa(objX), strconv.Itoa(objY), strconv.Itoa(objID), strconv.Itoa(objRotation))
 	return nil
 }

@@ -12,7 +12,7 @@ import (
 func StoveDeliverInfo(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	// Dont allow players to modify the packet and sending us CSD while in editor.
-	if c.Location.Cafe().InEditorMode {
+	if c.Location.Cafe().InEditorMode() {
 		return nil
 	}
 
@@ -30,7 +30,7 @@ func StoveDeliverInfo(req *requests.Request, c *client.Client, gm *managers.Game
 
 	// Choose counter that is empty or has the same food type
 	var counter *objects.CafeObject
-	for _, object := range c.Location.Cafe().Objects {
+	for _, object := range c.Location.Cafe().GetObjects() {
 		if !object.IsCounter() {
 			continue
 		}
