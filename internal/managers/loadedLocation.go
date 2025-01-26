@@ -107,8 +107,6 @@ func (lc *LoadedLocation) Join(playerID int, channel chan<- responses.Response) 
 	lc.mu.Lock()
 	defer lc.mu.Unlock()
 
-	log.Printf("--------------------------")
-
 	if !lc.running {
 		lc.running = true
 		go agents.AgentCycle(lc)

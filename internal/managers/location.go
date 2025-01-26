@@ -56,7 +56,6 @@ func (gm *GameManager) AddLocation(id int) *LoadedLocation {
 
 	//
 	loc := NewLoadedLocation(cafeObj, gm)
-	fmt.Printf("Loaded %v cafe from db\n", loc.cafe.GetID())
 	gm.locations[id] = loc
 
 	return loc

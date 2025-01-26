@@ -75,7 +75,6 @@ func ConvertCafeDAOToCafe(cafeDAO CafeDAO) (*objects.Cafe, error) {
 
 	// Parse furniture inventory
 	cafe.SetFurnitureInventory(map[int]int{})
-	log.Printf("FURNITURE INVENTORY: %v", cafeDAO.FurnitureInventory)
 	raw_fuInv := strings.Split(cafeDAO.FurnitureInventory, "#")
 	for _, item := range raw_fuInv {
 
