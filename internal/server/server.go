@@ -47,7 +47,7 @@ func (s *CafeServer) Run() {
 	// Set up MariaDB connection
 	db, err := database.ConnectToDB(s.dbConfig)
 	if err != nil {
-		log.Errorf("%v", err)
+		log.Fatalf("%v", err)
 		return
 	}
 	defer db.Close()

@@ -1,6 +1,7 @@
 package objects
 
 import (
+	"cafego/internal/utils"
 	"fmt"
 	"math/rand"
 	"strconv"
@@ -76,12 +77,7 @@ func (a *Avatar) String() string {
 func (a *Avatar) Apperance() string {
 
 	face := fmt.Sprintf("%v$0", 1080+int(a.Gender))
-
-	hat := "1062$0"
-	if a.IsNPC {
-		hat = "1061$0"
-	}
-
+	hat := utils.If(a.IsNPC, "1061$0", "1062$0")
 	top := fmt.Sprintf("%v$%v", 1000+int(a.Gender), a.TopColor)
 	skin := fmt.Sprintf("%v$%v", 1020+int(a.Gender), a.SkinColor)
 	hair := fmt.Sprintf("%v$%v", 1040+int(a.Gender), a.HairColor)

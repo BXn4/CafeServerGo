@@ -25,7 +25,7 @@ func RandString(n int) string {
 
 func main() {
 	var wg sync.WaitGroup
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 10000; i++ {
 		time.Sleep(10 * time.Millisecond)
 		wg.Add(1)
 		go mimicPlayer(&wg)

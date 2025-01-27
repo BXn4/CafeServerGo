@@ -8,8 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/charmbracelet/log"
-
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -29,11 +27,7 @@ type PlayerDAO struct {
 	EmailVerified       bool   `json:"email_verified" form:"email_verified" gorm:"column:email_verified"`
 	NewGifts            int    `json:"new_gifts" form:"new_gifts" gorm:"column:new_gifts"`
 	Username            string `json:"username" form:"username" gorm:"column:username"`
-	Gender              int    `json:"gender" form:"gender" gorm:"column:gender"`
-	TopColor            int    `json:"top_color" form:"top_color" gorm:"column:top_color"`
-	SkinColor           int    `json:"skin_color" form:"skin_color" gorm:"column:skin_color"`
-	HairColor           int    `json:"hair_color" form:"hair_color" gorm:"column:hair_color"`
-	LegsColor           int    `json:"legs_color" form:"legs_color" gorm:"column:legs_color"`
+	Avatar              string `json:"avatar" form:"avatar" gorm:"column:avatar"`
 	IsBanned            bool   `json:"is_banned" form:"is_banned" gorm:"column:is_banned"`
 	Mastery             string `json:"mastery" form:"mastery" gorm:"column:mastery"`
 	Achievement         string `json:"achievement" form:"achievement" gorm:"column:achievement"`
@@ -72,31 +66,20 @@ func ConvertPlayerDAOToPlayer(playerDAO PlayerDAO) (*objects.Player, error) {
 	player.ParseAchievement(playerDAO.Achievement)
 
 	// Fill avatar
-	avatar := objects.Avatar{
-		Name:      playerDAO.Username,
-		Gender:    objects.AvatarGender(playerDAO.Gender),
-		SkinColor: playerDAO.SkinColor,
-		TopColor:  playerDAO.TopColor,
-		HairColor: playerDAO.HairColor,
-		LegsColor: playerDAO.LegsColor,
-		IsNPC:     false,
-	}
-
-	player.Avatar = avatar
+	player.Avatar = *objects.NewAvatarFromString(playerDAO.Avatar)
+	player.Avatar.Name = playerDAO.Username
+	player.Avatar.IsNPC = false
 
 	return &player, nil
 }
 
 func (db *CafeDB) GetPlayerByName(name string) (*objects.Player, error) {
-	// db.mu.Lock()
-	// defer db.mu.Unlock()
 
 	// Prepare query
 	row := db.conn.QueryRow("SELECT * FROM player WHERE username = ? OR email = ?", name, name)
 
 	// Scan rows
 	var playerDAO PlayerDAO
-	var av string
 	err := row.Scan(
 		&playerDAO.ID,
 		&playerDAO.Email,
@@ -113,12 +96,7 @@ func (db *CafeDB) GetPlayerByName(name string) (*objects.Player, error) {
 		&playerDAO.EmailVerified,
 		&playerDAO.NewGifts,
 		&playerDAO.Username,
-		&av,
-		&playerDAO.Gender,
-		&playerDAO.TopColor,
-		&playerDAO.SkinColor,
-		&playerDAO.HairColor,
-		&playerDAO.LegsColor,
+		&playerDAO.Avatar,
 		&playerDAO.IsBanned,
 		&playerDAO.Mastery,
 		&playerDAO.Achievement,
@@ -142,13 +120,10 @@ func (db *CafeDB) GetPlayerByName(name string) (*objects.Player, error) {
 }
 
 func (db *CafeDB) GetPlayer(id int) (*objects.Player, error) {
-	// db.mu.Lock()
-	// defer db.mu.Unlock()
 
 	row := db.conn.QueryRow("SELECT * FROM player WHERE id = ?", id)
 
 	var playerDAO PlayerDAO
-	var av string
 	err := row.Scan(
 		&playerDAO.ID,
 		&playerDAO.Email,
@@ -165,12 +140,7 @@ func (db *CafeDB) GetPlayer(id int) (*objects.Player, error) {
 		&playerDAO.EmailVerified,
 		&playerDAO.NewGifts,
 		&playerDAO.Username,
-		&av,
-		&playerDAO.Gender,
-		&playerDAO.TopColor,
-		&playerDAO.SkinColor,
-		&playerDAO.HairColor,
-		&playerDAO.LegsColor,
+		&playerDAO.Avatar,
 		&playerDAO.IsBanned,
 		&playerDAO.Mastery,
 		&playerDAO.Achievement,
@@ -194,15 +164,13 @@ func (db *CafeDB) GetPlayer(id int) (*objects.Player, error) {
 }
 
 func (db *CafeDB) SavePlayer(player *objects.Player) {
-	// db.mu.Lock()
-	// defer db.mu.Unlock()
 
 	friendsStr := []string{}
 	for _, f := range player.Friends {
 		friendsStr = append(friendsStr, strconv.Itoa(f))
 	}
 
-	result, err := db.conn.Exec(
+	_, err := db.conn.Exec(
 		" UPDATE player SET "+
 			"cash = ?,"+
 			"gold = ?,"+
@@ -215,11 +183,7 @@ func (db *CafeDB) SavePlayer(player *objects.Player) {
 			"allow_friend_requests = ?,"+
 			"friends = ?,"+
 			"new_gifts = ?,"+
-			"gender = ?,"+
-			"top_color = ?,"+
-			"skin_color = ?,"+
-			"hair_color = ?,"+
-			"legs_color = ?,"+
+			"avatar = ?,"+
 			"mastery = ?,"+
 			"achievement = ?,"+
 			"gifts = ? "+
@@ -235,11 +199,7 @@ func (db *CafeDB) SavePlayer(player *objects.Player) {
 		player.AllowFriendRequests,
 		strings.Join(friendsStr, "#"),
 		player.NewGifts,
-		player.Avatar.Gender,
-		player.Avatar.TopColor,
-		player.Avatar.SkinColor,
-		player.Avatar.HairColor,
-		player.Avatar.LegsColor,
+		player.Avatar.Apperance(),
 		player.BuildMastery(),
 		player.BuildAchievement(),
 		objects.BuildGifts(player.Gifts),
@@ -251,16 +211,9 @@ func (db *CafeDB) SavePlayer(player *objects.Player) {
 		return
 	}
 
-	// Check how many rows were affected
-	_, err = result.RowsAffected()
-	if err != nil {
-		log.Fatal("Error fetching rows affected:", err)
-	}
 }
 
 func (db *CafeDB) DeleteFriend(playerID, friendID int) {
-	// db.mu.Lock()
-	// defer db.mu.Unlock()
 
 	friendIDStr := strconv.Itoa(friendID)
 
@@ -284,7 +237,7 @@ func (db *CafeDB) DeleteFriend(playerID, friendID int) {
 	newFriends := append(friends[:index], friends[index+1:]...)
 
 	// Update friends
-	result, err := db.conn.Exec(
+	_, err = db.conn.Exec(
 		" UPDATE player SET friends = ? WHERE id = ?",
 		strings.Join(newFriends, "#"),
 		playerID,
@@ -295,16 +248,9 @@ func (db *CafeDB) DeleteFriend(playerID, friendID int) {
 		return
 	}
 
-	// Check how many rows were affected
-	_, err = result.RowsAffected()
-	if err != nil {
-		log.Fatal("Error fetching rows affected:", err)
-	}
 }
 
 func (db *CafeDB) GetDailyLogin(playerID int) (*time.Time, error) {
-	// db.mu.Lock()
-	// defer db.mu.Unlock()
 
 	row := db.conn.QueryRow("SELECT daily_login FROM player WHERE id = ?", playerID)
 	var dailyLoginStr string
@@ -321,11 +267,9 @@ func (db *CafeDB) GetDailyLogin(playerID int) (*time.Time, error) {
 }
 
 func (db *CafeDB) ResetDailyLogin(playerID int) error {
-	// db.mu.Lock()
-	// defer db.mu.Unlock()
 
 	// Update friends
-	result, err := db.conn.Exec(
+	_, err := db.conn.Exec(
 		"UPDATE player SET daily_login = ? WHERE id = ?",
 		time.Now(),
 		playerID,
@@ -333,12 +277,6 @@ func (db *CafeDB) ResetDailyLogin(playerID int) error {
 
 	if err != nil {
 		return fmt.Errorf("Cant reset daily_login: %v\n", err)
-	}
-
-	// Check how many rows were affected
-	_, err = result.RowsAffected()
-	if err != nil {
-		log.Fatal("Error fetching rows affected:", err)
 	}
 
 	return nil

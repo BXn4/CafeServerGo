@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"cafego/internal/database"
 	"cafego/internal/interfaces"
-	"io"
 	"time"
 
 	"github.com/charmbracelet/log"
@@ -87,9 +86,6 @@ func (c *Client) receiveRequests() {
 
 		message, err := c.Reader.ReadString('\x00')
 		if err != nil {
-			if err == io.EOF {
-				continue
-			}
 			return
 		}
 		log.Logf(log.Level(-5), "%s", message)

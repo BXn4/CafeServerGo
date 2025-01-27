@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-// pin
+// nfi
 func FireWaiter(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	id, err := strconv.Atoi(req.Args[2])
