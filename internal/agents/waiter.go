@@ -26,7 +26,7 @@ func SpawnWaiter(l interfaces.CafeLocation, w *objects.Waiter) {
 		"1", // NPC type (1: Waiter)
 		strconv.Itoa(w.Priority),
 		"-1", // DishID (unnecessary for waiters)
-		w.Avatar.String(),
+		w.Avatar.String(w.Name),
 	}
 	if !w.IsWorking {
 		return

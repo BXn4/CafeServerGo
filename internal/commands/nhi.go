@@ -15,7 +15,6 @@ func HireWaiter(req *requests.Request, c *client.Client, gm *managers.GameManage
 	npcGender := utils.If(req.Args[3] == "1", objects.Girl, objects.Boy)
 	avatar := objects.NewRandomAvatar()
 	avatar.Gender = npcGender
-	avatar.Name = req.Args[2]
 
 	// find new waiter id
 	newID := 1

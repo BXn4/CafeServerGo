@@ -14,7 +14,6 @@ func NewMarketplace() (*Cafe, error) {
 		background:  MarketplaceBackground,
 		rating:      0,
 		luxury:      -1,
-		expansionID: 4,
 		size:        12,
 	}
 

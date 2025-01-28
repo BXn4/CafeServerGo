@@ -5,6 +5,7 @@ import (
 	"cafego/internal/managers"
 	"cafego/internal/types/requests"
 	"cafego/internal/types/responses"
+	"time"
 
 	"github.com/charmbracelet/log"
 )
@@ -15,6 +16,14 @@ func HandleClient(c *client.Client, gm *managers.GameManager) {
 		if req == nil {
 			continue
 		}
+
+		// Check for timeout
+		if time.Now().Sub(c.TimeoutStamp) > 5*time.Minute {
+			log.Warnf("Client %v timed out", c.Player.ID)
+			c.Disconnect()
+			return
+		}
+
 		// Handle requests
 		err := HandleRequest(req, c, gm)
 		if err != nil {

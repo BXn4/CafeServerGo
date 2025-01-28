@@ -5,6 +5,7 @@ import (
 	"cafego/internal/managers"
 	"cafego/internal/types/requests"
 	"cafego/internal/utils"
+	"fmt"
 	"strconv"
 )
 
@@ -38,8 +39,8 @@ func UserInfo(req *requests.Request, c *client.Client, gm *managers.GameManager)
 		utils.If(c.Player.AllowFriendRequests, "1", "0"),
 		utils.If(c.Player.AllowEmails, "1", "0"),
 		utils.If(c.Player.EmailVerified, "1", "0"),
-		strconv.Itoa(c.Player.NewGifts),
-		c.Player.Avatar.String(),
+		strconv.Itoa(len(c.Player.Gifts)),
+		fmt.Sprintf("%s+%d+%s", c.Player.Username, c.Player.Avatar.Gender, c.Player.Avatar.Apperance()),
 	)
 	return nil
 }

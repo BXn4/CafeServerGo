@@ -2,41 +2,46 @@ package database
 
 import (
 	"cafego/internal/objects"
-	"database/sql"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"gorm.io/gorm"
 )
 
 type PlayerDAO struct {
-	ID                  int    `json:"id" form:"id" gorm:"column:id"`
-	Email               string `json:"email" form:"email" gorm:"column:email"`
-	Password            string `json:"password" form:"password" gorm:"column:password"`
-	Cash                int    `json:"cash" form:"cash" gorm:"column:cash"`
-	Gold                int    `json:"gold" form:"gold" gorm:"column:gold"`
-	XP                  int    `json:"xp" form:"xp" gorm:"column:xp"`
-	InstantCookings     int    `json:"instant_cookings" form:"instant_cookings" gorm:"column:instant_cookings"`
-	OpenJobs            int    `json:"open_jobs" form:"open_jobs" gorm:"column:open_jobs"`
-	PlayedWheel         bool   `json:"played_wheel" form:"played_wheel" gorm:"column:played_wheel"`
-	AllowFriendRequests bool   `json:"allow_friend_requests" form:"allow_friend_requests" gorm:"column:allow_friend_requests"`
-	Friends             string `json:"friends" form:"friends" gorm:"column:friends"`
-	AllowEmails         bool   `json:"allow_emails" form:"allow_emails" gorm:"column:allow_emails"`
-	EmailVerified       bool   `json:"email_verified" form:"email_verified" gorm:"column:email_verified"`
-	NewGifts            int    `json:"new_gifts" form:"new_gifts" gorm:"column:new_gifts"`
-	Username            string `json:"username" form:"username" gorm:"column:username"`
-	Avatar              string `json:"avatar" form:"avatar" gorm:"column:avatar"`
-	IsBanned            bool   `json:"is_banned" form:"is_banned" gorm:"column:is_banned"`
-	Mastery             string `json:"mastery" form:"mastery" gorm:"column:mastery"`
-	Achievement         string `json:"achievement" form:"achievement" gorm:"column:achievement"`
-	LastLogin           string `json:"last_login" form:"last_login" gorm:"column:last_login"`
-	DailyLogin          string `json:"daily_login" form:"daily_login" gorm:"column:daily_login"`
-	Gifts               string `json:"gifts" form:"gifts" gorm:"column:gifts"`
+	ID                  int    `gorm:"column:id"`
+	Email               string `gorm:"column:email"`
+	Password            string `gorm:"column:password"`
+	Cash                int    `gorm:"column:cash"`
+	Gold                int    `gorm:"column:gold"`
+	XP                  int    `gorm:"column:xp"`
+	InstantCookings     int    `gorm:"column:instant_cookings"`
+	OpenJobs            int    `gorm:"column:open_jobs"`
+	PlayedWheel         bool   `gorm:"column:played_wheel"`
+	AllowFriendRequests bool   `gorm:"column:allow_friend_requests"`
+	Friends             string `gorm:"column:friends"`
+	AllowEmails         bool   `gorm:"column:allow_emails"`
+	EmailVerified       bool   `gorm:"column:email_verified"`
+	Username            string `gorm:"column:username"`
+	Avatar              string `gorm:"column:avatar"`
+	IsBanned            bool   `gorm:"column:is_banned"`
+	Mastery             string `gorm:"column:mastery"`
+	Achievement         string `gorm:"column:achievement"`
+	LastLogin           string `gorm:"column:last_login"`
+	DailyLogin          string `gorm:"column:daily_login"`
+	Gifts               string `gorm:"column:gifts"`
+	AccessLevel         int    `gorm:"column:access_level"`
+}
+
+func (playerDAO PlayerDAO) TableName() string {
+	return "player"
 }
 
 func ConvertPlayerDAOToPlayer(playerDAO PlayerDAO) (*objects.Player, error) {
+
 	var player objects.Player
 
 	// Fill in simple data
@@ -50,8 +55,8 @@ func ConvertPlayerDAOToPlayer(playerDAO PlayerDAO) (*objects.Player, error) {
 	player.AllowFriendRequests = playerDAO.AllowFriendRequests
 	player.AllowEmails = playerDAO.AllowEmails
 	player.EmailVerified = playerDAO.EmailVerified
-	player.NewGifts = playerDAO.NewGifts
 	player.Username = playerDAO.Username
+	player.AccessLevel = playerDAO.AccessLevel
 	player.Position = [2]int{0, 0}
 
 	// Parse gifts
@@ -67,7 +72,6 @@ func ConvertPlayerDAOToPlayer(playerDAO PlayerDAO) (*objects.Player, error) {
 
 	// Fill avatar
 	player.Avatar = *objects.NewAvatarFromString(playerDAO.Avatar)
-	player.Avatar.Name = playerDAO.Username
 	player.Avatar.IsNPC = false
 
 	return &player, nil
@@ -75,37 +79,10 @@ func ConvertPlayerDAOToPlayer(playerDAO PlayerDAO) (*objects.Player, error) {
 
 func (db *CafeDB) GetPlayerByName(name string) (*objects.Player, error) {
 
-	// Prepare query
-	row := db.conn.QueryRow("SELECT * FROM player WHERE username = ? OR email = ?", name, name)
-
-	// Scan rows
 	var playerDAO PlayerDAO
-	err := row.Scan(
-		&playerDAO.ID,
-		&playerDAO.Email,
-		&playerDAO.Password,
-		&playerDAO.Cash,
-		&playerDAO.Gold,
-		&playerDAO.XP,
-		&playerDAO.InstantCookings,
-		&playerDAO.OpenJobs,
-		&playerDAO.PlayedWheel,
-		&playerDAO.AllowFriendRequests,
-		&playerDAO.Friends,
-		&playerDAO.AllowEmails,
-		&playerDAO.EmailVerified,
-		&playerDAO.NewGifts,
-		&playerDAO.Username,
-		&playerDAO.Avatar,
-		&playerDAO.IsBanned,
-		&playerDAO.Mastery,
-		&playerDAO.Achievement,
-		&playerDAO.LastLogin,
-		&playerDAO.DailyLogin,
-		&playerDAO.Gifts,
-	)
+	err := db.conn.Where("username = ? OR email = ?", name, name).First(&playerDAO).Error
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("NAME: %v NOT FOUND", name)
 		}
 		return nil, fmt.Errorf("SQL ERR: %v", err)
@@ -117,39 +94,14 @@ func (db *CafeDB) GetPlayerByName(name string) (*objects.Player, error) {
 	}
 
 	return player, nil
+
 }
 
 func (db *CafeDB) GetPlayer(id int) (*objects.Player, error) {
-
-	row := db.conn.QueryRow("SELECT * FROM player WHERE id = ?", id)
-
 	var playerDAO PlayerDAO
-	err := row.Scan(
-		&playerDAO.ID,
-		&playerDAO.Email,
-		&playerDAO.Password,
-		&playerDAO.Cash,
-		&playerDAO.Gold,
-		&playerDAO.XP,
-		&playerDAO.InstantCookings,
-		&playerDAO.OpenJobs,
-		&playerDAO.PlayedWheel,
-		&playerDAO.AllowFriendRequests,
-		&playerDAO.Friends,
-		&playerDAO.AllowEmails,
-		&playerDAO.EmailVerified,
-		&playerDAO.NewGifts,
-		&playerDAO.Username,
-		&playerDAO.Avatar,
-		&playerDAO.IsBanned,
-		&playerDAO.Mastery,
-		&playerDAO.Achievement,
-		&playerDAO.LastLogin,
-		&playerDAO.DailyLogin,
-		&playerDAO.Gifts,
-	)
+	err := db.conn.First(&playerDAO, id).Error
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("ID NOT FOUND")
 		}
 		return nil, fmt.Errorf("SQL ERR: %v", err)
@@ -163,121 +115,84 @@ func (db *CafeDB) GetPlayer(id int) (*objects.Player, error) {
 	return player, nil
 }
 
-func (db *CafeDB) SavePlayer(player *objects.Player) {
+func (db *CafeDB) SavePlayer(player *objects.Player) error {
 
+	// Build friends
 	friendsStr := []string{}
 	for _, f := range player.Friends {
 		friendsStr = append(friendsStr, strconv.Itoa(f))
 	}
 
-	_, err := db.conn.Exec(
-		" UPDATE player SET "+
-			"cash = ?,"+
-			"gold = ?,"+
-			"xp = ?,"+
-			"instant_cookings = ?,"+
-			"open_jobs = ?,"+
-			"played_wheel = ?,"+
-			"open_jobs = ?,"+
-			"played_wheel = ?,"+
-			"allow_friend_requests = ?,"+
-			"friends = ?,"+
-			"new_gifts = ?,"+
-			"avatar = ?,"+
-			"mastery = ?,"+
-			"achievement = ?,"+
-			"gifts = ? "+
-			"WHERE id = ?",
-		uint(player.Cash),
-		player.Gold,
-		player.XP,
-		player.InstantCookings,
-		player.OpenJobs,
-		player.PlayedWheel,
-		player.OpenJobs,
-		player.PlayedWheel,
-		player.AllowFriendRequests,
-		strings.Join(friendsStr, "#"),
-		player.NewGifts,
-		player.Avatar.Apperance(),
-		player.BuildMastery(),
-		player.BuildAchievement(),
-		objects.BuildGifts(player.Gifts),
-		player.ID,
-	)
-
-	if err != nil {
-		fmt.Printf("Cant save player: %v\n", err)
-		return
+	updateData := map[string]interface{}{
+		"cash":                  uint(player.Cash),
+		"gold":                  player.Gold,
+		"xp":                    player.XP,
+		"instant_cookings":      player.InstantCookings,
+		"open_jobs":             player.OpenJobs,
+		"played_wheel":          player.PlayedWheel,
+		"allow_friend_requests": player.AllowFriendRequests,
+		"friends":               strings.Join(friendsStr, "#"),
+		"avatar":                player.Avatar.Apperance(),
+		"mastery":               player.BuildMastery(),
+		"achievement":           player.BuildAchievement(),
+		"gifts":                 objects.BuildGifts(player.Gifts),
 	}
 
+	err := db.conn.Model(&PlayerDAO{}).Where("id = ?", player.ID).Updates(updateData).Error
+	if err != nil {
+		return fmt.Errorf("Cant save player: %v", err)
+	}
+	return nil
 }
 
-func (db *CafeDB) DeleteFriend(playerID, friendID int) {
+func (db *CafeDB) DeleteFriend(playerID, friendID int) error {
+	var playerDAO PlayerDAO
+	err := db.conn.First(&playerDAO, playerID).Error
+	if err != nil {
+		return fmt.Errorf("Player not found: %v", err)
+	}
 
+	friends := strings.Split(playerDAO.Friends, "#")
 	friendIDStr := strconv.Itoa(friendID)
-
-	// Get friends
-	row := db.conn.QueryRow("SELECT friends FROM player WHERE id = ?", playerID)
-	var friendsRaw string
-	err := row.Scan(&friendsRaw)
-
-	// Delete friend
-	friends := strings.Split(friendsRaw, "#")
 	index := -1
 	for i, f := range friends {
 		if f == friendIDStr {
 			index = i
+			break
 		}
 	}
 	if index == -1 {
-		return
+		return nil // Friend not found, no action needed
 	}
 
 	newFriends := append(friends[:index], friends[index+1:]...)
+	playerDAO.Friends = strings.Join(newFriends, "#")
 
-	// Update friends
-	_, err = db.conn.Exec(
-		" UPDATE player SET friends = ? WHERE id = ?",
-		strings.Join(newFriends, "#"),
-		playerID,
-	)
-
+	err = db.conn.Save(&playerDAO).Error
 	if err != nil {
-		fmt.Printf("Cant save friends: %v\n", err)
-		return
+		return fmt.Errorf("Cant save friends: %v", err)
 	}
-
+	return nil
 }
-
 func (db *CafeDB) GetDailyLogin(playerID int) (*time.Time, error) {
-
-	row := db.conn.QueryRow("SELECT daily_login FROM player WHERE id = ?", playerID)
-	var dailyLoginStr string
-
-	err := row.Scan(&dailyLoginStr)
-
+	var playerDAO PlayerDAO
+	err := db.conn.Select("daily_login").First(&playerDAO, playerID).Error
 	if err != nil {
 		return nil, err
 	}
 
-	dailyLogin, err := time.Parse("2025-01-23 22:09:07", dailyLoginStr)
+	dailyLogin, err := time.Parse("2006-01-02 15:04:05", playerDAO.DailyLogin)
+	if err != nil {
+		return nil, fmt.Errorf("Error parsing daily login time: %v", err)
+	}
 
 	return &dailyLogin, nil
 }
 
 func (db *CafeDB) ResetDailyLogin(playerID int) error {
-
-	// Update friends
-	_, err := db.conn.Exec(
-		"UPDATE player SET daily_login = ? WHERE id = ?",
-		time.Now(),
-		playerID,
-	)
-
+	err := db.conn.Model(&PlayerDAO{}).Where("id = ?", playerID).Update("daily_login", time.Now().Format("2006-01-02 15:04:05")).Error
 	if err != nil {
-		return fmt.Errorf("Cant reset daily_login: %v\n", err)
+		return fmt.Errorf("Cant reset daily_login: %v", err)
 	}
-
 	return nil
 }

@@ -27,7 +27,6 @@ type Cafe struct {
 	ownerName          string
 	rating             int
 	luxury             int
-	expansionID        int
 	size               int
 	background         CafeBackground
 	tiles              [][]int
@@ -42,14 +41,14 @@ type Cafe struct {
 	mutex              sync.RWMutex
 }
 
-func NewCafe(id int, playerID int, ownerName string, luxury int, expansionID int) *Cafe {
+func NewCafe(id int, playerID int, ownerName string, luxury int, size int) *Cafe {
 	return &Cafe{
-		id:          id,
-		playerID:    playerID,
-		ownerName:   ownerName,
-		luxury:      luxury,
-		expansionID: expansionID,
-		background:  DefaultBackground,
+		id:         id,
+		playerID:   playerID,
+		ownerName:  ownerName,
+		luxury:     luxury,
+		size:       size,
+		background: DefaultBackground,
 	}
 }
 
@@ -77,7 +76,7 @@ func (c *Cafe) AsResponse() []string {
 		c.ownerName,
 		strconv.Itoa(c.rating),
 		strconv.Itoa(c.luxury),
-		strconv.Itoa(c.expansionID),
+		strconv.Itoa(c.size),
 		strconv.Itoa(len(c.tiles)),
 		strconv.Itoa(len(c.tiles[0])),
 		string(c.background),
@@ -93,7 +92,7 @@ func (cafe *Cafe) ParseTiles(rawTiles string) error {
 
 	// Parse tiles
 	raw_tiles := strings.Split(rawTiles, "+")
-	cafe.size = cafe.expansionID + 8
+
 	cafe.tiles = make([][]int, cafe.size)
 	for i := range len(cafe.tiles) {
 		cafe.tiles[i] = make([]int, cafe.size)
@@ -358,12 +357,6 @@ func (c *Cafe) GetLuxury() int {
 	return c.luxury
 }
 
-func (c *Cafe) GetExpansionID() int {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-	return c.expansionID
-}
-
 func (c *Cafe) GetSize() int {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
@@ -459,12 +452,6 @@ func (c *Cafe) AddLuxury(luxury int) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	c.luxury = luxury
-}
-
-func (c *Cafe) SetExpansionID(expansionID int) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-	c.expansionID = expansionID
 }
 
 func (c *Cafe) SetSize(size int) {

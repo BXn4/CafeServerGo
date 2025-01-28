@@ -2,30 +2,32 @@ package database
 
 import (
 	"cafego/internal/objects"
-	"cafego/internal/types/daos"
-	"database/sql"
-	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 
-	"github.com/charmbracelet/log"
+	"gorm.io/gorm"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 type CafeDAO struct {
-	ID                 int    `json:"id" form:"id" gorm:"column:id"`
-	PlayerID           int    `json:"player_id" form:"player_id" gorm:"column:player_id"`
-	OwnerName          string `json:"owner_name" form:"owner_name" gorm:"column:owner_name"`
-	Rating             int    `json:"rating" form:"rating" gorm:"column:rating"`
-	Luxury             int    `json:"luxury" form:"luxury" gorm:"column:luxury"`
-	ExpansionID        int    `json:"expansion_id" form:"expansion_id" gorm:"column:expansion_id"`
-	Tiles              string `json:"tiles" form:"tiles" gorm:"column:tiles"`
-	Objects            string `json:"objects" form:"objects" gorm:"column:objects"`
-	FridgeInventory    string `json:"fridge_inv" form:"fridge_inv" gorm:"column:fridge_inv"`
-	FurnitureInventory string `json:"furniture_inv" form:"furniture_inv" gorm:"column:furniture_inv"`
-	Waiters            string `json:"waiters" form:"waiters" gorm:"column:waiters"`
+	ID                 int    `gorm:"column:id"`
+	PlayerID           int    `gorm:"column:player_id;uniqueIndex"`
+	OwnerName          string `gorm:"column:owner_name"`
+	Rating             int    `gorm:"column:rating"`
+	Luxury             int    `gorm:"column:luxury"`
+	Size               int    `gorm:"column:size"`
+	Tiles              string `gorm:"column:tiles"`
+	Objects            string `gorm:"column:objects"`
+	FridgeInventory    string `gorm:"column:fridge_inv"`
+	FurnitureInventory string `gorm:"column:furniture_inv"`
+	Waiters            string `gorm:"column:waiters"`
+}
+
+func (cafeDAO CafeDAO) TableName() string {
+	return "cafe"
 }
 
 func ConvertCafeDAOToCafe(cafeDAO CafeDAO) (*objects.Cafe, error) {
@@ -36,7 +38,7 @@ func ConvertCafeDAOToCafe(cafeDAO CafeDAO) (*objects.Cafe, error) {
 		cafeDAO.PlayerID,
 		cafeDAO.OwnerName,
 		cafeDAO.Luxury,
-		cafeDAO.ExpansionID,
+		cafeDAO.Size,
 	)
 	cafe.SetRating(cafe.GetMinimumRating(cafeDAO.Rating))
 
@@ -55,8 +57,8 @@ func ConvertCafeDAOToCafe(cafeDAO CafeDAO) (*objects.Cafe, error) {
 
 	// Parse fridge inventory
 	cafe.SetFridgeInventory(map[int]int{})
-	raw_frInv := strings.Split(cafeDAO.FridgeInventory, "#")
-	for _, item := range raw_frInv {
+	fridgeInv := strings.Split(cafeDAO.FridgeInventory, "#")
+	for _, item := range fridgeInv {
 
 		// Parse item and count
 		data := strings.Split(item, "+")
@@ -75,8 +77,8 @@ func ConvertCafeDAOToCafe(cafeDAO CafeDAO) (*objects.Cafe, error) {
 
 	// Parse furniture inventory
 	cafe.SetFurnitureInventory(map[int]int{})
-	raw_fuInv := strings.Split(cafeDAO.FurnitureInventory, "#")
-	for _, item := range raw_fuInv {
+	furnitureInv := strings.Split(cafeDAO.FurnitureInventory, "#")
+	for _, item := range furnitureInv {
 
 		// Parse item and count
 		data := strings.Split(item, "+")
@@ -94,55 +96,38 @@ func ConvertCafeDAOToCafe(cafeDAO CafeDAO) (*objects.Cafe, error) {
 	}
 
 	// Parse waiters
-	var daos []daos.WaiterDAO
-	if err := json.Unmarshal([]byte(cafeDAO.Waiters), &daos); err != nil {
-		return nil, err
-	}
-	for _, waiterDAO := range daos {
-		waiter, err := ConvertWaiterDAOToWaiter(&waiterDAO)
+	waitersRaw := strings.Split(cafeDAO.Waiters, "%")
+	for i, waiterRaw := range waitersRaw {
+		println("waitersRaw: ", waiterRaw)
+		waiter, err := NewWaiterFromString(waiterRaw)
 		if err != nil {
 			return nil, err
 		}
+		waiter.ID = i + 1
 		cafe.AddWaiter(waiter)
 	}
 
 	return cafe, nil
 }
 
-func (db *CafeDB) GetCafeByPlayerID(player_id int) (*objects.Cafe, error) {
-
-	row := db.conn.QueryRow("SELECT * FROM cafe WHERE player_id = ?", player_id)
+func (db *CafeDB) GetCafeByPlayerID(playerID int) (*objects.Cafe, error) {
 
 	var cafeDAO CafeDAO
-	err := row.Scan(
-		&cafeDAO.ID,
-		&cafeDAO.PlayerID,
-		&cafeDAO.Rating,
-		&cafeDAO.Luxury,
-		&cafeDAO.ExpansionID,
-		&cafeDAO.Tiles,
-		&cafeDAO.Objects,
-		&cafeDAO.OwnerName,
-		&cafeDAO.FridgeInventory,
-		&cafeDAO.FurnitureInventory,
-		&cafeDAO.Waiters,
-	)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("ID NOT FOUND")
+	if err := db.conn.Where("player_id = ?", playerID).First(&cafeDAO).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("Cafe for player ID %d not found", playerID)
 		}
-		return nil, fmt.Errorf("\n\tSQL ERR: %v", err)
+		return nil, fmt.Errorf("Database error: %v", err)
 	}
-
 	cafe, err := ConvertCafeDAOToCafe(cafeDAO)
 	if err != nil {
-		return nil, fmt.Errorf("\n\tCannot convert CafeDAO to Cafe: %v", err)
+		return nil, fmt.Errorf("Cannot convert CafeDAO to Cafe: %v", err)
 	}
 
 	return cafe, nil
 }
 
-func (db *CafeDB) SaveCafe(cafe *objects.Cafe) {
+func (db *CafeDB) SaveCafe(cafe *objects.Cafe) error {
 
 	// Build tiles
 	var tiles []string
@@ -173,40 +158,26 @@ func (db *CafeDB) SaveCafe(cafe *objects.Cafe) {
 	// Build waiters
 	waiters := []string{}
 	for _, w := range cafe.GetWaiters() {
-		waiters = append(waiters, w.JSON())
+		waiters = append(waiters, w.String())
 	}
 
-	result, err := db.conn.Exec(
-		" UPDATE cafe SET "+
-			"rating = ?,"+
-			"luxury = ?,"+
-			"expansion_id = ?,"+
-			"tiles = ?,"+
-			"objects = ?,"+
-			"fridge_inv = ?,"+
-			"furniture_inv = ?,"+
-			"waiters = ? "+
-			"WHERE player_id = ?",
-		cafe.GetRating(),
-		cafe.GetLuxury(),
-		cafe.GetExpansionID(),
-		strings.Join(tiles, "+"),
-		"["+strings.Join(objs, ", ")+"]",
-		strings.Join(fridgeInv, "#"),
-		strings.Join(furnitureInv, "#"),
-		"["+strings.Join(waiters, ", ")+"]",
-		cafe.GetID(),
-	)
-
-	if err != nil {
-		log.Errorf("Cant save cafe: %v\n", err)
-		return
+	cafeDAO := CafeDAO{
+		ID:                 cafe.GetID(),
+		PlayerID:           cafe.GetPlayerID(),
+		OwnerName:          cafe.GetOwnerName(),
+		Rating:             cafe.GetRating(),
+		Luxury:             cafe.GetLuxury(),
+		Size:               cafe.GetSize(),
+		Tiles:              strings.Join(tiles, "+"),
+		Objects:            "[" + strings.Join(objs, ",") + "]",
+		FridgeInventory:    strings.Join(fridgeInv, "#"),
+		FurnitureInventory: strings.Join(furnitureInv, "#"),
+		Waiters:            strings.Join(waiters, "%"),
 	}
 
-	// Check how many rows were affected
-	_, err = result.RowsAffected()
-	if err != nil {
-		log.Fatal("Error fetching rows affected:", err)
+	if err := db.conn.Save(&cafeDAO).Error; err != nil {
+		return fmt.Errorf("Cannot save cafe: %v", err)
 	}
 
+	return nil
 }

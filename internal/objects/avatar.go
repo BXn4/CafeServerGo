@@ -27,7 +27,6 @@ const (
 )
 
 type Avatar struct {
-	Name      string
 	Gender    AvatarGender
 	SkinColor int
 	TopColor  int
@@ -70,8 +69,8 @@ func NewAvatarFromString(s string) *Avatar {
 	return &avatar
 }
 
-func (a *Avatar) String() string {
-	return fmt.Sprintf("%s+%d+%s", a.Name, a.Gender, a.Apperance())
+func (a *Avatar) String(name string) string {
+	return fmt.Sprintf("%s+%d+%s", name, a.Gender, a.Apperance())
 }
 
 func (a *Avatar) Apperance() string {
@@ -88,7 +87,6 @@ func (a *Avatar) Apperance() string {
 
 func NewRandomAvatar() Avatar {
 	return Avatar{
-		Name:      "Customer",
 		Gender:    AvatarGender(rand.Intn(2) + 1),
 		SkinColor: rand.Intn(8),
 		TopColor:  rand.Intn(17),

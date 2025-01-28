@@ -23,7 +23,6 @@ type Player struct {
 	Friends             []int
 	AllowEmails         bool
 	EmailVerified       bool
-	NewGifts            int
 	Username            string
 	Avatar              Avatar
 	Position            [2]int
@@ -33,6 +32,7 @@ type Player struct {
 	SeekingJob          bool
 	Gifts               []*Gift
 	DailyLogin          time.Time
+	AccessLevel         int
 }
 
 func (player *Player) String() string {
@@ -46,7 +46,7 @@ func (player *Player) String() string {
 		strconv.Itoa(player.OpenJobs),
 		utils.If(player.SeekingJob, "1", "0"),
 		utils.If(player.AllowFriendRequests, "1", "0"),
-		player.Avatar.String(),
+		fmt.Sprintf("%s+%d+%s", player.Username, player.Avatar.Gender, player.Avatar.Apperance()),
 	}
 	return strings.Join(params, "+")
 }

@@ -24,6 +24,8 @@ type Client struct {
 	Player        *objects.Player         // Player object
 	ClientManager interfaces.ClientManager
 
+	TimeoutStamp time.Time
+
 	RequestQueue  chan *requests.Request
 	ResponseQueue chan responses.Response
 }
@@ -34,6 +36,8 @@ func New(conn net.Conn, dbc *database.CafeDB, cm interfaces.ClientManager) *Clie
 		Writer:        bufio.NewWriter(conn),
 		DB:            dbc,
 		ClientManager: cm,
+
+		TimeoutStamp: time.Now(),
 
 		RequestQueue:  make(chan *requests.Request, 255),
 		ResponseQueue: make(chan responses.Response, 255),

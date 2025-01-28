@@ -1,4 +1,4 @@
-package commands
+package admin
 
 import (
 	"cafego/internal/client"

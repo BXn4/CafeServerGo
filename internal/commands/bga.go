@@ -33,7 +33,7 @@ func SendFriendsAvatar(req *requests.Request, c *client.Client, gm *managers.Gam
 				return fmt.Errorf("Player %v not in db: %v", f, err)
 			}
 		}
-		friendsStr = append(friendsStr, fmt.Sprintf("%v+%v+%v", c.Player.ID, player.XP, player.Avatar.String()))
+		friendsStr = append(friendsStr, fmt.Sprintf("%v+%v+%v", c.Player.ID, player.XP, player.Avatar.String(player.Username)))
 	}
 	c.SendExtensionResponse("bga", "-1", "0", strings.Join(friendsStr, "%"))
 	return nil

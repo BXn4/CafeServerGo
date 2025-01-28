@@ -1,37 +1,31 @@
 package database
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
+	"gorm.io/gorm"
 )
 
 func (db *CafeDB) Authenticate(name string, pass string) (int, error) {
 
-	row := db.conn.QueryRow("SELECT password, is_banned, username FROM player WHERE username=? OR email=?", name, name)
-
-	var password, username string
-	var is_banned int
-	err := row.Scan(
-		&password,
-		&is_banned,
-		&username,
-	)
+	// Find player by username or email
+	var player PlayerDAO
+	err := db.conn.Where("username = ? OR email = ?", name, name).First(&player).Error
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return 14, fmt.Errorf("Player \"%v\" not found!", name)
 		}
-		return 14, fmt.Errorf("SQL ERR: %v", err)
+		return 14, fmt.Errorf("DB Error: %v", err)
 	}
 
 	// TODO: Secure authentication
-	if password != pass {
+	if player.Password != pass {
 		return 14, errors.New("Access Denied!")
 	}
 
-	if is_banned != 0 {
+	if player.IsBanned {
 		return 19, errors.New("You are banned!")
 	}
 

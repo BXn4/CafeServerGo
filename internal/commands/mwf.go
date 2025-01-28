@@ -14,7 +14,7 @@ import (
 func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	// If you have too much gifts return
-	if c.Player.NewGifts >= 99 {
+	if len(c.Player.Gifts) >= 99 {
 		c.SendExtensionResponse("mwf", "-1", "92")
 		return nil
 	}
@@ -63,7 +63,7 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 	case 4:
 		fallthrough
 	case 11:
-		val := rand.Intn(int(99 - c.Player.NewGifts))
+		val := rand.Intn(int(99 - len(c.Player.Gifts)))
 		fancyCount := utils.If(val > 3, 3, val)
 		fancies, err := utils.GetItems("fancy")
 		if err != nil {
@@ -90,7 +90,7 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 	case 7:
 		fallthrough
 	case 15:
-		val := rand.Intn(int(99 - c.Player.NewGifts))
+		val := rand.Intn(int(99 - len(c.Player.Gifts)))
 		dishCount := utils.If(val > 3, 3, val)
 		dishes, err := utils.GetItems("dish")
 		if err != nil {
@@ -125,7 +125,7 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 		c.Player.Gold += amount
 		c.SendExtensionResponse("mwf", "-1", "0", rewardStr, "1902+"+amountStr)
 	case 10:
-		val := rand.Intn(int(99 - c.Player.NewGifts))
+		val := rand.Intn(int(99 - len(c.Player.Gifts)))
 		ingredientCount := utils.If(val > 3, 3, val)
 		ingredients, err := utils.GetItems("ingredient")
 		if err != nil {

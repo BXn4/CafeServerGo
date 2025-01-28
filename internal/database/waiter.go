@@ -2,25 +2,28 @@ package database
 
 import (
 	"cafego/internal/objects"
-	"cafego/internal/types/daos"
-	"cafego/internal/utils"
+	"strconv"
 	"strings"
 )
 
-func ConvertWaiterDAOToWaiter(dao *daos.WaiterDAO) (*objects.Waiter, error) {
+func NewWaiterFromString(s string) (*objects.Waiter, error) {
 	var waiter objects.Waiter
 
+	println("NewWaiterFromString: ", s)
+
+	data := strings.Split(s, "+")
+	priority, err := strconv.Atoi(data[2])
+	if err != nil {
+		return nil, err
+	}
+
 	// Fill simple waiter data
-	waiter.ID = dao.ID
-	waiter.Name = dao.Name
-	waiter.Priority = dao.Priority
+	waiter.ID = -1
+	waiter.Name = data[0]
+	waiter.Priority = priority
 
 	// Parse avatar
-	println("waiter avatar: ", dao.Avatar)
-	data := strings.Split(dao.Avatar, "+")
-	waiter.Avatar = *objects.NewAvatarFromString(data[2])
-	waiter.Avatar.Name = data[0]
-	waiter.Avatar.Gender = objects.AvatarGender(utils.If(data[1] == "2", 2, 1))
+	waiter.Avatar = *objects.NewAvatarFromString(data[1])
 	waiter.Avatar.IsNPC = true
 
 	return &waiter, nil

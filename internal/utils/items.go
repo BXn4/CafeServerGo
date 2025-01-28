@@ -29,7 +29,6 @@ type Wod struct {
 	DishCategory     int    `xml:"dishcategory,attr,omitempty"`
 	Category         string `xml:"category,attr,omitempty"`
 	Requirements     string `xml:"requirements,attr,omitempty"`
-	ExpansionID      int    `xml:"expansionID,attr,omitempty"`
 	SizeX            int    `xml:"sizeX,attr,omitempty"`
 	SizeY            int    `xml:"sizeY,attr,omitempty"`
 	MaxMembers       int    `xml:"maxMember,attr,omitempty"`

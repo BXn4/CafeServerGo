@@ -52,7 +52,7 @@ func SpawnCustomer(l interfaces.CafeLocation) *objects.Customer {
 		"0",  // Favourite = Waiters priority ???
 		"-1", // DishID (unnecessary for waiters)
 		utils.If(customer.IsThirsty(), "1", "0"),
-		customer.GetAvatar().String(),
+		customer.GetAvatar().String("Customer"),
 	}
 	// Send customer info + spawn
 	l.Broadcast("nav", "-1", "0", strings.Join(args, "+"))

@@ -70,12 +70,10 @@ func (g *Gift) String() string {
 func (p *Player) AddGift(id, amount, sender int) {
 	gift := NewGift(id, amount, sender, time.Now().UTC())
 	p.Gifts = append(p.Gifts, gift)
-	p.NewGifts = len(p.Gifts)
 }
 
 func (p *Player) RemoveGift(index int) {
 	p.Gifts = append(p.Gifts[:index], p.Gifts[index+1:]...)
-	p.NewGifts = len(p.Gifts)
 }
 
 func BuildGifts(gifts []*Gift) string {

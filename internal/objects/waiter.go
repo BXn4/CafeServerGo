@@ -1,11 +1,6 @@
 package objects
 
-import (
-	"cafego/internal/types/daos"
-	"encoding/json"
-
-	"github.com/charmbracelet/log"
-)
+import "fmt"
 
 const (
 	WAITER_INSERT Action = iota
@@ -51,19 +46,6 @@ func (w *Waiter) StopWorking() {
 	}
 }
 
-func (w *Waiter) JSON() string {
-
-	dao := daos.WaiterDAO{
-		ID:       w.ID,
-		Name:     w.Name,
-		Priority: w.Priority,
-		Avatar:   w.Avatar.String(),
-	}
-
-	b, err := json.Marshal(dao)
-	if err != nil {
-		log.Errorf("%v", err)
-		return ""
-	}
-	return string(b)
+func (w *Waiter) String() string {
+	return fmt.Sprintf("%v+%v+%v", w.Name, w.Avatar.Apperance(), w.Priority)
 }
