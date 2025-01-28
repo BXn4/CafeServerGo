@@ -2,7 +2,7 @@ package commands
 
 import (
 	"cafego/internal/client"
-	"cafego/internal/commands/admin"
+	"cafego/internal/commands/cmdlet"
 	"cafego/internal/managers"
 	"cafego/internal/types/requests"
 	"strconv"
@@ -20,7 +20,7 @@ func SendChatMessage(req *requests.Request, c *client.Client, gm *managers.GameM
 	message := req.Args[2]
 
 	if strings.HasPrefix(message, "/") {
-		admin.HandleAdminCommands(req, c, gm, message)
+		cmdlet.HandleCmdlets(c, gm, message)
 		return nil
 	}
 
