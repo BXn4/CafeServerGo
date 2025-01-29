@@ -55,20 +55,20 @@ func BuyObject(req *requests.Request, c *client.Client, gm *managers.GameManager
 
 	// If the player does not have the object in their inventory, dont remove cash, gold
 	if c.Location.Cafe().GetFurnitureInventory()[objID] != 0 {
-		if objectInfo.Cash != 0 && objectInfo.Cash > c.Player.Cash {
+		if objectInfo.Cash != 0 && objectInfo.Cash > c.Player.GetCash() {
 			// Need to send the ID, because the client parse it / these.
 			c.SendExtensionResponse("ebu", "-1", "4", strconv.Itoa(objX), strconv.Itoa(objY), strconv.Itoa(objID), strconv.Itoa(objRotation))
 			return nil
 		}
 
-		if objectInfo.Gold != 0 && objectInfo.Gold > c.Player.Gold {
+		if objectInfo.Gold != 0 && objectInfo.Gold > c.Player.GetGold() {
 			// Need to send the ID, because the client parse it / these.
 			c.SendExtensionResponse("ebu", "-1", "4", strconv.Itoa(objX), strconv.Itoa(objY), strconv.Itoa(objID), strconv.Itoa(objRotation))
 			return nil
 		}
 
-		c.Player.Cash -= objectInfo.Cash
-		c.Player.Gold -= objectInfo.Gold
+		c.Player.AddCash(objectInfo.Cash)
+		c.Player.AddGold(objectInfo.Gold)
 	}
 
 	// Need to add back the old wall in the inventory

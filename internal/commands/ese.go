@@ -66,7 +66,7 @@ func SellObject(req *requests.Request, c *client.Client, gm *managers.GameManage
 
 	}
 
-	c.Player.Cash += sellAmount * int(math.Round(float64(objectInfo.Cash)*0.2+float64(objectInfo.Gold)*0.2))
+	c.Player.AddCash(sellAmount * int(math.Round(float64(objectInfo.Cash)*0.2+float64(objectInfo.Gold)*0.2)))
 
 	c.SendExtensionResponse("ese", "-1", "0", strconv.Itoa(objX), strconv.Itoa(objY), strconv.Itoa(objID), strconv.Itoa(sellAmount))
 	return nil

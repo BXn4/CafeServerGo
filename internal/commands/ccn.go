@@ -33,11 +33,11 @@ func Clean(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 
 	var status string
 	if obj.IsStove() {
-		if c.Player.Cash < 15 {
+		if c.Player.GetCash() < 15 {
 			status = "4"
 		} else {
 			status = "0"
-			c.Player.Cash -= 15
+			c.Player.AddCash(-15)
 			obj.SetDishID(-1)
 		}
 	} else {

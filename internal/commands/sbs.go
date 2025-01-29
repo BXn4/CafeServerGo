@@ -9,11 +9,17 @@ import (
 	"strings"
 )
 
-func SendFriendsAvatar(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
+/*
+This file is temporary,
+this was created just
+
+*/
+
+func SendSocialFriendsAvatar(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	friends := c.Player.Friends
 	if len(friends) == 0 {
-		c.SendExtensionResponse("bga", "-1", "0", "")
+		c.SendExtensionResponse("sbs", "-1", "0", "")
 		return nil
 	}
 
@@ -33,8 +39,9 @@ func SendFriendsAvatar(req *requests.Request, c *client.Client, gm *managers.Gam
 				return fmt.Errorf("Player %v not in db: %v", f, err)
 			}
 		}
-		friendsStr = append(friendsStr, fmt.Sprintf("%v+%v+%v", c.Player.ID, player.GetXP(), player.Avatar.String(player.Username)))
+		pln := "2"
+		friendsStr = append(friendsStr, fmt.Sprintf("%v|%v|%v|%v", pln, c.Player.ID, player.GetXP(), player.Avatar.String(player.Username)))
 	}
-	c.SendExtensionResponse("bga", "-1", "0", strings.Join(friendsStr, "%"))
+	c.SendExtensionResponse("sbs", "-1", "0", strings.Join(friendsStr, "||"))
 	return nil
 }

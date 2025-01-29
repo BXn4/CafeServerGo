@@ -8,6 +8,9 @@ import (
 	"cafego/internal/utils"
 	"fmt"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/charmbracelet/log"
 )
@@ -41,6 +44,10 @@ func New(config *CafeConfig, dbconfig *database.DBConfig) (*CafeServer, error) {
 
 func (s *CafeServer) Run() {
 
+	// Set up signal handling
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
 	// Read the items XML file and cache it
 	utils.ReadAndCacheItems()
 
@@ -66,18 +73,29 @@ func (s *CafeServer) Run() {
 	log.Infof("Server started and listening on %s...", address)
 
 	// Handle connections
-	for {
-		conn, err := listener.Accept()
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer conn.Close()
+	go func() {
+		for {
+			conn, err := listener.Accept()
+			if err != nil {
+				continue
+			}
+			defer conn.Close()
 
-		c := client.New(conn, db, s.gm)
-		s.gm.AddClient(c)
-		c.Start()
-		go commands.HandleClient(c, s.gm)
+			c := client.New(conn, db, s.gm)
+			s.gm.AddClient(c)
+			c.Start()
+			go commands.HandleClient(c, s.gm)
+		}
+	}()
+	// Wait for interrupt signal
+	<-sigChan
+	log.Info("Received interrupt signal. Saving all data...")
+
+	// Save all
+	if err := s.gm.SaveAll(); err != nil {
+		log.Fatalf("Error saving data: %v", err)
+	} else {
+		log.Info("All data saved successfully")
 	}
-	// TODO: Save all and free memory
 
 }

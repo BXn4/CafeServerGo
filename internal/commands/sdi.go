@@ -48,7 +48,7 @@ func SellIngredient(req *requests.Request, c *client.Client, gm *managers.GameMa
 	}
 
 	// Calcualte money
-	c.Player.Cash += sellAmount * int(math.Round(float64(ingredientInfo.Cash)*0.2+float64(ingredientInfo.Gold)*0.2))
+	c.Player.AddCash(sellAmount * int(math.Round(float64(ingredientInfo.Cash)*0.2+float64(ingredientInfo.Gold)*0.2)))
 
 	c.Location.Cafe().RemoveFromFridge(ingredientID, sellAmount)
 

@@ -60,8 +60,13 @@ func ConvertCafeDAOToCafe(cafeDAO CafeDAO) (*objects.Cafe, error) {
 	fridgeInv := strings.Split(cafeDAO.FridgeInventory, "#")
 	for _, item := range fridgeInv {
 
+		if item == "" {
+			continue
+		}
+
 		// Parse item and count
 		data := strings.Split(item, "+")
+		println("frige item: ", item)
 		id, err := strconv.Atoi(data[0])
 		if err != nil {
 			return nil, fmt.Errorf("Cannot convert data: %v", err)

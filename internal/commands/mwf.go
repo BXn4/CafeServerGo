@@ -23,19 +23,22 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 	if c.Player.PlayedWheel {
 		c.SendExtensionResponse("mwf", "-1", "4")
 	}
+	// TODO: Set wheel timer and set played wheel
+
+	c.Player.UpdateAchivementWheelOfFortune()
 
 	reward := rand.Intn(16)
 	rewardStr := strconv.Itoa(reward)
 
 	switch reward {
 	case 0:
-		c.Player.Gold += 10
+		c.Player.AddGold(10)
 		c.SendExtensionResponse("mwf", "-1", "0", rewardStr, "1902+10")
 	case 1:
 		fallthrough
 	case 9:
 		amount := 300 + rand.Intn((401-300)/5)*5
-		c.Player.EarnedChips(amount)
+		c.Player.AddCash(amount)
 		amountStr := strconv.Itoa(amount)
 		c.SendExtensionResponse("mwf", "-1", "0", rewardStr, "1901+"+amountStr)
 	case 2:
@@ -116,13 +119,13 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 		fallthrough
 	case 14:
 		amount := (rand.Intn(150-60+1) + 60) * c.Player.GetLevel()
-		c.Player.XP += amount
+		c.Player.AddXP(amount)
 		amountStr := strconv.Itoa(amount)
 		c.SendExtensionResponse("mwf", "-1", "0", rewardStr, "1905+"+amountStr)
 	case 8:
 		amount := rand.Intn(5) + 1
 		amountStr := strconv.Itoa(amount)
-		c.Player.Gold += amount
+		c.Player.AddGold(amount)
 		c.SendExtensionResponse("mwf", "-1", "0", rewardStr, "1902+"+amountStr)
 	case 10:
 		val := rand.Intn(int(99 - len(c.Player.Gifts)))

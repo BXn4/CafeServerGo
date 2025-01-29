@@ -38,20 +38,20 @@ func BuyIngredient(req *requests.Request, c *client.Client, gm *managers.GameMan
 	}
 
 	if ingredientInfo.Cash != 0 {
-		if c.Player.Cash < ingredientInfo.Cash {
+		if c.Player.GetCash() < ingredientInfo.Cash {
 			c.SendExtensionResponse("sbi", "-1", "4")
 			return nil
 		} else {
-			c.Player.Cash -= ingredientInfo.Cash
+			c.Player.AddCash(-ingredientInfo.Cash)
 		}
 	}
 
 	if ingredientInfo.Gold != 0 {
-		if c.Player.Gold < ingredientInfo.Gold {
+		if c.Player.GetGold() < ingredientInfo.Gold {
 			c.SendExtensionResponse("sbi", "-1", "4")
 			return nil
 		} else {
-			c.Player.Gold -= ingredientInfo.Gold
+			c.Player.AddGold(ingredientInfo.Gold)
 		}
 	}
 

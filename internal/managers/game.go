@@ -39,3 +39,26 @@ func NewGameManager() (*GameManager, error) {
 
 	return gm, nil
 }
+
+func (gm *GameManager) SaveAll() error {
+
+	for _, client := range gm.clients {
+		if client.Player != nil {
+			err := gm.db.SavePlayer(client.Player)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	for _, location := range gm.locations {
+		if location != nil {
+			err := gm.db.SaveCafe(location.Cafe())
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}

@@ -87,7 +87,7 @@ func SendFriendRequest(req *requests.Request, c *client.Client, gm *managers.Gam
 		fromClient.SendExtensionResponse("big", "-1", "0", "2",
 			req.Args[3],
 			req.Args[4],
-			fmt.Sprintf("%v+%v+%v", toPlayer.ID, toPlayer.XP, toPlayer.Avatar.String(toPlayer.Username)),
+			fmt.Sprintf("%v+%v+%v", toPlayer.ID, toPlayer.GetXP(), toPlayer.Avatar.String(toPlayer.Username)),
 		)
 	case UNFRIEND:
 		// TODO: Test
@@ -100,7 +100,7 @@ func SendFriendRequest(req *requests.Request, c *client.Client, gm *managers.Gam
 			fromClient.SendExtensionResponse("big", "-1", "0", "3",
 				req.Args[3],
 				req.Args[4],
-				fmt.Sprintf("%v+%v+%v", toPlayer.ID, toPlayer.XP, toPlayer.Avatar.String(toPlayer.Username)),
+				fmt.Sprintf("%v+%v+%v", toPlayer.ID, toPlayer.GetXP(), toPlayer.Avatar.String(toPlayer.Username)),
 			)
 		} else {
 			// if player offline

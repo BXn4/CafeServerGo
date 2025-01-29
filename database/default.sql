@@ -11,6 +11,7 @@ CREATE TABLE player (
     played_wheel BOOL DEFAULT FALSE,
     allow_friend_requests BOOL DEFAULT TRUE,
     friends TEXT DEFAULT "",
+    friends_with_gifts TEXT DEFAULT "",
     allow_emails BOOL DEFAULT FALSE,
     email_verified BOOL DEFAULT TRUE,
     username VARCHAR(50) NOT NULL,
@@ -21,7 +22,8 @@ CREATE TABLE player (
     last_login TEXT DEFAULT "",
     daily_login DATETIME DEFAULT CURRENT_TIMESTAMP,
     gifts TEXT DEFAULT "",
-    send_gifts TEXT DEFAULT "",
+    sendable_gifts TEXT DEFAULT "",
+    gift_refresh_time DATETIME DEFAULT CURRENT_TIMESTAMP,
     access_level TINYINT DEFAULT 0
 );
 
@@ -36,16 +38,24 @@ CREATE TABLE cafe (
     owner_name VARCHAR(50) NOT NULL,
     fridge_inv text DEFAULT '1314+3#1327+3',
     furniture_inv text DEFAULT '602+5#603+10',
-    waiters LONGTEXT DEFAULT 'James+1002$0#1022$2#1042$6#1052$0#1062$0#1082$0+50',
-    CONSTRAINT cafe_ibfk_1 FOREIGN KEY (player_id) REFERENCES player (id)
+    waiters LONGTEXT DEFAULT 'James+1002$0#1022$2#1042$6#1052$0#1062$0#1082$0+50'
+    -- CONSTRAINT cafe_ibfk_1 FOREIGN KEY (player_id) REFERENCES player (id)
 );
 
 --- Data
 --- Dummy1
 INSERT INTO
-    player (id, email, password, xp, cash, username)
+    player (
+        id,
+        email,
+        password,
+        xp,
+        cash,
+        username,
+        access_level
+    )
 VALUES
-    (1, 'a@a.a', '1234', 99999999, 120999, 'bence');
+    (1, 'a@a.a', '1234', 99999999, 120999, 'bence', 3);
 
 INSERT INTO
     cafe (id, player_id, owner_name)
@@ -54,9 +64,17 @@ VALUES
 
 --- Dummy2
 INSERT INTO
-    player (id, email, password, xp, cash, username)
+    player (
+        id,
+        email,
+        password,
+        xp,
+        cash,
+        username,
+        access_level
+    )
 VALUES
-    (2, 'b@b.b', '1234', 99999999, 120999, 'bence2');
+    (2, 'b@b.b', '1234', 99999999, 120999, 'bence2', 3);
 
 INSERT INTO
     cafe (id, player_id, owner_name)

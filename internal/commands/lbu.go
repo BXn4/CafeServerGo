@@ -20,10 +20,6 @@ func LoginRewards(req *requests.Request, c *client.Client, gm *managers.GameMana
 		return err
 	}
 
-	// DEBUG
-	asd := (time.Now().Add(-24 * time.Hour))
-	dailyLogin = &asd
-
 	// Check if time passed by daily login
 	timePassed := time.Now().Sub(*dailyLogin)
 	isDaily := timePassed >= 24*time.Hour
@@ -50,6 +46,7 @@ func LoginRewards(req *requests.Request, c *client.Client, gm *managers.GameMana
 		loginBonus := 500 * (int(c.Player.GetLevel()/10) + 1)
 		loginBonusStr = fmt.Sprintf("1906+%v#%v+1", loginBonus, fancy.ID)
 		args = append(args, loginBonusStr)
+
 	}
 
 	// Get my cafe

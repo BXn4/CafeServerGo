@@ -11,16 +11,15 @@ import (
 )
 
 func HandleClient(c *client.Client, gm *managers.GameManager) {
-
+	defer c.Disconnect()
 	for req := range c.RequestQueue {
 		if req == nil {
-			continue
+			return
 		}
 
 		// Check for timeout
 		if time.Now().Sub(c.TimeoutStamp) > 5*time.Minute {
 			log.Warnf("Client %v timed out", c.Player.ID)
-			c.Disconnect()
 			return
 		}
 
@@ -32,7 +31,6 @@ func HandleClient(c *client.Client, gm *managers.GameManager) {
 		}
 	}
 
-	c.Disconnect()
 }
 
 func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
@@ -125,6 +123,10 @@ func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameMan
 		err = CreateAvatar(req, c, gm)
 	case requests.C2S_REGISTER:
 		err = Register(req, c, gm)
+	case requests.C2S_GIFT_SENDABLEGIFTS:
+		err = DailyGifts(req, c, gm)
+	case requests.C2S_GIFT_ALLREADYSEND_PLAYERS:
+		err = GiftAllReadySendPlayers(req, c, gm)
 	default:
 		log.Infof("NOT IMPLEMENTED: %v", req.Args[0])
 	}

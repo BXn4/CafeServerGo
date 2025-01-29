@@ -26,7 +26,7 @@ func InstantCook(req *requests.Request, c *client.Client, gm *managers.GameManag
 		return nil
 	}
 
-	if c.Player.Gold < 1 {
+	if c.Player.GetGold() < 1 {
 		c.Location.Broadcast("cic", "-1", "4")
 	}
 

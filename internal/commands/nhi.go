@@ -51,7 +51,7 @@ func HireWaiter(req *requests.Request, c *client.Client, gm *managers.GameManage
 		newWaiter.Dish = -1
 	}()
 
-	c.Player.Gold -= 2
+	c.Player.AddGold(-2)
 
 	c.SendExtensionResponse("nhi", "0", "0", req.Args[2], req.Args[3])
 	return nil

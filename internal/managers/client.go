@@ -4,6 +4,7 @@ import (
 	"cafego/internal/client"
 	"cafego/internal/interfaces"
 	"fmt"
+	"time"
 )
 
 // AddClient adds a new client to the list
@@ -26,27 +27,33 @@ func (gm *GameManager) DisconnectClient(id int) {
 			continue
 		}
 
-		if c.Player.ID == id {
-
-			// Save player to db
-			gm.db.SavePlayer(gm.clients[i].Player)
-			c.Player = nil
-
-			// Leave current location
-			if c.Location != nil {
-				c.Location.Leave(id)
-				// Check if empty, owner offline, not market
-				if c.Location.IsEmpty() && !gm.isOnline(c.Location.Cafe().GetID()) && c.Location.Cafe().GetID() > 0 {
-					gm.RemoveLocation(id)
-				}
-
-			}
-
-			// Remove client by re-slicing
-			gm.clients = append(gm.clients[:i], gm.clients[i+1:]...)
-
-			return
+		// Skip if not player
+		if c.Player.ID != id {
+			continue
 		}
+
+		// Send signal to close connection
+		c.RequestQueue <- nil
+		time.Sleep(time.Millisecond * 100)
+
+		// Save player to db
+		gm.db.SavePlayer(gm.clients[i].Player)
+		c.Player = nil
+
+		// Leave current location
+		if c.Location != nil {
+			c.Location.Leave(id)
+			// Check if empty, owner offline, not market
+			if c.Location.IsEmpty() && !gm.isOnline(c.Location.Cafe().GetID()) && c.Location.Cafe().GetID() > 0 {
+				gm.RemoveLocation(id)
+			}
+		}
+
+		// Remove client by re-slicing
+		gm.clients = append(gm.clients[:i], gm.clients[i+1:]...)
+
+		return
+
 	}
 }
 
@@ -110,5 +117,5 @@ func (gm *GameManager) GetClientByName(name string) (*client.Client, error) {
 			return c, nil
 		}
 	}
-	return nil, fmt.Errorf("Cafe with username %v not found", name)
+	return nil, fmt.Errorf("Client with username %v not found", name)
 }

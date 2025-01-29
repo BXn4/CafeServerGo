@@ -51,7 +51,7 @@ func BuyFloor(req *requests.Request, c *client.Client, gm *managers.GameManager)
 	}
 
 	// If the player not have enough cash
-	if c.Player.Cash < tileInfo.Cash*buyAmount {
+	if c.Player.GetCash() < tileInfo.Cash*buyAmount {
 		c.SendExtensionResponse("ebf", "-1", "4",
 			strconv.Itoa(startX),
 			strconv.Itoa(startY),

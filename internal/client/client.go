@@ -17,6 +17,7 @@ import (
 
 // Client
 type Client struct {
+	conn          net.Conn
 	Writer        *bufio.Writer           // Buffered write connection to the client
 	Reader        *bufio.Reader           // Buffered read  connection to the client
 	DB            *database.CafeDB        // Connection to the database
@@ -32,6 +33,7 @@ type Client struct {
 
 func New(conn net.Conn, dbc *database.CafeDB, cm interfaces.ClientManager) *Client {
 	return &Client{
+		conn:          conn,
 		Reader:        bufio.NewReader(conn),
 		Writer:        bufio.NewWriter(conn),
 		DB:            dbc,
@@ -53,11 +55,12 @@ func (c *Client) Start() {
 	go c.sendResponses()
 }
 
-func (c *Client) Disconnect() {
+func (c *Client) Disconnect() error {
 	if c.Player != nil {
 		id := c.Player.ID
 		c.ClientManager.DisconnectClient(id)
 	}
+	return nil
 }
 
 func (c *Client) SendSystemResponse(args ...string) {
@@ -76,9 +79,8 @@ func (c *Client) sendResponses() {
 	defer close(c.ResponseQueue)
 	for resp := range c.ResponseQueue {
 		if resp == nil {
-			continue
+			return
 		}
-		time.Sleep(10 * time.Millisecond)
 		c.Writer.Write([]byte(resp.Wrap()))
 		c.Writer.Flush()
 	}

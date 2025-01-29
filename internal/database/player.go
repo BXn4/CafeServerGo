@@ -23,6 +23,7 @@ type PlayerDAO struct {
 	PlayedWheel         bool   `gorm:"column:played_wheel"`
 	AllowFriendRequests bool   `gorm:"column:allow_friend_requests"`
 	Friends             string `gorm:"column:friends"`
+	FriendsWithGifts    string `gorm:"column:friends_with_gifts"`
 	AllowEmails         bool   `gorm:"column:allow_emails"`
 	EmailVerified       bool   `gorm:"column:email_verified"`
 	Username            string `gorm:"column:username"`
@@ -33,6 +34,8 @@ type PlayerDAO struct {
 	LastLogin           string `gorm:"column:last_login"`
 	DailyLogin          string `gorm:"column:daily_login"`
 	Gifts               string `gorm:"column:gifts"`
+	GiftRefreshTime     string `gorm:"column:gift_refresh_time"`
+	SendableGifts       string `gorm:"column:sendable_gifts"`
 	AccessLevel         int    `gorm:"column:access_level"`
 }
 
@@ -46,9 +49,10 @@ func ConvertPlayerDAOToPlayer(playerDAO PlayerDAO) (*objects.Player, error) {
 
 	// Fill in simple data
 	player.ID = playerDAO.ID
-	player.Cash = playerDAO.Cash
-	player.Gold = playerDAO.Gold
-	player.XP = playerDAO.XP
+	player.SetCash(playerDAO.Cash)
+	player.SetGold(playerDAO.Gold)
+	player.SetXP(playerDAO.XP)
+	player.ParseAchievement(playerDAO.Achievement)
 	player.InstantCookings = playerDAO.InstantCookings
 	player.OpenJobs = playerDAO.OpenJobs
 	player.PlayedWheel = playerDAO.PlayedWheel
@@ -68,7 +72,6 @@ func ConvertPlayerDAOToPlayer(playerDAO PlayerDAO) (*objects.Player, error) {
 
 	player.ParseFriends(playerDAO.Friends)
 	player.ParseMastery(playerDAO.Mastery)
-	player.ParseAchievement(playerDAO.Achievement)
 
 	// Fill avatar
 	player.Avatar = *objects.NewAvatarFromString(playerDAO.Avatar)
@@ -124,9 +127,9 @@ func (db *CafeDB) SavePlayer(player *objects.Player) error {
 	}
 
 	updateData := map[string]interface{}{
-		"cash":                  uint(player.Cash),
-		"gold":                  player.Gold,
-		"xp":                    player.XP,
+		"cash":                  uint(player.GetCash()),
+		"gold":                  player.GetGold(),
+		"xp":                    player.GetXP(),
 		"instant_cookings":      player.InstantCookings,
 		"open_jobs":             player.OpenJobs,
 		"played_wheel":          player.PlayedWheel,
@@ -189,10 +192,61 @@ func (db *CafeDB) GetDailyLogin(playerID int) (*time.Time, error) {
 	return &dailyLogin, nil
 }
 
+func (db *CafeDB) GetGiftRefreshTime(playerID int) (*time.Time, error) {
+	var playerDAO PlayerDAO
+	err := db.conn.Select("gift_refresh_time").First(&playerDAO, playerID).Error
+	if err != nil {
+		return nil, err
+	}
+
+	refreshTime, err := time.Parse("2006-01-02 15:04:05", playerDAO.GiftRefreshTime)
+	if err != nil {
+		return nil, fmt.Errorf("Error parsing daily login time: %v", err)
+	}
+
+	return &refreshTime, nil
+}
+
+func (db *CafeDB) GetFriendsWithGifts(playerID int) ([]string, error) {
+	var playerDAO PlayerDAO
+	err := db.conn.Select("friends_with_gifts").First(&playerDAO, playerID).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return strings.Split(playerDAO.FriendsWithGifts, "+"), nil
+}
+
+func (db *CafeDB) GetSendableGifts(playerID int) (string, error) {
+	var playerDAO PlayerDAO
+	err := db.conn.Select("gift_refresh_time").First(&playerDAO, playerID).Error
+	if err != nil {
+		return "", err
+	}
+
+	return playerDAO.SendableGifts, nil
+}
+
 func (db *CafeDB) ResetDailyLogin(playerID int) error {
 	err := db.conn.Model(&PlayerDAO{}).Where("id = ?", playerID).Update("daily_login", time.Now().Format("2006-01-02 15:04:05")).Error
 	if err != nil {
-		return fmt.Errorf("Cant reset daily_login: %v", err)
+		return fmt.Errorf("Cant reset daily login: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) ResetGiftRefreshTime(playerID int) error {
+	err := db.conn.Model(&PlayerDAO{}).Where("id = ?", playerID).Update("gift_refresh_time", time.Now().Format("2006-01-02 15:04:05")).Error
+	if err != nil {
+		return fmt.Errorf("Cant reset gift refresh time: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateSendableGifts(playerID int, gifts string) error {
+	err := db.conn.Model(&PlayerDAO{}).Where("id = ?", playerID).Update("sendable_gifts", gifts).Error
+	if err != nil {
+		return fmt.Errorf("Cant update sendable gifts: %v", err)
 	}
 	return nil
 }

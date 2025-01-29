@@ -210,8 +210,8 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 		log.Errorf("Cant find dish! %v\n", c.GetDish())
 		return
 	}
-	player.Cash += dishInfo.IncomePerServing
-	player.XP += dishInfo.XP
+	player.AddCash(dishInfo.IncomePerServing)
+	player.AddXP(dishInfo.XP)
 	l.Cafe().AddRating(1)
 
 	// Dirty dishes

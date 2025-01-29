@@ -13,9 +13,9 @@ import (
 
 type Player struct {
 	ID                  int
-	Cash                int
-	Gold                int
-	XP                  int
+	cash                int
+	gold                int
+	xp                  int
 	InstantCookings     int
 	OpenJobs            int
 	PlayedWheel         bool
@@ -27,11 +27,11 @@ type Player struct {
 	Avatar              Avatar
 	Position            [2]int
 	Mastery             map[int]int
-	Achievement         map[int]int
+	achievement         map[int]int
 	WorkTimeLeft        int
 	SeekingJob          bool
 	Gifts               []*Gift
-	DailyLogin          time.Time
+	dailyLogin          time.Time
 	AccessLevel         int
 }
 
@@ -39,7 +39,7 @@ func (player *Player) String() string {
 	params := []string{
 		strconv.Itoa(player.ID),
 		strconv.Itoa(player.ID),
-		strconv.Itoa(player.XP),
+		strconv.Itoa(player.GetXP()),
 		strconv.Itoa(player.Position[0]),
 		strconv.Itoa(player.Position[1]),
 		strconv.Itoa(player.WorkTimeLeft),
@@ -51,10 +51,10 @@ func (player *Player) String() string {
 	return strings.Join(params, "+")
 }
 func (p *Player) GetLevel() int {
-	if p.XP < 90 {
-		return int(math.Pow(math.Floor(float64(p.XP)/10), 1/2))
+	if p.xp < 90 {
+		return int(math.Pow(math.Floor(float64(p.xp)/10), 1/2))
 	}
-	return int(math.Pow(math.Floor(float64(p.XP)/5), 1/3.72))
+	return int(math.Pow(math.Floor(float64(p.xp)/5), 1/3.72))
 }
 
 func (p *Player) ParseMastery(mastery string) {
@@ -91,12 +91,14 @@ func (p *Player) ParseFriends(friends string) {
 		}
 		p.Friends = append(p.Friends, id)
 	}
+	println(len(p.Friends))
+	p.SetAchivementFriendsCount()
 }
 
 func (p *Player) ParseAchievement(achivement string) {
 	pairs := strings.Split(achivement, "#")
 
-	p.Achievement = make(map[int]int)
+	p.achievement = make(map[int]int)
 
 	for _, pair := range pairs {
 		parts := strings.Split(pair, "+")
@@ -110,7 +112,7 @@ func (p *Player) ParseAchievement(achivement string) {
 		if err != nil {
 			log.Printf("Cant parse achievement progress to int: %v", err)
 		}
-		p.Achievement[achivementID] = progression
+		p.achievement[achivementID] = progression
 	}
 }
 
@@ -127,7 +129,7 @@ func (p *Player) BuildMastery() string {
 
 func (p *Player) BuildAchievement() string {
 	var pairs []string
-	for achivement, progress := range p.Achievement {
+	for achivement, progress := range p.achievement {
 		pair := fmt.Sprintf("%d+%d", achivement-2001, progress)
 		pairs = append(pairs, pair)
 
@@ -226,6 +228,7 @@ func (p *Player) GetDishMasteryDuration(dishID int) int {
 
 func (p *Player) AddFriend(id int) {
 	p.Friends = append(p.Friends, id)
+	p.SetAchivementFriendsCount()
 }
 
 func (p *Player) DeleteFriend(id int) {
@@ -240,4 +243,53 @@ func (p *Player) DeleteFriend(id int) {
 	}
 	p.Friends = append(p.Friends[:index], p.Friends[index+1:]...)
 
+}
+
+func (p *Player) AddCash(amount int) {
+	p.cash += amount
+	if amount > 0 {
+		p.UpdateAchivementSpendChips(amount)
+	} else if amount < 0 {
+		p.UpdateAchivementSpendChips(amount)
+	}
+}
+
+func (p *Player) SetCash(amount int) {
+	p.cash = amount
+}
+
+func (p *Player) SetGold(amount int) {
+	p.gold = amount
+}
+
+func (p *Player) GetCash() int {
+	return p.cash
+}
+
+func (p *Player) GetGold() int {
+	return p.gold
+}
+
+func (p *Player) AddGold(amount int) {
+	p.gold += amount
+	if amount < 0 {
+		p.UpdateAchivementSpendGold(amount)
+	}
+}
+
+func (p *Player) GetXP() int {
+	return p.xp
+}
+
+func (p *Player) AddXP(amount int) {
+	beforeLvl := p.GetLevel()
+	p.xp += amount
+	if beforeLvl < p.GetLevel() {
+		p.AddCash(500)
+		p.AddGold(1)
+	}
+}
+
+func (p *Player) SetXP(amount int) {
+	p.xp = amount
 }

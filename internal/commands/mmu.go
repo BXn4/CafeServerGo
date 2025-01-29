@@ -36,23 +36,22 @@ func PlayMuffinGame(req *requests.Request, c *client.Client, gm *managers.GameMa
 	}
 
 	// Just dont enable this
-	if c.Player.Cash < cash || c.Player.Gold < gold {
+	if c.Player.GetCash() < cash || c.Player.GetGold() < gold {
 		return nil
 	}
 
-	c.Player.Cash -= cash
-	c.Player.Cash -= gold
+	c.Player.AddCash(-cash)
+	c.Player.AddGold(-gold)
 
 	switch isWin {
 	case true:
-		c.Player.Cash += cash * 2
-		c.Player.Gold += gold * 2
+		c.Player.AddCash(cash * 2)
+		c.Player.AddGold(gold * 2)
+		c.Player.UpdateAchivementMuffinmanCash(cash * 2)
+		c.Player.UpdateAchivementMuffinmanGold(gold * 2)
 
 		c.SendExtensionResponse("mmu", "-1", "0", "1", strconv.Itoa(cash), strconv.Itoa(gold))
 	case false:
-		c.Player.Cash -= cash
-		c.Player.Gold -= gold
-
 		c.SendExtensionResponse("mmu", "-1", "0", "0", strconv.Itoa(-cash), strconv.Itoa(-gold))
 	}
 

@@ -25,6 +25,7 @@ func CafeWalk(req *requests.Request, c *client.Client, gm *managers.GameManager)
 
 	if c.Location.Cafe().GetObjectByPos(posX, posY) != nil {
 		c.SendExtensionResponse("cwa", "-1", "23")
+		return nil
 	}
 
 	c.Player.Position = [2]int{posX, posY}
