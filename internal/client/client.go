@@ -75,6 +75,10 @@ func (c *Client) SendExtensionResponse(args ...string) {
 	c.ResponseQueue <- resp
 }
 
+func (c *Client) GetIP() string {
+	return strings.Split(c.conn.RemoteAddr().String(), ":")[0]
+}
+
 func (c *Client) sendResponses() {
 	defer close(c.ResponseQueue)
 	for resp := range c.ResponseQueue {

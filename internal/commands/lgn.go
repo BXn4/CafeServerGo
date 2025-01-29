@@ -20,7 +20,9 @@ func Login(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 	if err == nil {
 		if searched, _ := gm.GetClientByName(name); searched != nil {
 			statusCode = 15
-			gm.DisconnectClient(searched.ID()) // Kick client out
+			if c.GetIP() == searched.GetIP() {
+				gm.DisconnectClient(searched.ID()) // Kick client out
+			}
 		}
 	}
 
