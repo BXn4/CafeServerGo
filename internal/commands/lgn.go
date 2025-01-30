@@ -23,7 +23,6 @@ func Login(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 			// Check if the same ip because than its most likely a bug
 			if c.GetIP() == searched.GetIP() {
 				err = searched.Disconnect() // Kick client out
-				println("STCUK HERE? 1")
 			}
 		}
 	}

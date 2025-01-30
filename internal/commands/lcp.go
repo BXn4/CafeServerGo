@@ -16,7 +16,6 @@ func ChangePassword(req *requests.Request, c *client.Client, gm *managers.GameMa
 	newPasswd := req.Args[3]
 
 	status, err := c.DB.ChangePassword(c.ID(), oldPasswd, newPasswd)
-	log.Warnf("WTF %v", status)
 	if err != nil {
 		log.Warnf("Error changing password: %v", err)
 	}

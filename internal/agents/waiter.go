@@ -51,9 +51,9 @@ func IterateWaiter(l interfaces.CafeLocation, w *objects.Waiter) {
 
 	time.Sleep(1 * time.Second)
 
-	job := rand.Intn(100)
+	job := rand.Intn(100) + 1 // 1-100
 
-	if job < w.Priority {
+	if job > w.Priority {
 		TakePlates(l, w)
 	} else {
 		ServeFood(l, w)
@@ -67,6 +67,16 @@ func TakePlates(l interfaces.CafeLocation, w *objects.Waiter) {
 		return
 	}
 
+	if w.CurrentCounter == nil {
+		w.CurrentCounter, _ = GetRandomCounter(l.Cafe())
+		if w.CurrentCounter == nil {
+			return
+		}
+		if !MoveWaiter(l, w, w.CurrentCounter.GetPos(), objects.MOVE_TO_COUNTER, 600*time.Millisecond) {
+			return
+		}
+	}
+
 	// Get space with dirty plates
 	space := l.GetDirtySpace()
 	if space == nil {
@@ -76,6 +86,11 @@ func TakePlates(l interfaces.CafeLocation, w *objects.Waiter) {
 
 	// Move to dirty plates
 	if !MoveWaiter(l, w, space.GetPos(), objects.CLEAN, time.Duration(600)*time.Millisecond) {
+		return
+	}
+
+	// Wait until waiter takes plates
+	if !SleepWhileChecking(l, time.Second*5, &w.IsWorking) {
 		return
 	}
 
