@@ -55,7 +55,15 @@ INSERT INTO
         access_level
     )
 VALUES
-    (1, 'a@a.a', '1234', 99999999, 120999, 'bence', 3);
+    (
+        1,
+        'a@a.a',
+        '$2a$14$yCr6IBITIv.u9S7PcdLrHuyxS1lvPDWJ1OCF6SFBEZkJbBcRObfR.', -- pass: 1234
+        99999999,
+        120999,
+        'bence',
+        3
+    );
 
 INSERT INTO
     cafe (id, player_id, owner_name)
@@ -74,7 +82,15 @@ INSERT INTO
         access_level
     )
 VALUES
-    (2, 'b@b.b', '1234', 99999999, 120999, 'bence2', 3);
+    (
+        2,
+        'b@b.b',
+        '$2a$14$yCr6IBITIv.u9S7PcdLrHuyxS1lvPDWJ1OCF6SFBEZkJbBcRObfR.', -- pass: 1234
+        99999999,
+        120999,
+        'bence2',
+        3
+    );
 
 INSERT INTO
     cafe (id, player_id, owner_name)

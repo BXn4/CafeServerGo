@@ -54,15 +54,20 @@ func (db *CafeDB) Close() error {
 
 func (db *CafeDB) CreateAccount(name, email, password string, avatar objects.Avatar) (*objects.Player, error) {
 
+	hashedPasswd, err := HashPassword(password)
+	if err != nil {
+		return nil, err
+	}
+
 	dao := &PlayerDAO{
 		Email:    email,
-		Password: password,
+		Password: hashedPasswd,
 		Username: name,
 		Avatar:   avatar.String(name),
 	}
 
 	// Create player and get id
-	err := db.conn.Transaction(func(tx *gorm.DB) error {
+	err = db.conn.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(dao).Error; err != nil {
 			return fmt.Errorf("Cant create player: %w", err)
 		}

@@ -20,6 +20,8 @@ type CafeLocation interface {
 	// Send message to other clients in the location (Not going to send to the source)
 	Announce(id int, arg ...string)
 
+	Send(id int, arg ...string)
+
 	// The wrapped cafe object
 	Cafe() *objects.Cafe
 
@@ -47,6 +49,8 @@ type CafeLocation interface {
 
 	//
 	IsEmpty() bool
+
+	AtLocation(int) bool
 
 	//
 	GetUniqueCustomerID() int

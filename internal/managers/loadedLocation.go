@@ -47,6 +47,14 @@ func (lc *LoadedLocation) Broadcast(args ...string) {
 	lc.broadcast(args...)
 }
 
+// This will send a message to a user in the location
+func (lc *LoadedLocation) Send(id int, args ...string) {
+	lc.mu.Lock()
+	defer lc.mu.Unlock()
+
+	lc.send(id, args...)
+}
+
 // Same as the Broadcast, just sending to the other players, and not sending it to the source
 func (lc *LoadedLocation) Announce(playerID int, args ...string) {
 	lc.mu.Lock()
@@ -59,6 +67,13 @@ func (lc *LoadedLocation) IsEmpty() bool {
 	lc.mu.Lock()
 	defer lc.mu.Unlock()
 	return len(lc.occupants) == 0
+}
+
+func (lc *LoadedLocation) AtLocation(id int) bool {
+	lc.mu.Lock()
+	defer lc.mu.Unlock()
+	_, ok := lc.occupants[id]
+	return ok
 }
 
 func (lc *LoadedLocation) IsRunning() bool {

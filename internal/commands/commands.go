@@ -23,6 +23,10 @@ func HandleClient(c *client.Client, gm *managers.GameManager) {
 			return
 		}
 
+		if req.NeedsLogin() && c.Player == nil {
+			return
+		}
+
 		// Handle requests
 		err := HandleRequest(req, c, gm)
 		if err != nil {
@@ -127,6 +131,14 @@ func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameMan
 		err = DailyGifts(req, c, gm)
 	case requests.C2S_GIFT_ALLREADYSEND_PLAYERS:
 		err = GiftAllReadySendPlayers(req, c, gm)
+	case requests.C2S_ALLOW_BUDDY_REQUESTS:
+		err = AllowFriendRequests(req, c, gm)
+	case requests.C2S_KICK_USER:
+		err = KickPlayer(req, c, gm)
+	case requests.C2S_ALLOW_MAIL_REQUESTS:
+		err = AllowEmails(req, c, gm)
+	case requests.C2S_CHANGE_PASSWORD:
+		err = ChangePassword(req, c, gm)
 	default:
 		log.Infof("NOT IMPLEMENTED: %v", req.Args[0])
 	}

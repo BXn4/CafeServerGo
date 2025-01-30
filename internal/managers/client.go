@@ -33,8 +33,10 @@ func (gm *GameManager) DisconnectClient(id int) {
 		}
 
 		// Send signal to close connection
-		c.RequestQueue <- nil
-		time.Sleep(time.Millisecond * 100)
+		for len(c.RequestQueue) > 0 {
+			c.RequestQueue <- nil
+		}
+		time.Sleep(time.Millisecond * 100) // Wait until procceses stop
 
 		// Save player to db
 		gm.db.SavePlayer(gm.clients[i].Player)

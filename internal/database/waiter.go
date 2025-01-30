@@ -9,8 +9,6 @@ import (
 func NewWaiterFromString(s string) (*objects.Waiter, error) {
 	var waiter objects.Waiter
 
-	println("NewWaiterFromString: ", s)
-
 	data := strings.Split(s, "+")
 	priority, err := strconv.Atoi(data[2])
 	if err != nil {

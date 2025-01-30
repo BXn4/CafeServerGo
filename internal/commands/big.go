@@ -6,6 +6,7 @@ import (
 	"cafego/internal/objects"
 	"cafego/internal/types/requests"
 	"fmt"
+	"slices"
 	"strconv"
 )
 
@@ -58,9 +59,11 @@ func SendFriendRequest(req *requests.Request, c *client.Client, gm *managers.Gam
 			break
 		}
 
-		if toPlayer.AllowFriendRequests {
+		// If they are not friends and to player allows friend requests
+		if !slices.Contains(fromPlayer.Friends, fromPlayer.ID) && toPlayer.AllowFriendRequests {
 			toClient.SendExtensionResponse("big", "-1", "0", "0", req.Args[3], req.Args[4])
 		}
+
 	case ACCEPT:
 		if toPlayer == nil {
 			break

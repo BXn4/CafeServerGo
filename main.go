@@ -23,6 +23,7 @@ func init() {
 }
 
 func main() {
+
 	// Read .env file
 	envFile, err := godotenv.Read(".env")
 

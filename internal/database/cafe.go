@@ -66,7 +66,6 @@ func ConvertCafeDAOToCafe(cafeDAO CafeDAO) (*objects.Cafe, error) {
 
 		// Parse item and count
 		data := strings.Split(item, "+")
-		println("frige item: ", item)
 		id, err := strconv.Atoi(data[0])
 		if err != nil {
 			return nil, fmt.Errorf("Cannot convert data: %v", err)
@@ -103,7 +102,6 @@ func ConvertCafeDAOToCafe(cafeDAO CafeDAO) (*objects.Cafe, error) {
 	// Parse waiters
 	waitersRaw := strings.Split(cafeDAO.Waiters, "%")
 	for i, waiterRaw := range waitersRaw {
-		println("waitersRaw: ", waiterRaw)
 		waiter, err := NewWaiterFromString(waiterRaw)
 		if err != nil {
 			return nil, err

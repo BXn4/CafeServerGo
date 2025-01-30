@@ -18,14 +18,16 @@ const (
 	LOGIN
 
 	// Extension request types
+	C2S_PING
 	C2S_LOGIN
 	C2S_LOGIN_SOCIAL
 	C2S_REGISTER
 	C2S_VERSION_CHECK
 	C2S_CREATE_AVATAR
 	C2S_LOST_PASSWORD
-	C2S_CHANGE_PASSWORD
 	C2S_PLAY_WITHOUT_REGISTER
+	// ---- After this line the requests are login only
+	C2S_CHANGE_PASSWORD
 	C2S_CHANGE_AVATAR
 	C2S_CAFE_COOK
 	C2S_CAFE_INSTANTCOOK
@@ -90,7 +92,6 @@ const (
 	C2S_FASTFOOD_NPC
 	C2S_EMAIL_VERIFICATION
 	C2S_ROOMLIST
-	C2S_PING
 )
 
 func LookupRequestKind(kindStr string) RequestKind {
@@ -247,4 +248,8 @@ func ParseExtensionRequest(req string) (*Request, error) {
 		Kind: kind,
 		Args: args,
 	}, nil
+}
+
+func (r *Request) NeedsLogin() bool {
+	return r.Kind > 14
 }

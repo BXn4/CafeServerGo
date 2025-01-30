@@ -16,12 +16,14 @@ func Login(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 	// Check credentials
 	statusCode, err := c.DB.Authenticate(name, password)
 
-	// Check if already logged in log him/her out
+	// Check if already logged in disconnect the client
 	if err == nil {
 		if searched, _ := gm.GetClientByName(name); searched != nil {
 			statusCode = 15
+			// Check if the same ip because than its most likely a bug
 			if c.GetIP() == searched.GetIP() {
-				gm.DisconnectClient(searched.ID()) // Kick client out
+				err = searched.Disconnect() // Kick client out
+				println("STCUK HERE? 1")
 			}
 		}
 	}
@@ -78,6 +80,12 @@ func Login(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 	err = SendPing(req, c, gm)
 	if err != nil {
 		return fmt.Errorf("\n\tpin request: %v", err)
+	}
+
+	// Send Friends
+	err = SendFriendsAvatar(req, c, gm)
+	if err != nil {
+		return fmt.Errorf("\n\tbga request: %v", err)
 	}
 
 	return nil

@@ -17,7 +17,7 @@ import (
 
 // Client
 type Client struct {
-	conn          net.Conn
+	Conn          net.Conn
 	Writer        *bufio.Writer           // Buffered write connection to the client
 	Reader        *bufio.Reader           // Buffered read  connection to the client
 	DB            *database.CafeDB        // Connection to the database
@@ -33,7 +33,7 @@ type Client struct {
 
 func New(conn net.Conn, dbc *database.CafeDB, cm interfaces.ClientManager) *Client {
 	return &Client{
-		conn:          conn,
+		Conn:          conn,
 		Reader:        bufio.NewReader(conn),
 		Writer:        bufio.NewWriter(conn),
 		DB:            dbc,
@@ -60,6 +60,7 @@ func (c *Client) Disconnect() error {
 		id := c.Player.ID
 		c.ClientManager.DisconnectClient(id)
 	}
+	c.Conn.Close()
 	return nil
 }
 
@@ -76,7 +77,7 @@ func (c *Client) SendExtensionResponse(args ...string) {
 }
 
 func (c *Client) GetIP() string {
-	return strings.Split(c.conn.RemoteAddr().String(), ":")[0]
+	return strings.Split(c.Conn.RemoteAddr().String(), ":")[0]
 }
 
 func (c *Client) sendResponses() {
