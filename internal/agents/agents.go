@@ -8,14 +8,19 @@ import (
 
 func AgentCycle(l interfaces.CafeLocation) {
 
+	// Clean tables and chairs
+	for _, obj := range l.Cafe().GetObjects() {
+		if obj.IsTable() || obj.IsChair() {
+			obj.SetDishID(-1)
+		}
+	}
+
+	//
 	l.ClearReservedObjects()
 
 	// Spawn waiters
 	for i, w := range l.Cafe().GetWaiters() {
 		// Spawn waiter
-		w.IsWorking = true
-		w.CurrentCounter = nil
-		w.CurrentCustomer = nil
 		w.ID = i + 1
 		SpawnWaiter(l, w)
 	}
@@ -53,12 +58,15 @@ func AgentCycle(l interfaces.CafeLocation) {
 
 }
 
+// This is a sleep wrapper that checks every 100ms the paramater boolean
+// and returns false if it stopped being true
 func SleepWhileChecking(l interfaces.CafeLocation, d time.Duration, isRunning *bool) bool {
 	startTime := time.Now()
 	tick := time.NewTicker(100 * time.Millisecond)
 	defer tick.Stop()
 	for time.Since(startTime) < d {
-		if !*isRunning { // We return if program is not running
+		// If program is not running
+		if !*isRunning {
 			return false
 		}
 		<-tick.C

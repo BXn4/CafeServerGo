@@ -91,7 +91,6 @@ func (p *Player) ParseFriends(friends string) {
 		}
 		p.Friends = append(p.Friends, id)
 	}
-	println(len(p.Friends))
 	p.SetAchivementFriendsCount()
 }
 
@@ -112,7 +111,14 @@ func (p *Player) ParseAchievement(achivement string) {
 		if err != nil {
 			log.Printf("Cant parse achievement progress to int: %v", err)
 		}
-		p.achievement[achivementID] = progression
+
+		// For compatibility
+		if achivementID < 2001 {
+			p.achievement[achivementID+2001] = progression
+		} else {
+			p.achievement[achivementID] = progression
+		}
+
 	}
 }
 

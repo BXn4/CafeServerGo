@@ -39,7 +39,7 @@ func SpawnCustomer(l interfaces.CafeLocation) *objects.Customer {
 		-1,
 		objects.CUSTOMER_INSERT,
 		false,
-		-2,
+		-1,
 	)
 
 	l.AddCustomer(customer)
@@ -72,13 +72,14 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 		return
 	}
 
+	//
 	var table *objects.CafeObject
 	var chair *objects.CafeObject
 	var distanceToChair int
 
 	// --- Wait until a eating space frees up ----------------------
 	startTime := time.Now()
-	for table == nil || chair == nil {
+	for chair == nil {
 
 		if time.Since(startTime) >= 10*time.Second {
 			l.Cafe().AddRating(-2)
@@ -93,7 +94,6 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 			return
 		}
 	}
-
 	// --- Walk to chair ---------------------------
 	args := []string{
 		strconv.Itoa(c.GetID()),
@@ -101,11 +101,12 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 		strconv.Itoa(chair.GetPos()[0]),
 		strconv.Itoa(chair.GetPos()[1]),
 	}
+	// We return if program is not running
 	if !l.IsRunning() {
 		l.UnreserveObject(table)
 		l.UnreserveObject(chair)
 		return
-	} // We return if program is not running
+	}
 	l.Broadcast("nac", "-1", "0", strings.Join(args, "+"))
 
 	// Wait until walks to chair
@@ -115,8 +116,6 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 		return
 	}
 	// --- Sit down ---------------------------
-
-	// Send
 	c.SetAction(objects.CUSTOMER_SIT_DOWN)
 	args = []string{
 		strconv.Itoa(c.GetID()),
@@ -124,19 +123,16 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 		strconv.Itoa(chair.GetPos()[0]),
 		strconv.Itoa(chair.GetPos()[1]),
 	}
+	// We return if program is not running
 	if !l.IsRunning() {
 		l.UnreserveObject(table)
 		l.UnreserveObject(chair)
 		return
-	} // We return if program is not running
+	}
 	l.Broadcast("nac", "-1", "0", strings.Join(args, "+"))
 
 	// Set position to chair
 	c.SetPos(chair.GetPos())
-
-	// Reset assigned waiter and food
-	c.SetAssignedWaiter(-1)
-	c.SetDish(-1)
 
 	// --- Wait for assigned waiter ----------------------
 	startTime = time.Now()
@@ -157,9 +153,17 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 	}
 
 	// --- Wait until food is placed ----------------------
-	// startTime = time.Now()
 	for c.GetDish() == -1 {
-		if !l.IsRunning() { // We return if program is not running
+		// Check if waiter abadoned customer
+		if c.GetAssignedWaiter() == -1 {
+			l.Cafe().AddRating(-2)
+			Leave(l, c) // Leaves sad :(
+			l.UnreserveObject(table)
+			l.UnreserveObject(chair)
+			return
+		}
+		// We return if program is not running
+		if !l.IsRunning() {
 			return
 		}
 		time.Sleep(100 * time.Millisecond)
@@ -217,8 +221,6 @@ func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
 	// Dirty dishes
 	chair.SetDishID(-2) // Dirty
 
-	// --- Leave happy ------------------------
-	//LeaveComplete(l, c)
 	Leave(l, c)
 }
 

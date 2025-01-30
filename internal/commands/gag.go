@@ -57,8 +57,6 @@ func DailyGifts(req *requests.Request, c *client.Client, gm *managers.GameManage
 		}
 	}
 
-	println("sendable gifts: ", gifts)
-
 	c.SendExtensionResponse("gag", "-1", "0", gifts)
 	return nil
 }

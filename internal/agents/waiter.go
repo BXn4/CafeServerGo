@@ -14,6 +14,10 @@ import (
 // Spawns a waiter at the location
 func SpawnWaiter(l interfaces.CafeLocation, w *objects.Waiter) {
 
+	w.IsWorking = true
+	w.CurrentCounter = nil
+	w.CurrentCustomer = nil
+
 	// Set waiter starter position
 	w.Pos = [2]int{
 		l.Cafe().GetPlayerStart()[0],
@@ -72,9 +76,9 @@ func TakePlates(l interfaces.CafeLocation, w *objects.Waiter) {
 		if w.CurrentCounter == nil {
 			return
 		}
-		if !MoveWaiter(l, w, w.CurrentCounter.GetPos(), objects.MOVE_TO_COUNTER, 600*time.Millisecond) {
-			return
-		}
+	}
+	if !MoveWaiter(l, w, w.CurrentCounter.GetPos(), objects.MOVE_TO_COUNTER, 600*time.Millisecond) {
+		return
 	}
 
 	// Get space with dirty plates
@@ -97,7 +101,6 @@ func TakePlates(l interfaces.CafeLocation, w *objects.Waiter) {
 	// Bring back to counter
 	for _, object := range l.Cafe().GetObjects() {
 		if object.IsCounter() {
-
 			if !MoveWaiter(l, w, space.GetPos(), objects.WAITER_MOVE_TO_COUNTER, time.Second) {
 				return
 			}
@@ -107,7 +110,7 @@ func TakePlates(l interfaces.CafeLocation, w *objects.Waiter) {
 		}
 	}
 
-	// Wait for response and set the table clean
+	// Wait and set the table clean
 	if !SleepWhileChecking(l, time.Second, &w.IsWorking) {
 		return
 	}
