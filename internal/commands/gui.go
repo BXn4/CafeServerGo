@@ -1,68 +1,46 @@
 package commands
 
 import (
-  "cafego/internal/types/requests"
-  "cafego/internal/client"
-  _"cafego/internal/objects"
-  "cafego/internal/managers"
-  "strconv"
+	"cafego/internal/client"
+	"cafego/internal/managers"
+	"cafego/internal/types/requests"
+	"cafego/internal/utils"
+	"fmt"
+	"strconv"
 )
 
 // gui - USER INFO
-func UserInfo(req *requests.Request, c *client.Client, clientManager *managers.ClientManager, cafeManager *managers.CafeManager) error {
-  var err error
-  name := req.Args[2]
+func UserInfo(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
+	var err error
+	name := req.Args[2]
 
-  if c.Player == nil {
-    c.Player, err = c.DB.GetPlayerByName(name)
-    if err != nil {
-      return err
-    }
-  }
+	if c.Player == nil {
+		c.Player, err = c.DB.GetPlayerByName(name)
+		if err != nil {
+			return err
+		}
+	}
 
-
-  playedWheel := "0"
-  if c.Player.PlayedWheel {
-    playedWheel = "1"
-  }
-
-  allowFriendRequests := "0"
-  if c.Player.AllowFriendRequests {
-    allowFriendRequests = "1"
-  }
-
-  allowEmails := "0"
-  if c.Player.AllowEmails {
-    allowEmails = "1"
-  }
-
-  emailVerified := "0"
-  if c.Player.EmailVerified {
-    emailVerified = "1"
-  }
-
-
-  c.SendExtensionResponse(
-    "gui",
-    "-1",
-    "0",
-    strconv.Itoa(c.Player.ID),
-    strconv.Itoa(c.Player.ID),
-    "0",
-    strconv.Itoa(c.Player.Cash),
-    strconv.Itoa(c.Player.Gold),
-    strconv.Itoa(c.Player.XP),
-    strconv.Itoa(c.Player.InstantCookings),
-    strconv.Itoa(c.Player.OpenJobs),
-    "0",
-    playedWheel,
-    "0",
-    allowFriendRequests,
-    allowEmails,
-    emailVerified,
-    strconv.Itoa(c.Player.NewGifts),
-    c.Player.Avatar.String(),
-  )
-  return nil
+	c.SendExtensionResponse(
+		"gui",
+		"-1",
+		"0",
+		strconv.Itoa(c.Player.ID),
+		strconv.Itoa(c.Player.ID),
+		"0",
+		strconv.Itoa(c.Player.GetCash()),
+		strconv.Itoa(c.Player.GetGold()),
+		strconv.Itoa(c.Player.GetXP()),
+		strconv.Itoa(c.Player.InstantCookings),
+		strconv.Itoa(c.Player.OpenJobs),
+		"0",
+		utils.If(c.Player.PlayedWheel, "1", "0"),
+		"0",
+		utils.If(c.Player.AllowFriendRequests, "1", "0"),
+		utils.If(c.Player.AllowEmails, "1", "0"),
+		utils.If(c.Player.EmailVerified, "1", "0"),
+		strconv.Itoa(len(c.Player.Gifts)),
+		fmt.Sprintf("%s+%d+%s", c.Player.Username, c.Player.Avatar.Gender, c.Player.Avatar.Apperance()),
+	)
+	return nil
 }
-

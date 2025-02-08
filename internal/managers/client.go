@@ -1,52 +1,123 @@
 package managers
 
 import (
-  "fmt"
-  "sync"
-  "cafego/internal/client"
+	"cafego/internal/client"
+	"cafego/internal/interfaces"
+	"fmt"
+	"time"
 )
 
-
-type ClientManager struct {
-	mu    sync.Mutex
-	clients []*client.Client
-}
-
-func NewClientManager() *ClientManager {
-	return &ClientManager{
-		clients: make([]*client.Client, 0),
-	}
-}
-
 // AddClient adds a new client to the list
-func (cm *ClientManager) Add(c *client.Client) {
-	cm.mu.Lock() 
-	defer cm.mu.Unlock()
-	cm.clients = append(cm.clients, c)
+func (gm *GameManager) AddClient(item interfaces.ManagedItem) {
+	gm.clientMutex.Lock()
+	defer gm.clientMutex.Unlock()
+
+	c := item.(*client.Client)
+
+	gm.clients = append(gm.clients, c)
 }
 
-// RemoveClient removes a client by id 
-func (cm *ClientManager) Remove(id int) {
-	cm.mu.Lock()
-	defer cm.mu.Unlock()
-	for i, c := range cm.clients {
-		if c.Player.ID == id {
-			// Remove client by re-slicing
-			cm.clients = append(cm.clients[:i], cm.clients[i+1:]...)
-			return
+// RemoveClient removes a client by id
+func (gm *GameManager) DisconnectClient(id int) {
+	gm.clientMutex.Lock()
+	defer gm.clientMutex.Unlock()
+
+	for i, c := range gm.clients {
+		if c.Player == nil {
+			continue
 		}
+
+		// Skip if not player
+		if c.Player.ID != id {
+			continue
+		}
+
+		// Send signal to close connection
+		for len(c.RequestQueue) > 0 {
+			c.RequestQueue <- nil
+		}
+		time.Sleep(time.Millisecond * 100) // Wait until procceses stop
+
+		// Save player to db
+		gm.db.SavePlayer(gm.clients[i].Player)
+		c.Player = nil
+
+		// Leave current location
+		if c.Location != nil {
+			c.Location.Leave(id)
+			// Check if empty, owner offline, not market
+			if c.Location.IsEmpty() && !gm.isOnline(c.Location.Cafe().GetID()) && c.Location.Cafe().GetID() > 0 {
+				gm.RemoveLocation(id)
+			}
+		}
+
+		// Remove client by re-slicing
+		gm.clients = append(gm.clients[:i], gm.clients[i+1:]...)
+
+		return
+
 	}
 }
 
+// GetClient retrieves a client by its ID
+func (gm *GameManager) GetClient(id int) (interfaces.ManagedItem, error) {
+	gm.clientMutex.Lock()
+	defer gm.clientMutex.Unlock()
 
-// GetClientByID retrieves a client by its ID
-func (cm *ClientManager) Get(id int) (*client.Client, error) {
-	cm.mu.Lock()
-	defer cm.mu.Unlock()
-	for _, c := range cm.clients {
+	for _, c := range gm.clients {
+		if c.Player == nil {
+			continue
+		}
 		if c.Player.ID == id {
 			return c, nil
 		}
 	}
-	return nil, fmt.Errorf("Cafe with ID %d not found", id)
+
+	return nil, fmt.Errorf("Client with ID %v not found", id)
+}
+
+// Checks if client is online
+func (gm *GameManager) IsOnline(id int) bool {
+	gm.clientMutex.Lock()
+	defer gm.clientMutex.Unlock()
+
+	for _, c := range gm.clients {
+		if c.Player == nil {
+			continue
+		}
+		if c.Player.ID == id {
+			return true
+		}
+	}
+
+	return false
+}
+
+// Checks if client is online
+func (gm *GameManager) isOnline(id int) bool {
+
+	for _, c := range gm.clients {
+		if c.Player == nil {
+			continue
+		}
+		if c.Player.ID == id {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (gm *GameManager) GetClientByName(name string) (*client.Client, error) {
+	gm.clientMutex.Lock()
+	defer gm.clientMutex.Unlock()
+	for _, c := range gm.clients {
+		if c.Player == nil {
+			continue
+		}
+		if c.Player.Username == name {
+			return c, nil
+		}
+	}
+	return nil, fmt.Errorf("Client with username %v not found", name)
 }

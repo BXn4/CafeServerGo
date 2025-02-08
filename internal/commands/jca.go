@@ -1,98 +1,42 @@
 package commands
 
 import (
-  "cafego/internal/types/requests"
-  "cafego/internal/client"
-  "cafego/internal/managers"
-  "strconv"
+	"cafego/internal/client"
+	"cafego/internal/managers"
+	"cafego/internal/types/requests"
+	"strconv"
 )
 
 // jca - JoinCafe
-func JoinCafe(req *requests.Request, c *client.Client, clientManager *managers.ClientManager, cafeManager *managers.CafeManager) error {
-  
-  // Get id of cafe to join
-  id, err := strconv.Atoi(req.Args[3])
-  if err != nil {
-    return err
-  }
+func JoinCafe(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
-  // Adds cafe to manager (load it if not loaded)
-  cafe := cafeManager.Add(id)
-  
+	// Get id of cafe to join
+	id, err := strconv.Atoi(req.Args[3])
+	if err != nil {
+		return err
+	}
 
-  // Send cafe joined 
-  c.SendExtensionResponse("jca", "-1", "0")
+	// Adds cafe to manager (loads it if not loaded)
+	location := gm.AddLocation(id)
 
-  // TODO: Handle if already in a cafe
+	// Send cafe joined
+	c.SendExtensionResponse("jca", "-1", "0")
 
-  // Join cafe 
-  cafe.Join(id, c.Conn) 
+	// Leave cafe if already in one
+	if c.Location != nil {
+		c.Location.Leave(c.Player.ID)
 
-  // Save location
-  c.Cafe = cafe 
+		// Remove location if empty and owner is offline
+		if c.Location.IsEmpty() && !gm.IsOnline(c.Location.Cafe().GetID()) && c.Location.Cafe().GetID() > 0 {
+			gm.RemoveLocation(c.Location.Cafe().GetID())
+		}
+	}
 
-  // Send cafe layout (sgc)
-  SendCafe(req, c, clientManager, cafeManager)
+	// Join location
+	location.Join(c.Player.ID, c.ResponseQueue)
 
+	// Save location
+	c.Location = location
 
-
-  return nil
+	return nil
 }
-
-
-/*
-        existing_player = [player for player in server.players if player.id == int(params[2])]
-        if existing_player:
-            wanted_player = existing_player[0]
-        else:
-            wanted_player = server.db.get_player_by_id(int(params[2]))
-            server.players.append(wanted_player)
-
-        response = wanted_player.cafe.to_response('sgc', '-1', '0')
-        player.room = wanted_player.cafe
-        player.pos = wanted_player.cafe.get_start_pos()
-
-        await server.send_response(client, ExtensionResponse(*response))
-
-*/
-
-
-
-/*
-async def handle_jca(server: 'CafeServer', client: 'StreamWriter', *params: str) -> None:
-    wanted_player_id = int(params[2])
-    address = client.get_extra_info('peername')
-    player = server.clients[address]
-
-    check_player = [player for player in server.players if player.id == wanted_player_id]
-    if check_player:
-        wanted_player = check_player[0]
-    else:
-        wanted_player = server.db.get_player_by_id(int(params[2]))
-        server.players.append(wanted_player)
-
-    response = ExtensionResponse('jca', '-1', '0')
-    await server.send_response(client, response)
-
-
---------------------------\/\/\/\/\/\/
-
-
-    await handle_sgc(server, client, 'jca', *params)
-
-    await handle_ifr(server, client, *params)
-    await handle_ein(server, client, *params)
-
-    if wanted_player.id == player.id:
-        await handle_asy(server, client)
-
-    if not wanted_player.cafe.customer_cycle:
-        print(f'Created a new customer cycle\nUsed this player\'s Cafe: {wanted_player.avatar.username}')
-        wanted_player.cafe.customer_cycle = create_task(spawn_cycle(server, wanted_player.client))
-
-        create_task(spawn_waiters(server, wanted_player.client))
-    else:
-        create_task(spawn_customers_to_client(server, client, wanted_player.cafe))
-        create_task(spawn_waiters_to_client(server, client, wanted_player.cafe))
-*/
-

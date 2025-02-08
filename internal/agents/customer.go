@@ -1,0 +1,292 @@
+package agents
+
+import (
+	"cafego/internal/interfaces"
+	"cafego/internal/objects"
+	"cafego/internal/utils"
+	"math/rand"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/charmbracelet/log"
+)
+
+// Spawns a custommer at the location
+func SpawnCustomer(l interfaces.CafeLocation) *objects.Customer {
+
+	rating := l.Cafe().GetRating()
+
+	var spawnInterval int
+	if rating < 150 {
+		spawnInterval = rand.Intn(10) + 10
+	} else if rating <= 150 && rating < 350 {
+		spawnInterval = rand.Intn(3) + 5
+	} else if rating <= 350 && rating < 500 {
+		spawnInterval = rand.Intn(2) + 4
+	} else {
+		spawnInterval = rand.Intn(4) + 1
+	}
+
+	if !SleepWhileChecking(l, time.Duration(spawnInterval)*time.Second, l.GetIsRunning()) {
+		return nil
+	}
+
+	customer := objects.NewCustomer(
+		l.GetUniqueCustomerID(),
+		objects.NewRandomAvatar(),
+		[2]int{l.Cafe().GetPlayerStart()[0], l.Cafe().GetPlayerStart()[1]},
+		-1,
+		objects.CUSTOMER_INSERT,
+		false,
+		-1,
+	)
+
+	l.AddCustomer(customer)
+
+	// Send customer info
+	strID := strconv.Itoa(customer.GetID())
+	args := []string{
+		strID,
+		"0",  // NPC type (0: Customer)
+		"0",  // Favourite = Waiters priority ???
+		"-1", // DishID (unnecessary for waiters)
+		utils.If(customer.IsThirsty(), "1", "0"),
+		customer.GetAvatar().String("Customer"),
+	}
+	// Send customer info + spawn
+	l.Broadcast("nav", "-1", "0", strings.Join(args, "+"))
+	l.Broadcast("nac", "-1", "0", strID+"+"+"0")
+
+	if !SleepWhileChecking(l, 1*time.Second, l.GetIsRunning()) {
+		return nil
+	}
+
+	return customer
+}
+
+// Does one iteration of the customer tasks
+func IterateCustomer(l interfaces.CafeLocation, c *objects.Customer) {
+
+	if c == nil {
+		return
+	}
+
+	//
+	var table *objects.CafeObject
+	var chair *objects.CafeObject
+	var distanceToChair int
+
+	// --- Wait until a eating space frees up ----------------------
+	startTime := time.Now()
+	for chair == nil {
+
+		if time.Since(startTime) >= 10*time.Second {
+			l.Cafe().AddRating(-2)
+			Leave(l, c) // Leaves sad :(
+			return
+		}
+
+		// Waiting for available space
+		table, chair, distanceToChair = GetAvailableEatingSpace(l)
+		time.Sleep(100 * time.Millisecond)
+		if !l.IsRunning() {
+			return
+		}
+	}
+	// --- Walk to chair ---------------------------
+	args := []string{
+		strconv.Itoa(c.GetID()),
+		strconv.Itoa(objects.CUSTOMER_WALK_TO_CHAIR),
+		strconv.Itoa(chair.GetPos()[0]),
+		strconv.Itoa(chair.GetPos()[1]),
+	}
+	// We return if program is not running
+	if !l.IsRunning() {
+		l.UnreserveObject(table)
+		l.UnreserveObject(chair)
+		return
+	}
+	l.Broadcast("nac", "-1", "0", strings.Join(args, "+"))
+
+	// Wait until walks to chair
+	if !SleepWhileChecking(l, time.Duration(distanceToChair-2)*time.Second, l.GetIsRunning()) {
+		l.UnreserveObject(table)
+		l.UnreserveObject(chair)
+		return
+	}
+	// --- Sit down ---------------------------
+	c.SetAction(objects.CUSTOMER_SIT_DOWN)
+	args = []string{
+		strconv.Itoa(c.GetID()),
+		strconv.Itoa(int(c.GetAction())),
+		strconv.Itoa(chair.GetPos()[0]),
+		strconv.Itoa(chair.GetPos()[1]),
+	}
+	// We return if program is not running
+	if !l.IsRunning() {
+		l.UnreserveObject(table)
+		l.UnreserveObject(chair)
+		return
+	}
+	l.Broadcast("nac", "-1", "0", strings.Join(args, "+"))
+
+	// Set position to chair
+	c.SetPos(chair.GetPos())
+
+	// --- Wait for assigned waiter ----------------------
+	startTime = time.Now()
+	for c.GetAssignedWaiter() == -1 {
+		if !l.IsRunning() { // We return if program is not running
+			l.UnreserveObject(table)
+			l.UnreserveObject(chair)
+			return
+		}
+		if time.Since(startTime) >= 10*time.Second {
+			l.Cafe().AddRating(-2)
+			Leave(l, c) // Leaves sad :(
+			l.UnreserveObject(table)
+			l.UnreserveObject(chair)
+			return
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+
+	// --- Wait until food is placed ----------------------
+	for c.GetDish() == -1 {
+		// Check if waiter abadoned customer
+		if c.GetAssignedWaiter() == -1 {
+			l.Cafe().AddRating(-2)
+			Leave(l, c) // Leaves sad :(
+			l.UnreserveObject(table)
+			l.UnreserveObject(chair)
+			return
+		}
+		// We return if program is not running
+		if !l.IsRunning() {
+			return
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+
+	c.SetAction(objects.CUSTOMER_EAT)
+
+	// Wait for food so we dont eat the table xd
+	if !SleepWhileChecking(l, 3*time.Second, l.GetIsRunning()) {
+		l.UnreserveObject(table)
+		l.UnreserveObject(chair)
+		return
+	}
+
+	// --- Eat food ---------------------------
+	args = []string{
+		strconv.Itoa(c.GetID()),
+		strconv.Itoa(int(c.GetAction())),
+		strconv.Itoa(int(c.GetPos()[0])),
+		strconv.Itoa(int(c.GetPos()[1])),
+	}
+	if !l.IsRunning() {
+		l.UnreserveObject(table)
+		l.UnreserveObject(chair)
+		return
+	} // We return if program is not running
+	l.Broadcast(
+		"nac", "-1", "0",
+		strings.Join(args, "+"),
+	)
+
+	// Wait while checking for exit
+	if !SleepWhileChecking(l, 25*time.Second, l.GetIsRunning()) {
+		l.UnreserveObject(table)
+		l.UnreserveObject(chair)
+		return
+	}
+
+	// --- Add rewards to player ------------
+	player, err := l.Owner()
+	if err != nil {
+		log.Errorf("Cant find owner!")
+		return
+	}
+
+	dishInfo, err := utils.GetDish(c.GetDish())
+	if err != nil {
+		log.Errorf("Cant find dish! %v\n", c.GetDish())
+		return
+	}
+	player.AddCash(dishInfo.IncomePerServing)
+	player.AddXP(dishInfo.XP)
+	l.Cafe().AddRating(1)
+
+	// Dirty dishes
+	chair.SetDishID(-2) // Dirty
+
+	Leave(l, c)
+}
+
+// Returns a chair and a table
+// which are empty and approachable
+func GetAvailableEatingSpace(l interfaces.CafeLocation) (*objects.CafeObject, *objects.CafeObject, int) {
+
+	spaces := l.Cafe().GetEatingSpaces()
+	for table, chairs := range spaces {
+
+		// If there are no connected chairs skip
+		if len(chairs) == 0 {
+			continue
+		}
+
+		// Try to reserve table
+		if !l.ReserveObject(table) {
+			continue
+		}
+
+		// Loop through all chairs and if approachable return them
+		for _, chair := range chairs {
+			start := NewCafePoint([2]int(l.Cafe().GetPlayerStart()), l.Cafe())
+			end := NewCafePoint(chair.GetPos(), l.Cafe())
+			_, distance, found := Path(start, end)
+			if found {
+				l.ReserveObject(chair)
+				return table, chair, distance
+			}
+		}
+
+	}
+	return nil, nil, 0
+}
+
+func Leave(l interfaces.CafeLocation, c *objects.Customer) {
+
+	// This will tell the waiter to not serve leaving customers
+	c.SetAction(objects.CUSTOMER_LEAVE)
+
+	// Send leave
+	args := []string{
+		strconv.Itoa(c.GetID()),
+		strconv.Itoa(int(c.GetAction())),
+	}
+	if !l.IsRunning() { // We return if program is not running
+		return
+	}
+	l.Broadcast(
+		"nac", "-1", "0",
+		strings.Join(args, "+"),
+	)
+
+	// Move to exit
+	start := NewCafePoint(c.GetPos(), l.Cafe())
+	end := NewCafePoint([2]int(l.Cafe().GetPlayerStart()), l.Cafe())
+	_, distance, _ := Path(start, end)
+
+	if !SleepWhileChecking(l, time.Duration(distance)*time.Second, l.GetIsRunning()) {
+		return
+	}
+
+	// Delete customer from customers
+	if !SleepWhileChecking(l, 5*time.Second, l.GetIsRunning()) {
+		return
+	}
+
+	l.Cafe().RemoveCustomer(c.GetID())
+}

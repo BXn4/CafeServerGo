@@ -1,146 +1,252 @@
 package database
 
 import (
-  "fmt"
-  _"strconv"
-  _"strings"
-  "cafego/internal/objects"
-  "database/sql"
+	"cafego/internal/objects"
+	"fmt"
+	"strconv"
+	"strings"
+	"time"
+
 	_ "github.com/go-sql-driver/mysql"
+	"gorm.io/gorm"
 )
 
 type PlayerDAO struct {
-  id                  int    `json:"id" form:"id" gorm:"column:id"`
-  email               string `json:"email" form:"email" gorm:"column:email"`
-  password            string `json:"password" form:"password" gorm:"column:password"`
-  cash                int    `json:"cash" form:"cash" gorm:"column:cash"`
-  gold                int    `json:"gold" form:"gold" gorm:"column:gold"`
-  xp                  int    `json:"xp" form:"xp" gorm:"column:xp"`
-  instant_cookings    int    `json:"instant_cookings" form:"instant_cookings" gorm:"column:instant_cookings"`
-  open_jobs           int   `json:"open_jobs" form:"open_jobs" gorm:"column:open_jobs"`
-  played_wheel        bool   `json:"played_wheel" form:"played_wheel" gorm:"column:played_wheel"`
-  allow_friend_requests bool `json:"allow_friend_requests" form:"allow_friend_requests" gorm:"column:allow_friend_requests"`
-  allow_emails        bool   `json:"allow_emails" form:"allow_emails" gorm:"column:allow_emails"`
-  email_verified      bool   `json:"email_verified" form:"email_verified" gorm:"column:email_verified"`
-  new_gifts           int    `json:"new_gifts" form:"new_gifts" gorm:"column:new_gifts"`
-  username            string `json:"username" form:"username" gorm:"column:username"`
-  gender              int    `json:"gender" form:"gender" gorm:"column:gender"`
-  top_color           int    `json:"top_color" form:"top_color" gorm:"column:top_color"`
-  skin_color          int    `json:"skin_color" form:"skin_color" gorm:"column:skin_color"`
-  hair_color          int    `json:"hair_color" form:"hair_color" gorm:"column:hair_color"`
-  legs_color          int    `json:"legs_color" form:"legs_color" gorm:"column:legs_color"`
-  is_banned           bool   `json:"is_banned" form:"is_banned" gorm:"column:is_banned"`
-  mastery             string `json:"mastery" form:"mastery" gorm:"column:mastery"`
-  last_login 	        string `json:"last_login" form:"last_login" gorm:"column:last_login"`
-  daily_login 	      string `json:"daily_login" form:"daily_login" gorm:"column:daily_login"`
-
+	ID                  int    `gorm:"column:id"`
+	Email               string `gorm:"column:email"`
+	Password            string `gorm:"column:password"`
+	Cash                int    `gorm:"column:cash"`
+	Gold                int    `gorm:"column:gold"`
+	XP                  int    `gorm:"column:xp"`
+	InstantCookings     int    `gorm:"column:instant_cookings"`
+	OpenJobs            int    `gorm:"column:open_jobs"`
+	PlayedWheel         bool   `gorm:"column:played_wheel"`
+	AllowFriendRequests bool   `gorm:"column:allow_friend_requests"`
+	Friends             string `gorm:"column:friends"`
+	FriendsWithGifts    string `gorm:"column:friends_with_gifts"`
+	AllowEmails         bool   `gorm:"column:allow_emails"`
+	EmailVerified       bool   `gorm:"column:email_verified"`
+	Username            string `gorm:"column:username"`
+	Avatar              string `gorm:"column:avatar"`
+	IsBanned            bool   `gorm:"column:is_banned"`
+	Mastery             string `gorm:"column:mastery"`
+	Achievement         string `gorm:"column:achievement"`
+	LastLogin           string `gorm:"column:last_login"`
+	DailyLogin          string `gorm:"column:daily_login"`
+	Gifts               string `gorm:"column:gifts"`
+	GiftRefreshTime     string `gorm:"column:gift_refresh_time"`
+	SendableGifts       string `gorm:"column:sendable_gifts"`
+	AccessLevel         int    `gorm:"column:access_level"`
 }
 
-/*
-
-type Player struct {
-  ID int
-  Cash int
-  Gold int
-  XP int
-  InstantCookings int
-  OpenJobs bool
-  PlayedWheel bool
-  AllowFriendRequests bool
-  AllowEmails bool
-  EmailVerified bool
-  NewGifts int
-  Username string
-  Avatar Avatar
-  Mastery string // TODO: Create proper mastery
+func (playerDAO PlayerDAO) TableName() string {
+	return "player"
 }
-
-
-*/
 
 func ConvertPlayerDAOToPlayer(playerDAO PlayerDAO) (*objects.Player, error) {
-  var player objects.Player
 
+	var player objects.Player
 
-  // Fill in simple data
-  player.ID = playerDAO.id
-  player.Cash = playerDAO.cash
-  player.Gold = playerDAO.gold
-  player.XP = playerDAO.xp
-  player.InstantCookings = playerDAO.instant_cookings
-  player.OpenJobs = playerDAO.open_jobs
-  player.PlayedWheel = playerDAO.played_wheel
-  player.AllowFriendRequests = playerDAO.allow_friend_requests
-  player.AllowEmails = playerDAO.allow_emails
-  player.EmailVerified = playerDAO.email_verified
-  player.NewGifts = playerDAO.new_gifts
-  player.Username = playerDAO.username
+	// Fill in simple data
+	player.ID = playerDAO.ID
+	player.SetCash(playerDAO.Cash)
+	player.SetGold(playerDAO.Gold)
+	player.SetXP(playerDAO.XP)
+	player.ParseAchievement(playerDAO.Achievement)
+	player.InstantCookings = playerDAO.InstantCookings
+	player.OpenJobs = playerDAO.OpenJobs
+	player.PlayedWheel = playerDAO.PlayedWheel
+	player.AllowFriendRequests = playerDAO.AllowFriendRequests
+	player.AllowEmails = playerDAO.AllowEmails
+	player.EmailVerified = playerDAO.EmailVerified
+	player.Username = playerDAO.Username
+	player.AccessLevel = playerDAO.AccessLevel
+	player.Position = [2]int{0, 0}
 
-  player.Mastery = playerDAO.mastery
+	// Parse gifts
+	gifts, err := objects.ParseGifts(playerDAO.Gifts)
+	if err != nil {
+		return nil, err
+	}
+	player.Gifts = gifts
 
-  // Fill avatar
-  avatar := objects.Avatar{ 
-    playerDAO.username,
-    objects.AvatarGender(playerDAO.gender),
-    playerDAO.skin_color,
-    playerDAO.top_color,
-    playerDAO.hair_color,
-    playerDAO.legs_color,
-    false,
-  }
+	player.ParseFriends(playerDAO.Friends)
+	player.ParseMastery(playerDAO.Mastery)
 
-  player.Avatar = avatar
-  
-  return &player, nil
+	// Fill avatar
+	player.Avatar = *objects.NewAvatarFromString(playerDAO.Avatar)
+	player.Avatar.IsNPC = false
+
+	return &player, nil
 }
-
-
 
 func (db *CafeDB) GetPlayerByName(name string) (*objects.Player, error) {
-  db.mu.Lock()
-  defer db.mu.Unlock()
 
-  row := db.conn.QueryRow("SELECT * FROM player WHERE username = ? OR email = ?", name, name)
+	var playerDAO PlayerDAO
+	err := db.conn.Where("username = ? OR email = ?", name, name).First(&playerDAO).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, fmt.Errorf("NAME: %v NOT FOUND", name)
+		}
+		return nil, fmt.Errorf("SQL ERR: %v", err)
+	}
 
-  var playerDAO PlayerDAO
-  err := row.Scan(
-    &playerDAO.id,
-    &playerDAO.email,
-    &playerDAO.password,
-    &playerDAO.cash,
-    &playerDAO.gold,
-    &playerDAO.xp,
-    &playerDAO.instant_cookings,
-    &playerDAO.open_jobs,
-    &playerDAO.played_wheel,
-    &playerDAO.allow_friend_requests,
-    &playerDAO.allow_emails,
-    &playerDAO.email_verified,
-    &playerDAO.new_gifts,
-    &playerDAO.username,
-    &playerDAO.gender,
-    &playerDAO.top_color,
-    &playerDAO.skin_color,
-    &playerDAO.hair_color,
-    &playerDAO.legs_color,
-    &playerDAO.is_banned,
-    &playerDAO.mastery,
-    &playerDAO.last_login,
-    &playerDAO.daily_login,
-  )
-  if err != nil { 
-    if err == sql.ErrNoRows {
-      fmt.Errorf("ID NOT FOUND")
-    }
-    fmt.Errorf("SQL ERR: %v", err)
-    return nil, err
-  }
+	player, err := ConvertPlayerDAOToPlayer(playerDAO)
+	if err != nil {
+		return nil, err
+	}
 
-  player, err := ConvertPlayerDAOToPlayer(playerDAO);  
-  if err != nil {
-    return nil, err
-  }
+	return player, nil
 
-  return player, nil
 }
 
+func (db *CafeDB) GetPlayer(id int) (*objects.Player, error) {
+	var playerDAO PlayerDAO
+	err := db.conn.First(&playerDAO, id).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, fmt.Errorf("ID NOT FOUND")
+		}
+		return nil, fmt.Errorf("SQL ERR: %v", err)
+	}
+
+	player, err := ConvertPlayerDAOToPlayer(playerDAO)
+	if err != nil {
+		return nil, err
+	}
+
+	return player, nil
+}
+
+func (db *CafeDB) SavePlayer(player *objects.Player) error {
+
+	// Build friends
+	friendsStr := []string{}
+	for _, f := range player.Friends {
+		friendsStr = append(friendsStr, strconv.Itoa(f))
+	}
+
+	updateData := map[string]interface{}{
+		"cash":                  uint(player.GetCash()),
+		"gold":                  player.GetGold(),
+		"xp":                    player.GetXP(),
+		"instant_cookings":      player.InstantCookings,
+		"open_jobs":             player.OpenJobs,
+		"played_wheel":          player.PlayedWheel,
+		"allow_friend_requests": player.AllowFriendRequests,
+		"friends":               strings.Join(friendsStr, "#"),
+		"avatar":                player.Avatar.Apperance(),
+		"mastery":               player.BuildMastery(),
+		"achievement":           player.BuildAchievement(),
+		"gifts":                 objects.BuildGifts(player.Gifts),
+	}
+
+	err := db.conn.Model(&PlayerDAO{}).Where("id = ?", player.ID).Updates(updateData).Error
+	if err != nil {
+		return fmt.Errorf("Cant save player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) DeleteFriend(playerID, friendID int) error {
+	var playerDAO PlayerDAO
+	err := db.conn.First(&playerDAO, playerID).Error
+	if err != nil {
+		return fmt.Errorf("Player not found: %v", err)
+	}
+
+	friends := strings.Split(playerDAO.Friends, "#")
+	friendIDStr := strconv.Itoa(friendID)
+	index := -1
+	for i, f := range friends {
+		if f == friendIDStr {
+			index = i
+			break
+		}
+	}
+	if index == -1 {
+		return nil // Friend not found, no action needed
+	}
+
+	newFriends := append(friends[:index], friends[index+1:]...)
+	playerDAO.Friends = strings.Join(newFriends, "#")
+
+	err = db.conn.Save(&playerDAO).Error
+	if err != nil {
+		return fmt.Errorf("Cant save friends: %v", err)
+	}
+	return nil
+}
+func (db *CafeDB) GetDailyLogin(playerID int) (*time.Time, error) {
+	var playerDAO PlayerDAO
+	err := db.conn.Select("daily_login").First(&playerDAO, playerID).Error
+	if err != nil {
+		return nil, err
+	}
+
+	dailyLogin, err := time.Parse("2006-01-02 15:04:05", playerDAO.DailyLogin)
+	if err != nil {
+		return nil, fmt.Errorf("Error parsing daily login time: %v", err)
+	}
+
+	return &dailyLogin, nil
+}
+
+func (db *CafeDB) GetGiftRefreshTime(playerID int) (*time.Time, error) {
+	var playerDAO PlayerDAO
+	err := db.conn.Select("gift_refresh_time").First(&playerDAO, playerID).Error
+	if err != nil {
+		return nil, err
+	}
+
+	refreshTime, err := time.Parse("2006-01-02 15:04:05", playerDAO.GiftRefreshTime)
+	if err != nil {
+		return nil, fmt.Errorf("Error parsing daily login time: %v", err)
+	}
+
+	return &refreshTime, nil
+}
+
+func (db *CafeDB) GetFriendsWithGifts(playerID int) ([]string, error) {
+	var playerDAO PlayerDAO
+	err := db.conn.Select("friends_with_gifts").First(&playerDAO, playerID).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return strings.Split(playerDAO.FriendsWithGifts, "+"), nil
+}
+
+func (db *CafeDB) GetSendableGifts(playerID int) (string, error) {
+	var playerDAO PlayerDAO
+	err := db.conn.Select("gift_refresh_time").First(&playerDAO, playerID).Error
+	if err != nil {
+		return "", err
+	}
+
+	return playerDAO.SendableGifts, nil
+}
+
+func (db *CafeDB) ResetDailyLogin(playerID int) error {
+	err := db.conn.Model(&PlayerDAO{}).Where("id = ?", playerID).Update("daily_login", time.Now().Format("2006-01-02 15:04:05")).Error
+	if err != nil {
+		return fmt.Errorf("Cant reset daily login: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) ResetGiftRefreshTime(playerID int) error {
+	err := db.conn.Model(&PlayerDAO{}).Where("id = ?", playerID).Update("gift_refresh_time", time.Now().Format("2006-01-02 15:04:05")).Error
+	if err != nil {
+		return fmt.Errorf("Cant reset gift refresh time: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateSendableGifts(playerID int, gifts string) error {
+	err := db.conn.Model(&PlayerDAO{}).Where("id = ?", playerID).Update("sendable_gifts", gifts).Error
+	if err != nil {
+		return fmt.Errorf("Cant update sendable gifts: %v", err)
+	}
+	return nil
+}

@@ -1,164 +1,374 @@
 package objects
 
 import (
-  "encoding/json"
-  "time"
-  "strconv"
-  "strings"
-)
+	"cafego/internal/types/cafetypes"
+	"cafego/internal/types/daos"
+	"cafego/internal/utils"
+	"encoding/json"
+	"fmt"
+	"strconv"
+	"strings"
+	"sync"
+	"time"
 
-type CafeObjectKind int
-//TODO: Write down types
-const (
-  STOVE CafeObjectKind = 0
-  COUNTER = 1
-  CHAIR = 2
-  TABLE = 3
-  VENDING = 4
-  OTHER = 5
-)
-
-type CafeObjectRotation int
-const (
-  Up CafeObjectRotation = iota
-  Left
-  Down
-  Right
+	"github.com/charmbracelet/log"
 )
 
 type CafeObject struct {
-  Kind CafeObjectKind         `json:"id"`
-  Pos  []int                  `json:"pos"`
-  Rotation CafeObjectRotation `json:"rotation"`
+	kind     cafetypes.CafeObjectKind
+	pos      [2]int
+	rotation cafetypes.CafeObjectRotation
 
-  DishID     int  `json:"dish_id,omitempty"`
-	DishStatus int  `json:"dish_status,omitempty"`
-	DishAmount int  `json:"dish_amount,omitempty"`
+	dishID     int
+	dishStatus int
+	dishAmount int
 
+	fancyIng   bool
+	startedAt  *time.Time
+	finishesAt *time.Time
 
-	FancyIng          bool      `json:"fancy_ing,omitempty"`
-	StartedAt         *time.Time `json:"started_at,omitempty"`
-	FinishesAt        *time.Time `json:"finishes_at,omitempty"`
-
+	mutex sync.Mutex
 }
 
-func NewCafeObjectFromString(s string) (*CafeObject,error) {
-  
-  var cafeObj CafeObject
+func NewCafeObject(posX int, posY int, objID int, objRotation int) (*CafeObject, error) {
+	cafeObj := CafeObject{
+		pos:      [2]int{posX, posY},
+		kind:     cafetypes.CafeObjectKind(objID),
+		rotation: cafetypes.CafeObjectRotation(objRotation),
+	}
+	return &cafeObj, nil
+}
 
-  if err := json.Unmarshal([]byte(s), &cafeObj); err != nil {
-    return nil, err
-  }
+func NewCafeObjectFromJSON(s string) (*CafeObject, error) {
 
-  return &cafeObj, nil
+	var cafeObj CafeObject
+	if err := json.Unmarshal([]byte(s), &cafeObj); err != nil {
+		return nil, err
+	}
+
+	return &cafeObj, nil
+}
+
+func NewCafeObjectFromString(s string) (*CafeObject, error) {
+
+	data := strings.Split(s, "+")
+	items, err := utils.MultiAtoi(data...)
+	if err != nil {
+		return nil, fmt.Errorf("Error parsing cafeobject from string: %v", err)
+	}
+
+	posX, posY, kind, rotation := items[0], items[1], items[2], items[3]
+
+	cafeObj := CafeObject{
+		pos:      [2]int{posX, posY},
+		kind:     cafetypes.CafeObjectKind(kind),
+		rotation: cafetypes.CafeObjectRotation(rotation),
+	}
+
+	return &cafeObj, nil
+}
+
+func (c *CafeObject) IsWall() bool {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	return 101 <= c.kind && c.kind <= 135
 }
 
 func (c *CafeObject) IsDoor() bool {
-  return 201 <= c.Kind && c.Kind <= 207
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	return 201 <= c.kind && c.kind <= 207
 }
 
 func (c *CafeObject) IsStove() bool {
-  return 252 <= c.Kind && c.Kind <= 259
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	return 252 <= c.kind && c.kind <= 259
+}
+
+func (c *CafeObject) isStove() bool {
+	return 252 <= c.kind && c.kind <= 259
 }
 
 func (c *CafeObject) IsCounter() bool {
-  return 301 <= c.Kind && c.Kind <= 312
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	return 301 <= c.kind && c.kind <= 312
+}
+
+func (c *CafeObject) isCounter() bool {
+	return 301 <= c.kind && c.kind <= 312
 }
 
 func (c *CafeObject) IsChair() bool {
-  return 601 <= c.Kind && c.Kind <= 624
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	return 601 <= c.kind && c.kind <= 624
+}
+
+func (c *CafeObject) isChair() bool {
+	return 601 <= c.kind && c.kind <= 624
 }
 
 func (c *CafeObject) IsTable() bool {
-  return 401 <= c.Kind && c.Kind <= 423
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	return 401 <= c.kind && c.kind <= 423
 }
 
 func (c *CafeObject) IsVending() bool {
-  return c.Kind == 1701 
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	return c.kind == 1701
 }
 
-func (c *CafeObject) String() string{
-  args := []string{
-    strconv.Itoa(c.Pos[0]),
-    strconv.Itoa(c.Pos[1]),
-    strconv.Itoa(int(c.Kind)),
-    strconv.Itoa(int(c.Rotation)),
-  }
-
-  // if STOVE
-  if c.IsStove() {
-      
-    args = append(args, strconv.Itoa(c.DishID))
-    println("DISH_ID:", c.DishID)
-    if !(c.DishID == -1 || c.DishID == -2) {
-      
-      fancyIngStr := "0"
-      if c.FancyIng {
-        fancyIngStr = "1"
-      }
-      args = append(args, fancyIngStr)
-
-      if c.StartedAt != nil {
-        println("IDO CICA")
-        currentTime := time.Now() 
-        passedTime := currentTime.Second() - c.StartedAt.Second()
-        remainingTime := c.FinishesAt.Second() - currentTime.Second()
-        
-        args = append(args, strconv.Itoa(passedTime))
-        args = append(args, strconv.Itoa(remainingTime))
-      }else{
-        println("NEM IDO CICA")
-        args = append(args,"-1")
-        args = append(args,"-1")
-      }
-    }
-  // if COUNTER
-  } else if c.IsCounter() {
-    args = append(args, strconv.Itoa(c.DishID))
-    args = append(args, strconv.Itoa(c.DishAmount))
-  // if CHAIR
-  } else if c.IsChair() {
-    args = append(args, strconv.Itoa(c.DishID))
-    args = append(args, strconv.Itoa(c.DishStatus))
-  // if VENDING
-  } else if c.IsVending() {
-    args = append(args, strconv.Itoa(c.DishID))
-    args = append(args, strconv.Itoa(c.DishAmount))
-  }
-
-  return strings.Join(args, "+")
+func (c *CafeObject) isVending() bool {
+	return c.kind == 1701
 }
 
-/*
-    args = [str(self.pos[0]), str(self.pos[1]), str(self.id), str(self.rotation)]
+func (c *CafeObject) IsFridge() bool {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	return 351 <= c.kind && c.kind <= 358
+}
 
-        if self.type == ObjectType.STOVE:
-            args.append(str(self.dish_id))
+func (c *CafeObject) String() string {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
 
-            if self.dish_id not in (-1, -2):
-                args.append(str(int(self.fancy_ing)))
-                if not self.started_at:
-                    args.append('-1')
-                    args.append('-1')
-                else:
-                    current_time = datetime.now(timezone.utc)
-                    args.append(str(round((current_time - self.started_at).total_seconds())))
-                    args.append(str(round((self.finishes_at - current_time).total_seconds())))
+	args := []string{
+		strconv.Itoa(c.pos[0]),
+		strconv.Itoa(c.pos[1]),
+		strconv.Itoa(int(c.kind)),
+		strconv.Itoa(int(c.rotation)),
+	}
 
-        elif self.type == ObjectType.COUNTER:
-            args.append(str(self.dish_id))
-            args.append(str(self.dish_amount))
+	// if STOVE
+	if c.isStove() {
 
-        elif self.type == ObjectType.CHAIR:
-            args.append(str(self.dish_id))
-            args.append(str(self.dish_status))
+		args = append(args, strconv.Itoa(c.dishID))
+		if !(c.dishID == -1 || c.dishID == -2) {
 
-        elif self.type == ObjectType.VENDING:
-            args.append(str(self.fast_food_id))
-            args.append(str(self.fast_food_amount))
+			fancyIngStr := utils.If(c.fancyIng, "1", "0")
+			args = append(args, fancyIngStr)
 
-        return '+'.join(args)
+			if c.startedAt != nil {
+				currentTime := time.Now().UTC()
+				passedTime := currentTime.Sub(*c.startedAt).Seconds()
+				remainingTime := c.finishesAt.Sub(currentTime).Seconds()
 
+				args = append(args,
+					strconv.Itoa(int(passedTime)),
+					strconv.Itoa(int(remainingTime)),
+				)
+			} else {
+				args = append(args, "-1", "-1")
+			}
+		}
+		// if COUNTER
+	} else if c.isCounter() {
+		args = append(args, strconv.Itoa(c.dishID), strconv.Itoa(c.dishAmount))
+		// if CHAIR
+	} else if c.isChair() {
+		args = append(args, strconv.Itoa(c.dishID), strconv.Itoa(c.dishAmount))
+		// if VENDING
+	} else if c.isVending() {
+		args = append(args, strconv.Itoa(c.dishID), strconv.Itoa(c.dishAmount))
+	}
 
-*/
+	return strings.Join(args, "+")
+}
 
+func (c *CafeObject) JSON() string {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	obj := daos.CafeObjectDAO{
+		Kind:     c.kind,
+		Pos:      c.pos,
+		Rotation: c.rotation,
+
+		DishID:     c.dishID,
+		DishStatus: c.dishStatus,
+		DishAmount: c.dishAmount,
+
+		FancyIng:   c.fancyIng,
+		StartedAt:  c.startedAt,
+		FinishesAt: c.finishesAt,
+	}
+
+	b, err := json.Marshal(obj)
+	if err != nil {
+		log.Errorf("%v", err)
+		return ""
+	}
+	return string(b)
+}
+
+func (c *CafeObject) GetNormalizedRotation() [2]int {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	if c.rotation == cafetypes.Up {
+		return [2]int{1, 0}
+	} else if c.rotation == cafetypes.Down {
+		return [2]int{-1, 0}
+	} else if c.rotation == cafetypes.Left {
+		return [2]int{0, -1}
+	} else /* Right */ {
+		return [2]int{0, 1}
+	}
+}
+
+// --- GETTERS -------------------------------------
+
+func (c *CafeObject) GetKind() cafetypes.CafeObjectKind {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	return c.kind
+}
+
+func (c *CafeObject) GetPos() [2]int {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	return c.pos
+}
+
+func (c *CafeObject) GetRotation() cafetypes.CafeObjectRotation {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	return c.rotation
+}
+
+func (c *CafeObject) GetDishID() int {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	return c.dishID
+}
+
+func (c *CafeObject) GetDishStatus() int {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	return c.dishStatus
+}
+
+func (c *CafeObject) GetDishAmount() int {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	return c.dishAmount
+}
+
+func (c *CafeObject) GetFancyIng() bool {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	return c.fancyIng
+}
+
+func (c *CafeObject) GetStartedAt() *time.Time {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	return c.startedAt
+}
+
+func (c *CafeObject) GetFinishesAt() *time.Time {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	return c.finishesAt
+}
+
+// --- SETTERS -------------------------------------
+
+func (c *CafeObject) SetKind(k cafetypes.CafeObjectKind) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	c.kind = k
+}
+
+func (c *CafeObject) SetPos(pos [2]int) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	c.pos = pos
+}
+
+func (c *CafeObject) SetPosXY(x, y int) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	c.pos[0] = x
+	c.pos[1] = y
+}
+
+func (c *CafeObject) SetRotation(r cafetypes.CafeObjectRotation) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	c.rotation = r
+}
+
+func (c *CafeObject) SetDishID(id int) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	c.dishID = id
+}
+
+func (c *CafeObject) SetDishStatus(status int) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	c.dishStatus = status
+}
+
+func (c *CafeObject) SetDishAmount(amount int) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	c.dishAmount = amount
+}
+
+func (c *CafeObject) AddDishAmount(amount int) bool {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	if c.dishAmount+amount < 0 {
+		return false
+	}
+	c.dishAmount += amount
+
+	if c.dishAmount == 0 {
+		c.dishID = -1
+	}
+	return true
+}
+
+func (c *CafeObject) SetFancyIng(fancying bool) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	c.fancyIng = fancying
+}
+
+func (c *CafeObject) SetStartedAt(t *time.Time) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	c.startedAt = t
+}
+
+func (c *CafeObject) SetFinishesAt(t *time.Time) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	c.finishesAt = t
+}

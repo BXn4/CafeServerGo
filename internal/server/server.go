@@ -5,9 +5,14 @@ import (
 	"cafego/internal/commands"
 	"cafego/internal/database"
 	"cafego/internal/managers"
+	"cafego/internal/utils"
 	"fmt"
-	"log"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"github.com/charmbracelet/log"
 )
 
 // Config
@@ -18,36 +23,44 @@ type CafeConfig struct {
 
 // Server
 type CafeServer struct {
-	config        *CafeConfig
-	dbConfig      *database.DBConfig
-	maxConn       int
-	db            *database.CafeDB
-	clientManager *managers.ClientManager
-	cafeManager   *managers.CafeManager
+	config   *CafeConfig
+	dbConfig *database.DBConfig
+	maxConn  int
+	db       *database.CafeDB
+	gm       *managers.GameManager
 }
 
-func New(config *CafeConfig, dbconfig *database.DBConfig) *CafeServer {
-	return &CafeServer{
-		config:        config,
-		dbConfig:      dbconfig,
-		clientManager: managers.NewClientManager(),
-		cafeManager:   managers.NewCafeManager(),
+func New(config *CafeConfig, dbconfig *database.DBConfig) (*CafeServer, error) {
+	gm, err := managers.NewGameManager()
+	if err != nil {
+		return nil, err
 	}
+	return &CafeServer{
+		config:   config,
+		dbConfig: dbconfig,
+		gm:       gm,
+	}, nil
 }
 
 func (s *CafeServer) Run() {
 
+	// Set up signal handling
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	// Read the items XML file and cache it
+	utils.ReadAndCacheItems()
+
 	// Set up MariaDB connection
 	db, err := database.ConnectToDB(s.dbConfig)
 	if err != nil {
-		println(err.Error())
-		log.Fatal(err)
+		log.Fatalf("%v", err)
+		return
 	}
 	defer db.Close()
-	log.Printf("Server connected to database...")
+	log.Infof("Server connected to database...")
 
-  s.cafeManager.SetCafeDB(db)
-
+	s.gm.SetCafeDB(db)
 
 	// Start the TCP server
 	address := fmt.Sprintf("%s:%s", s.config.Host, s.config.Port)
@@ -57,20 +70,32 @@ func (s *CafeServer) Run() {
 	}
 	defer listener.Close()
 
-	log.Printf("Server started and listening on %s...", address)
+	log.Infof("Server started and listening on %s...", address)
 
 	// Handle connections
-	for {
-		conn, err := listener.Accept()
-		if err != nil {
-			log.Fatal(err)
+	go func() {
+		for {
+			conn, err := listener.Accept()
+			if err != nil {
+				continue
+			}
+			defer conn.Close()
+
+			c := client.New(conn, db, s.gm)
+			s.gm.AddClient(c)
+			c.Start()
+			go commands.HandleClient(c, s.gm)
 		}
+	}()
+	// Wait for interrupt signal
+	<-sigChan
+	log.Info("Received interrupt signal. Saving all data...")
 
-		c := client.New(conn, db)
-		println("ADDING TO ClientManager")
-		s.clientManager.Add(c)
-
-		go commands.HandleClient(c, s.clientManager, s.cafeManager)
+	// Save all
+	if err := s.gm.SaveAll(); err != nil {
+		log.Fatalf("Error saving data: %v", err)
+	} else {
+		log.Info("All data saved successfully")
 	}
 
 }
