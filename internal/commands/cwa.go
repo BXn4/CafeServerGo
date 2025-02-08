@@ -3,6 +3,7 @@ package commands
 import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
+	"cafego/internal/models/simple"
 	"cafego/internal/types/requests"
 	"strconv"
 )
@@ -11,7 +12,7 @@ import (
 func CafeWalk(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	// Dont allow players to modify the packet and sending us CWA while in editor.
-	if c.Location.Cafe().InEditorMode() {
+	if !c.Location.IsRunning() {
 		return nil
 	}
 	posX, err := strconv.Atoi(req.Args[2])
@@ -23,12 +24,12 @@ func CafeWalk(req *requests.Request, c *client.Client, gm *managers.GameManager)
 		return err
 	}
 
-	if c.Location.Cafe().GetObjectByPos(posX, posY) != nil {
+	if c.Location.Cafe().GetObjectByPosXY(posX, posY) != nil {
 		c.SendExtensionResponse("cwa", "-1", "23")
 		return nil
 	}
 
-	c.Player.Position = [2]int{posX, posY}
+	c.Player.Position = simple.NewPosition(posX, posY)
 
 	c.Location.Broadcast("cwa", "-1", "0", strconv.Itoa(c.Player.ID), "0", req.Args[2], req.Args[3])
 

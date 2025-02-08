@@ -12,7 +12,7 @@ import (
 func StoveDeliver(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	// Dont allow players to modify the packet and sending us CSD while in editor.
-	if c.Location.Cafe().InEditorMode() {
+	if !c.Location.IsRunning() {
 		return nil
 	}
 
@@ -36,8 +36,8 @@ func StoveDeliver(req *requests.Request, c *client.Client, gm *managers.GameMana
 		return err
 	}
 
-	stove := c.Location.Cafe().GetObjectByPos(stoveX, stoveY)
-	counter := c.Location.Cafe().GetObjectByPos(counterX, counterY)
+	stove := c.Location.Cafe().GetObjectByPosXY(stoveX, stoveY)
+	counter := c.Location.Cafe().GetObjectByPosXY(counterX, counterY)
 
 	// Get dish
 	dish, err := utils.GetDish(stove.GetDishID())

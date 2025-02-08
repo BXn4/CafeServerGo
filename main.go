@@ -18,7 +18,7 @@ func init() {
 	log.SetLevel(log.Level(-5))
 
 	// Uncomment to enable info level logging:
-	// log.SetLevel(log.InfoLevel)
+	log.SetLevel(log.InfoLevel)
 
 }
 
@@ -50,7 +50,7 @@ func main() {
 	)
 
 	if err != nil {
-		log.Errorf("Failed to create the server object!")
+		log.Errorf("Failed to create the server object: %v", err)
 		os.Exit(1)
 	} else {
 		srv.Run()

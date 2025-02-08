@@ -1,8 +1,9 @@
 package managers
 
 import (
+	"cafego/internal/agents"
 	"cafego/internal/database"
-	"cafego/internal/objects"
+	"cafego/internal/models/cafe"
 	"fmt"
 
 	"github.com/charmbracelet/log"
@@ -22,6 +23,8 @@ func (gm *GameManager) SetLocation(id int, cafe *LoadedLocation) {
 func (gm *GameManager) RemoveLocation(id int) {
 	gm.locationMutex.Lock()
 	defer gm.locationMutex.Unlock()
+
+	println("REMOVED CAFE: ", id)
 
 	for i, lc := range gm.locations {
 		if lc.cafe.GetID() == id {
@@ -46,10 +49,9 @@ func (gm *GameManager) AddLocation(id int) *LoadedLocation {
 	}
 
 	// If there is no loaded cafe load one
-	var cafeObj *objects.Cafe
+	var cafeObj *cafe.Cafe
 	cafeObj, err = gm.db.GetCafeByPlayerID(id)
 	if err != nil {
-		// BIG FUCK UP
 		log.Errorf("Player with id %v has no cafe in database: %v", id, err)
 		return nil
 	}
@@ -57,6 +59,10 @@ func (gm *GameManager) AddLocation(id int) *LoadedLocation {
 	//
 	loc := NewLoadedLocation(cafeObj, gm)
 	gm.locations[id] = loc
+
+	println("LOADED CAFE: ", id)
+
+	go agents.StartAgentCycles(loc)
 
 	return loc
 }
@@ -66,6 +72,7 @@ func (gm *GameManager) AddLocation(id int) *LoadedLocation {
 // |========================================|
 
 func (gm *GameManager) getLocationByID(id int) (*LoadedLocation, error) {
+
 	cafe, ok := gm.locations[id]
 	if ok {
 		return cafe, nil

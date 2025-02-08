@@ -3,7 +3,8 @@ package commands
 import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
-	"cafego/internal/objects"
+	"cafego/internal/models/avatar"
+	"cafego/internal/models/player"
 	"cafego/internal/types/requests"
 	"fmt"
 	"math/rand"
@@ -13,12 +14,12 @@ func CreateAvatar(req *requests.Request, c *client.Client, gm *managers.GameMana
 
 	guestName := fmt.Sprintf("Guest_%v'", rand.Intn(89999999)+10000000)
 
-	avatar := objects.NewAvatarFromString(req.Args[2])
+	avatar := avatar.NewAvatarFromString(req.Args[2])
 	if avatar == nil {
 		return fmt.Errorf("Cant parse avatar from string!")
 	}
 
-	c.Player = &objects.Player{
+	c.Player = &player.Player{
 		Avatar: *avatar,
 	}
 

@@ -44,7 +44,7 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 	case 2:
 		fallthrough
 	case 13:
-		c.Player.AddGift(1450, 1, -1)
+		c.Player.Gifts.AddGift(1450, 1, -1)
 		c.SendExtensionResponse("mwf", "-1", "0", rewardStr, "1450+1")
 	case 3:
 		decorations, err := utils.GetItems("deco")
@@ -81,7 +81,7 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 			amount := rand.Intn(10) + 1
 
 			// Add won fancy to gifts
-			c.Player.AddGift(fancy.ID, amount, -1)
+			c.Player.Gifts.AddGift(fancy.ID, amount, -1)
 
 			// Add to won fancy list
 			fancyStr := fmt.Sprintf("%v+%v", fancy.ID, amount)
@@ -108,7 +108,7 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 			amount := rand.Intn(10) + 1
 
 			// Add won dish to gifts
-			c.Player.AddGift(dish.ID, amount, -1)
+			c.Player.Gifts.AddGift(dish.ID, amount, -1)
 
 			// Add to won fancy list
 			dishStr := fmt.Sprintf("%v+%v", dish.ID, amount)
@@ -142,7 +142,7 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 			amount := rand.Intn(10) + 1
 
 			// Add won ingredient to gifts
-			c.Player.AddGift(ingredient.ID, amount, -1)
+			c.Player.Gifts.AddGift(ingredient.ID, amount, -1)
 
 			// Add to won ingredient list
 			dishStr := fmt.Sprintf("%v+%v", ingredient.ID, amount)

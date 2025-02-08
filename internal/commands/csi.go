@@ -3,7 +3,7 @@ package commands
 import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
-	"cafego/internal/objects"
+	"cafego/internal/models/object"
 	"cafego/internal/types/requests"
 	"cafego/internal/utils"
 	"strconv"
@@ -12,7 +12,7 @@ import (
 func StoveDeliverInfo(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	// Dont allow players to modify the packet and sending us CSD while in editor.
-	if c.Location.Cafe().InEditorMode() {
+	if !c.Location.IsRunning() {
 		return nil
 	}
 
@@ -26,10 +26,10 @@ func StoveDeliverInfo(req *requests.Request, c *client.Client, gm *managers.Game
 		return err
 	}
 
-	stove := c.Location.Cafe().GetObjectByPos(stoveX, stoveY)
+	stove := c.Location.Cafe().GetObjectByPosXY(stoveX, stoveY)
 
 	// Choose counter that is empty or has the same food type
-	var counter *objects.CafeObject
+	var counter *object.Object
 	for _, object := range c.Location.Cafe().GetObjects() {
 		if !object.IsCounter() {
 			continue
@@ -44,8 +44,8 @@ func StoveDeliverInfo(req *requests.Request, c *client.Client, gm *managers.Game
 	}
 
 	// Set args
-	counterX := utils.If(counter != nil, counter.GetPos()[0], -1)
-	counterY := utils.If(counter != nil, counter.GetPos()[1], -1)
+	counterX := utils.If(counter != nil, counter.GetPos().X, -1)
+	counterY := utils.If(counter != nil, counter.GetPos().Y, -1)
 	status := utils.If(counter != nil, "0", "37")
 
 	/*

@@ -15,20 +15,12 @@ import (
 
 func LoginRewards(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
-	dailyLogin, err := c.DB.GetDailyLogin(c.Player.ID)
-	if err != nil {
-		return err
-	}
-
 	// Check if time passed by daily login
-	timePassed := time.Now().Sub(*dailyLogin)
+	timePassed := time.Now().Sub(c.Player.DailyLogin)
 	isDaily := timePassed >= 24*time.Hour
 
 	if isDaily {
-		err = c.DB.ResetDailyLogin(c.Player.ID)
-		if err != nil {
-			return err
-		}
+		c.Player.DailyLogin = time.Now()
 	}
 
 	var args []string

@@ -3,7 +3,7 @@ package commands
 import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
-	"cafego/internal/objects"
+	"cafego/internal/models/player"
 	"cafego/internal/types/requests"
 	"fmt"
 	"strings"
@@ -26,7 +26,7 @@ func SendSocialFriendsAvatar(req *requests.Request, c *client.Client, gm *manage
 	var friendsStr []string
 	for _, f := range friends {
 
-		var player *objects.Player
+		var player *player.Player
 		// Check if online
 		item, err := gm.GetClient(f)
 		if err == nil {
@@ -40,7 +40,7 @@ func SendSocialFriendsAvatar(req *requests.Request, c *client.Client, gm *manage
 			}
 		}
 		pln := "2"
-		friendsStr = append(friendsStr, fmt.Sprintf("%v|%v|%v|%v", pln, c.Player.ID, player.GetXP(), player.Avatar.String(player.Username)))
+		friendsStr = append(friendsStr, fmt.Sprintf("%v|%v|%v|%v", pln, c.Player.ID, player.GetXP(), player.Avatar.String()))
 	}
 	c.SendExtensionResponse("sbs", "-1", "0", strings.Join(friendsStr, "||"))
 	return nil

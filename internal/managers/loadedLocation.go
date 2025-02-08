@@ -3,39 +3,44 @@ package managers
 import (
 	"cafego/internal/agents"
 	"cafego/internal/client"
-	"cafego/internal/objects"
+	"cafego/internal/models/cafe"
+	"cafego/internal/models/object"
+	"cafego/internal/models/player"
+	"cafego/internal/models/simple"
 	"cafego/internal/types/responses"
-	_ "cafego/internal/utils"
 	"slices"
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/charmbracelet/log"
 )
 
 // --- LoadedLocation ----------------------------------------------------------
 type LoadedLocation struct {
-	cafe         *objects.Cafe
+	cafe         *cafe.Cafe
 	occupants    map[int](chan<- responses.Response)
 	mu           sync.Mutex
 	gm           *GameManager
 	running      bool
-	reservedObjs []*objects.CafeObject
+	reservedObjs []*object.Object
 }
 
-func NewLoadedLocation(cafe *objects.Cafe, gm *GameManager) *LoadedLocation {
+func NewLoadedLocation(cafe *cafe.Cafe, gm *GameManager) *LoadedLocation {
 	return &LoadedLocation{
 		cafe:      cafe,
 		gm:        gm,
 		occupants: make(map[int](chan<- responses.Response), 0),
 		running:   false,
 	}
+
 }
 
-// TODO: Change this its shiti design and throws nil pointer exception
+// TODO: Change this its shit design and throws nil pointer exception
 // when more clients want to use it
-func (lc *LoadedLocation) Cafe() *objects.Cafe {
+// INSTEAD we should create a threadsafe interface for cafe
+func (lc *LoadedLocation) Cafe() *cafe.Cafe {
 	return lc.cafe
 }
 
@@ -82,6 +87,7 @@ func (lc *LoadedLocation) IsRunning() bool {
 	return lc.running
 }
 
+// TODO: Change this
 func (lc *LoadedLocation) GetIsRunning() *bool {
 	lc.mu.Lock()
 	defer lc.mu.Unlock()
@@ -91,41 +97,18 @@ func (lc *LoadedLocation) GetIsRunning() *bool {
 func (lc *LoadedLocation) SetRunning(b bool) {
 	lc.mu.Lock()
 	defer lc.mu.Unlock()
-	lc.running = b
 
-	// Change waiter switch
-	for _, w := range lc.cafe.GetWaiters() {
-		w.IsWorking = b
-	}
-
-	// Start agent cycle
-	if b {
-		go agents.AgentCycle(lc)
-	}
+	lc.setRunning(b)
 }
 
 func (lc *LoadedLocation) setRunning(b bool) {
+
 	lc.running = b
-
-	// Change waiter switch
-	for _, w := range lc.cafe.GetWaiters() {
-		w.IsWorking = b
-	}
-
-	// Start agent cycle
-	if b {
-		go agents.AgentCycle(lc)
-	}
 }
 
 func (lc *LoadedLocation) Join(playerID int, channel chan<- responses.Response) {
 	lc.mu.Lock()
 	defer lc.mu.Unlock()
-
-	if !lc.running {
-		lc.running = true
-		go agents.AgentCycle(lc)
-	}
 
 	// Get joined client
 	c, err := lc.gm.GetClient(playerID)
@@ -143,11 +126,6 @@ func (lc *LoadedLocation) Join(playerID int, channel chan<- responses.Response) 
 	// Add to players in cafe
 	lc.occupants[playerID] = channel
 
-	// Send cafe data
-	args := []string{"sgc", "-1", "0"}
-	args = append(args, lc.cafe.AsResponse()...)
-	lc.send(playerID, args...)
-
 	var playersStr []string
 
 	// Get all players in location
@@ -161,8 +139,40 @@ func (lc *LoadedLocation) Join(playerID int, channel chan<- responses.Response) 
 		playersStr = append(playersStr, c.(*client.Client).Player.String())
 	}
 
+	// Send cafe data
+	args := []string{"sgc", "-1", "0"}
+	args = append(args, lc.cafe.AsResponse()...)
+	lc.send(playerID, args...)
+
 	// Send it to joined player
 	lc.send(playerID, "jul", "-1", "0", strings.Join(playersStr, "$"))
+
+	// Send every customer in location
+	println("JOIN CUSTOMER DATA:")
+	for _, cs := range lc.cafe.GetCustomers() {
+		println("- SENT CUSTOMER DATA")
+		lc.send(playerID, "nav", "-1", "0", cs.SpawnString())
+		lc.send(playerID, "nac", "-1", "0", cs.ActionString())
+	}
+
+	println("CUSTOMER COUNT: ", len(lc.cafe.GetCustomers()))
+
+	lc.running = true
+
+	// Respawn waiters if owner joined
+	println("WP COND ", playerID, lc.cafe.GetPlayerID())
+	if playerID == lc.cafe.GetPlayerID() {
+
+		// Start waiters
+		for i, w := range lc.cafe.Waiters {
+			w.SetIsWorking(false)
+			time.Sleep(10 * time.Millisecond)
+			// Respawn waiters
+			go func() {
+				agents.SpawnWaiter(lc, w, i+1).Start()
+			}()
+		}
+	}
 }
 
 // Leaves the location and broadcasts leave to every one
@@ -171,6 +181,7 @@ func (lc *LoadedLocation) Leave(id int) {
 	lc.mu.Lock()
 	defer lc.mu.Unlock()
 
+	// Parse id
 	idStr := strconv.Itoa(id)
 
 	// Send leave to everyone
@@ -179,30 +190,35 @@ func (lc *LoadedLocation) Leave(id int) {
 	// Delete from occupants
 	delete(lc.occupants, id)
 
-	// If there are no players at the location and the location is not the marketplace
-	if len(lc.occupants) == 0 && !(lc.cafe.GetID() < 0) {
-		lc.setRunning(false)
+	// If there are no players at the location
+	// and the location is not marketplace
+	// and the owner is not online
+	if len(lc.occupants) == 0 && lc.cafe.GetID() > 0 && !lc.gm.UnsafeIsOnline(lc.cafe.GetID()) {
+		log.Debugf("Unloading cafe %v...", lc.cafe.GetID())
+		lc.gm.RemoveLocation(lc.cafe.ID)
 	}
 
+	lc.running = false
 }
 
 func (lc *LoadedLocation) ClearReservedObjects() {
 	for _, obj := range lc.reservedObjs {
 		if obj.IsChair() {
 			obj.SetDishID(-1)
+			obj.SetDishStatus(0)
 		}
 	}
-	lc.reservedObjs = []*objects.CafeObject{}
+	lc.reservedObjs = []*object.Object{}
 }
 
 // Returns the first table and unreserves it
-func (lc *LoadedLocation) GetDirtySpace() *objects.CafeObject {
+func (lc *LoadedLocation) GetDirtySpace() *object.Object {
 	lc.mu.Lock()
 	defer lc.mu.Unlock()
 
 	chairIndex := -1
 	for i, o := range lc.reservedObjs {
-		if o.IsChair() && o.GetDishID() == -2 {
+		if o.IsChair() && o.GetDishStatus() == 3 {
 			chairIndex = i
 		}
 	}
@@ -217,7 +233,7 @@ func (lc *LoadedLocation) GetDirtySpace() *objects.CafeObject {
 			continue
 		}
 		nr := chair.GetNormalizedRotation()
-		if o.GetPos()[0] == chair.GetPos()[0]+nr[0] && o.GetPos()[1] == chair.GetPos()[1]+nr[1] {
+		if o.GetPos().X == chair.GetPos().X+nr[0] && o.GetPos().Y == chair.GetPos().Y+nr[1] {
 			// Unreserve chair
 			lc.reservedObjs = append(lc.reservedObjs[:chairIndex], lc.reservedObjs[chairIndex+1:]...)
 			if chairIndex < j {
@@ -235,12 +251,12 @@ func (lc *LoadedLocation) GetDirtySpace() *objects.CafeObject {
 }
 
 // Get reserved item by pos
-func (lc *LoadedLocation) GetReservedObject(x, y int) *objects.CafeObject {
+func (lc *LoadedLocation) GetReservedObject(pos simple.Position) *object.Object {
 	lc.mu.Lock()
 	defer lc.mu.Unlock()
 
 	for _, o := range lc.reservedObjs {
-		if o.GetPos()[0] == x && o.GetPos()[1] == y {
+		if o.GetPos() == pos {
 			return o
 		}
 	}
@@ -248,7 +264,7 @@ func (lc *LoadedLocation) GetReservedObject(x, y int) *objects.CafeObject {
 	return nil
 }
 
-func (lc *LoadedLocation) ReserveObject(obj *objects.CafeObject) bool {
+func (lc *LoadedLocation) ReserveObject(obj *object.Object) bool {
 	lc.mu.Lock()
 	defer lc.mu.Unlock()
 
@@ -265,7 +281,7 @@ func (lc *LoadedLocation) ReserveObject(obj *objects.CafeObject) bool {
 	return true
 }
 
-func (lc *LoadedLocation) UnreserveObject(obj *objects.CafeObject) {
+func (lc *LoadedLocation) UnreserveObject(obj *object.Object) {
 	lc.mu.Lock()
 	defer lc.mu.Unlock()
 
@@ -303,14 +319,7 @@ func (lc *LoadedLocation) GetUniqueCustomerID() int {
 	return id
 }
 
-func (lc *LoadedLocation) AddCustomer(customer *objects.Customer) {
-	lc.mu.Lock()
-	defer lc.mu.Unlock()
-
-	lc.Cafe().AddCustomer(customer)
-}
-
-func (lc *LoadedLocation) Owner() (*objects.Player, error) {
+func (lc *LoadedLocation) Owner() (*player.Player, error) {
 	c, err := lc.gm.GetClient(lc.cafe.GetID())
 	if err != nil {
 		return nil, err
@@ -318,19 +327,14 @@ func (lc *LoadedLocation) Owner() (*objects.Player, error) {
 	return c.(*client.Client).Player, nil
 }
 
-// |========================================|
 // | !!!  BEFORE USING THIS LOCK MUTEX  !!! |
-// |========================================|
 func (lc *LoadedLocation) send(id int, args ...string) {
 	resp := responses.NewExtensionResponse(args...)
 	log.Logf(log.Level(-3), "to %v: %s", id, resp.Wrap())
 	lc.occupants[id] <- resp
 }
 
-// |========================================|
 // | !!!  BEFORE USING THIS LOCK MUTEX  !!! |
-// |========================================|
-
 // This will send a message to everyone in the loaded cafe
 func (lc *LoadedLocation) broadcast(args ...string) {
 
@@ -341,10 +345,7 @@ func (lc *LoadedLocation) broadcast(args ...string) {
 	}
 }
 
-// |========================================|
-// | !!!  BEFORE USING THIS LOCK MUTEX  !!! |
-// |========================================|
-
+// !!!  BEFORE USING THIS LOCK MUTEX  !!!
 // Same as the Broadcast, just sending to the other players, and not sending it to the source
 func (lc *LoadedLocation) announce(playerID int, args ...string) {
 

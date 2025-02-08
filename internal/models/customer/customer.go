@@ -1,6 +1,15 @@
-package objects
+package customer
 
-import "sync"
+import (
+	"cafego/internal/models/avatar"
+	"cafego/internal/models/simple"
+	"cafego/internal/utils"
+	"strconv"
+	"strings"
+	"sync"
+
+	"golang.org/x/exp/rand"
+)
 
 type CustomerAction int
 
@@ -17,25 +26,71 @@ const (
 
 type Customer struct {
 	id             int
-	avatar         Avatar
-	pos            [2]int
-	dish           int
+	avatar         avatar.Avatar
+	pos            simple.Position
 	action         CustomerAction
 	isThirsty      bool
 	assignedWaiter int
 	mutex          sync.Mutex
 }
 
-func NewCustomer(id int, avatar Avatar, pos [2]int, dish int, action CustomerAction, isThirsty bool, assignedWaiter int) *Customer {
+func NewCustomer(id int, avatar avatar.Avatar, pos simple.Position, dish int, action CustomerAction, isThirsty bool, assignedWaiter int) *Customer {
+	avatar.IsNPC = true
 	return &Customer{
 		id:             id,
 		avatar:         avatar,
 		pos:            pos,
-		dish:           dish,
 		action:         action,
 		isThirsty:      isThirsty,
 		assignedWaiter: assignedWaiter,
 	}
+}
+
+func NewRandomCustomer(id int, pos simple.Position) *Customer {
+	return &Customer{
+		id:             id,
+		avatar:         avatar.NewRandomAvatar(),
+		pos:            pos,
+		action:         CUSTOMER_INSERT,
+		isThirsty:      rand.Intn(2) == 1,
+		assignedWaiter: -1,
+	}
+}
+
+// nac - npc avatar string
+func (c *Customer) SpawnString() string {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	args := []string{
+		strconv.Itoa(c.id),
+		"0", // NPC type (0: Customer)
+		"0",
+		"-1", // DishID
+		utils.If(c.isThirsty, "1", "0"),
+		c.avatar.String(),
+	}
+
+	return strings.Join(args, "+")
+}
+
+// nav - npc action string
+func (c *Customer) ActionString() string {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	args := []string{
+		strconv.Itoa(c.id),
+		strconv.Itoa(int(c.action)),
+	}
+	// If there is no action return
+	if c.action == CUSTOMER_INSERT || c.action == CUSTOMER_LEAVE {
+		return strings.Join(args, "+")
+	}
+
+	args = append(args, strconv.Itoa(c.pos.X))
+	args = append(args, strconv.Itoa(c.pos.Y))
+
+	return strings.Join(args, "+")
 }
 
 // --- GETTERS ---------------------
@@ -45,22 +100,16 @@ func (c *Customer) GetID() int {
 	return c.id
 }
 
-func (c *Customer) GetAvatar() *Avatar {
+func (c *Customer) GetAvatar() *avatar.Avatar {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	return &c.avatar
 }
 
-func (c *Customer) GetPos() [2]int {
+func (c *Customer) GetPos() simple.Position {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	return c.pos
-}
-
-func (c *Customer) GetDish() int {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-	return c.dish
 }
 
 func (c *Customer) GetAction() CustomerAction {
@@ -89,22 +138,16 @@ func (c *Customer) SetID(id int) {
 	c.id = id
 }
 
-func (c *Customer) SetAvatar(a Avatar) {
+func (c *Customer) SetAvatar(a avatar.Avatar) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	c.avatar = a
 }
 
-func (c *Customer) SetPos(pos [2]int) {
+func (c *Customer) SetPos(pos simple.Position) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	c.pos = pos
-}
-
-func (c *Customer) SetDish(v int) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-	c.dish = v
 }
 
 func (c *Customer) SetAction(v CustomerAction) {

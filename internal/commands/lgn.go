@@ -14,7 +14,7 @@ func Login(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 	password := req.Args[3]
 
 	// Check credentials
-	statusCode, err := c.DB.Authenticate(name, password)
+	p, statusCode, err := c.DB.Authenticate(name, password)
 
 	// Check if already logged in disconnect the client
 	if err == nil {
@@ -39,52 +39,49 @@ func Login(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 		}
 	}
 
+	// Set player
+	c.Player = p
+
 	// Send room list (rlu)
 	err = RoomList(req, c, gm)
 	if err != nil {
-		return fmt.Errorf("\n\trlu request: %v", err)
+		return fmt.Errorf("\nrlu request: %v", err)
 	}
 
 	// Send user info (gui)
 	err = UserInfo(req, c, gm)
 	if err != nil {
-		return fmt.Errorf("\n\tgui request: %v", err)
+		return fmt.Errorf("\ngui request: %v", err)
 	}
 
 	// Send balancing constants (sbc)
 	err = SendBalancingConstant(req, c, gm)
 	if err != nil {
-		return fmt.Errorf("\n\tsbc request: %v", err)
+		return fmt.Errorf("\nsbc request: %v", err)
 	}
 
 	// Send mastery info (lmi)
 	err = SendMasteryInfo(req, c, gm)
 	if err != nil {
-		return fmt.Errorf("\n\tlmi request: %v", err)
-	}
-
-	// Send fridge info (ifr)
-	err = SendFridgeInventory(req, c, gm)
-	if err != nil {
-		return fmt.Errorf("\n\tifr request: %v", err)
+		return fmt.Errorf("\nlmi request: %v", err)
 	}
 
 	// Handle login bonus (lbu)
 	err = LoginRewards(req, c, gm)
 	if err != nil {
-		return fmt.Errorf("\n\tlbu request: %v", err)
+		return fmt.Errorf("\nlbu request: %v", err)
 	}
 
 	// Send Ping (pin)
 	err = SendPing(req, c, gm)
 	if err != nil {
-		return fmt.Errorf("\n\tpin request: %v", err)
+		return fmt.Errorf("\npin request: %v", err)
 	}
 
 	// Send Friends
 	err = SendFriendsAvatar(req, c, gm)
 	if err != nil {
-		return fmt.Errorf("\n\tbga request: %v", err)
+		return fmt.Errorf("\nbga request: %v", err)
 	}
 
 	return nil

@@ -27,11 +27,6 @@ func (gm *GameManager) DisconnectClient(id int) {
 			continue
 		}
 
-		// Skip if not player
-		if c.Player.ID != id {
-			continue
-		}
-
 		// Send signal to close connection
 		for len(c.RequestQueue) > 0 {
 			c.RequestQueue <- nil
@@ -45,10 +40,6 @@ func (gm *GameManager) DisconnectClient(id int) {
 		// Leave current location
 		if c.Location != nil {
 			c.Location.Leave(id)
-			// Check if empty, owner offline, not market
-			if c.Location.IsEmpty() && !gm.isOnline(c.Location.Cafe().GetID()) && c.Location.Cafe().GetID() > 0 {
-				gm.RemoveLocation(id)
-			}
 		}
 
 		// Remove client by re-slicing
@@ -95,6 +86,22 @@ func (gm *GameManager) IsOnline(id int) bool {
 
 // Checks if client is online
 func (gm *GameManager) isOnline(id int) bool {
+
+	for _, c := range gm.clients {
+		if c.Player == nil {
+			continue
+		}
+		if c.Player.ID == id {
+			return true
+		}
+	}
+
+	return false
+}
+
+// !!! USE IT WITH CARE !!!
+// Checks if client is online
+func (gm *GameManager) UnsafeIsOnline(id int) bool {
 
 	for _, c := range gm.clients {
 		if c.Player == nil {

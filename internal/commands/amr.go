@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-// abr - AllowFriendRequests
+// abr - AllowEmails
 func AllowEmails(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	c.Player.AllowEmails = utils.If(req.Args[2] == "1", true, false)

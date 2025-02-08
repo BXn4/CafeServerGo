@@ -12,8 +12,7 @@ import (
 // lcp - ChangePassword
 func ChangePassword(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
-	oldPasswd := req.Args[2]
-	newPasswd := req.Args[3]
+	oldPasswd, newPasswd := req.Args[2], req.Args[3]
 
 	status, err := c.DB.ChangePassword(c.ID(), oldPasswd, newPasswd)
 	if err != nil {
@@ -21,5 +20,6 @@ func ChangePassword(req *requests.Request, c *client.Client, gm *managers.GameMa
 	}
 
 	c.SendExtensionResponse("lcp", "1", strconv.Itoa(status))
+	c.Disconnect()
 	return nil
 }

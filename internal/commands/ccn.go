@@ -11,7 +11,7 @@ import (
 func Clean(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	// Dont allow players to modify the packet and sending us CCH while in editor.
-	if c.Location.Cafe().InEditorMode() {
+	if !c.Location.IsRunning() {
 		return nil
 	}
 
@@ -25,7 +25,7 @@ func Clean(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 		return err
 	}
 
-	obj := c.Location.Cafe().GetObjectByPos(objX, objY)
+	obj := c.Location.Cafe().GetObjectByPosXY(objX, objY)
 
 	if obj == nil {
 		return err

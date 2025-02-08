@@ -15,7 +15,7 @@ import (
 func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	// Dont allow players to modify the packet and sending us CCC while in editor.
-	if c.Location.Cafe().InEditorMode() {
+	if !c.Location.IsRunning() {
 		return nil
 	}
 
@@ -49,7 +49,7 @@ func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameMana
 
 	cookingTime := c.Player.GetDishMasteryDuration(dishID)
 
-	stove := c.Location.Cafe().GetObjectByPos(posX, posY)
+	stove := c.Location.Cafe().GetObjectByPosXY(posX, posY)
 
 	if stove == nil {
 		return fmt.Errorf("No stove found at: %v:%v", posX, posY)

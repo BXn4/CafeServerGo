@@ -3,7 +3,7 @@ package commands
 import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
-	"cafego/internal/objects"
+	"cafego/internal/models/object"
 	"cafego/internal/types/requests"
 	"cafego/internal/utils"
 	"strconv"
@@ -19,7 +19,7 @@ func UseGift(req *requests.Request, c *client.Client, gm *managers.GameManager) 
 	}
 
 	gift := c.Player.Gifts[slot]
-	c.Player.RemoveGift(slot)
+	c.Player.Gifts.RemoveGift(slot)
 
 	item, err := utils.GetItem(gift.ID)
 	if err != nil {
@@ -44,7 +44,7 @@ func UseGift(req *requests.Request, c *client.Client, gm *managers.GameManager) 
 	} else if strings.ToLower(item.Group) == "dish" {
 
 		// Get empty counter
-		var counter *objects.CafeObject
+		var counter *object.Object
 		for _, obj := range c.Location.Cafe().GetObjects() {
 			if !obj.IsCounter() {
 				continue
@@ -66,8 +66,8 @@ func UseGift(req *requests.Request, c *client.Client, gm *managers.GameManager) 
 		counter.SetDishAmount(gift.Amount)
 
 		// Convert counter pos to string
-		posX := strconv.Itoa(counter.GetPos()[0])
-		posY := strconv.Itoa(counter.GetPos()[1])
+		posX := strconv.Itoa(counter.GetPos().X)
+		posY := strconv.Itoa(counter.GetPos().Y)
 
 		c.SendExtensionResponse("gus", "-1", "0", req.Args[2], strId, strAmount, posX, posY)
 	}

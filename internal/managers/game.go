@@ -3,7 +3,7 @@ package managers
 import (
 	"cafego/internal/client"
 	"cafego/internal/database"
-	"cafego/internal/objects"
+	"cafego/internal/models/cafe"
 	"sync"
 )
 
@@ -20,7 +20,7 @@ type GameManager struct {
 func NewGameManager() (*GameManager, error) {
 
 	// Marketplace object
-	cafeObj, err := objects.NewMarketplace()
+	cafeObj, err := cafe.NewMarketplace(-1)
 	if err != nil {
 		return nil, err
 	}

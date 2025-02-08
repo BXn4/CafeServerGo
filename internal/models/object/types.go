@@ -1,4 +1,4 @@
-package cafetypes
+package object
 
 type CafeObjectKind int
 

@@ -1,7 +1,8 @@
-package objects
+package avatar
 
 import (
 	"cafego/internal/utils"
+	"database/sql/driver"
 	"fmt"
 	"math/rand"
 	"strconv"
@@ -27,12 +28,46 @@ const (
 )
 
 type Avatar struct {
-	Gender    AvatarGender
-	SkinColor int
-	TopColor  int
-	HairColor int
-	LegsColor int
-	IsNPC     bool
+	ID        int          `gorm:"type:int;not null"`
+	Name      string       `gorm:"type:string;not null"`
+	Gender    AvatarGender `gorm:"type:int;not null"`
+	SkinColor int          `gorm:"type:int;not null"`
+	TopColor  int          `gorm:"type:int;not null"`
+	HairColor int          `gorm:"type:int;not null"`
+	LegsColor int          `gorm:"type:int;not null"`
+	IsNPC     bool         `gorm:"type:boolean;default:0"`
+}
+
+// Scan implements the sql.Scanner interface
+func (a *Avatar) Scan(value interface{}) error {
+	if value == nil {
+		return nil
+	}
+
+	str, ok := value.(string)
+	if !ok {
+		bytes, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("failed to unmarshal Avatar value: %v", value)
+		}
+		str = string(bytes)
+	}
+
+	avatar := NewAvatarFromString(str)
+	if avatar == nil {
+		return fmt.Errorf("failed to parse avatar string: %s", str)
+	}
+
+	*a = *avatar
+	return nil
+}
+
+// Value implements the driver.Valuer interface
+func (a Avatar) Value() (driver.Value, error) {
+	if a.Gender == 0 {
+		return nil, nil
+	}
+	return a.Apperance(), nil
 }
 
 func NewAvatarFromString(s string) *Avatar {
@@ -50,7 +85,7 @@ func NewAvatarFromString(s string) *Avatar {
 
 		id := values[0][:len(values[0])-1]
 
-		// Set values
+		// Set apperance values
 		if values[0] == "1001" {
 			avatar.Gender = Girl
 			avatar.TopColor = color
@@ -69,19 +104,17 @@ func NewAvatarFromString(s string) *Avatar {
 	return &avatar
 }
 
-func (a *Avatar) String(name string) string {
-	return fmt.Sprintf("%s+%d+%s", name, a.Gender, a.Apperance())
+func (a *Avatar) String() string {
+	return fmt.Sprintf("%s+%d+%s", a.Name, a.Gender, a.Apperance())
 }
 
 func (a *Avatar) Apperance() string {
-
 	face := fmt.Sprintf("%v$0", 1080+int(a.Gender))
 	hat := utils.If(a.IsNPC, "1061$0", "1062$0")
 	top := fmt.Sprintf("%v$%v", 1000+int(a.Gender), a.TopColor)
 	skin := fmt.Sprintf("%v$%v", 1020+int(a.Gender), a.SkinColor)
 	hair := fmt.Sprintf("%v$%v", 1040+int(a.Gender), a.HairColor)
 	legs := fmt.Sprintf("%v$%v", 1050+int(a.Gender), a.LegsColor)
-
 	return strings.Join([]string{top, skin, hair, legs, hat, face}, "#")
 }
 

@@ -1,7 +1,10 @@
 package database
 
 import (
-	"cafego/internal/objects"
+	"cafego/internal/models/avatar"
+	"cafego/internal/models/cafe"
+	"cafego/internal/models/coop"
+	"cafego/internal/models/player"
 	"fmt"
 
 	"gorm.io/driver/mysql"
@@ -23,21 +26,19 @@ type CafeDB struct {
 
 func ConnectToDB(config *DBConfig) (*CafeDB, error) {
 
-	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", config.User, config.Password, config.Host, config.Port, config.Database)
+	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=true", config.User, config.Password, config.Host, config.Port, config.Database)
 
-	// This only creates the db pbject and does not start a connection
+	// Creates the db pbject and does not start a connection
 	db, err := gorm.Open(mysql.Open(connectionString), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
 
-	// We might want to use this in the future but for compatibility reasons we will not use it
-	/*
-		// err = db.AutoMigrate(&PlayerDAO{}, &CafeDAO{})
-		// if err != nil {
-		// 	return nil, err
-		// }
-	*/
+	// Check if database tables are valid
+	err = db.AutoMigrate(&player.Player{}, &cafe.Cafe{}, &coop.Coop{})
+	if err != nil {
+		return nil, err
+	}
 
 	cafe_db := &CafeDB{conn: db}
 
@@ -52,44 +53,35 @@ func (db *CafeDB) Close() error {
 	return sqlDB.Close()
 }
 
-func (db *CafeDB) CreateAccount(name, email, password string, avatar objects.Avatar) (*objects.Player, error) {
+func (db *CafeDB) CreateAccount(name, email, password string, a avatar.Avatar) (*player.Player, error) {
 
 	hashedPasswd, err := HashPassword(password)
 	if err != nil {
 		return nil, err
 	}
 
-	dao := &PlayerDAO{
+	player := &player.Player{
 		Email:    email,
 		Password: hashedPasswd,
 		Username: name,
-		Avatar:   avatar.String(name),
+		Avatar:   a,
 	}
 
 	// Create player and get id
 	err = db.conn.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Create(dao).Error; err != nil {
+		if err := tx.Create(player).Error; err != nil {
 			return fmt.Errorf("Cant create player: %w", err)
 		}
-		cafe := &CafeDAO{
-			ID:        dao.ID,
-			PlayerID:  dao.ID,
-			OwnerName: name,
-		}
+		cafe := cafe.NewCafeForCreation(player.ID, player.ID, name)
+
 		if err := tx.Create(cafe).Error; err != nil {
-			return fmt.Errorf("cant create cafe: %w", err)
+			return fmt.Errorf("Cant create cafe: %w", err)
 		}
 		return nil
 	})
 
 	if err != nil {
-		return nil, fmt.Errorf("Cant create cafe: %v", err)
-	}
-
-	// Parse player
-	player, err := ConvertPlayerDAOToPlayer(*dao)
-	if err != nil {
-		return nil, fmt.Errorf("Cant parse player: %v", err)
+		return nil, err
 	}
 
 	return player, nil

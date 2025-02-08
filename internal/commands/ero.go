@@ -3,7 +3,7 @@ package commands
 import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
-	"cafego/internal/types/cafetypes"
+	"cafego/internal/models/object"
 	"cafego/internal/types/requests"
 	"strconv"
 )
@@ -23,11 +23,11 @@ func RotateObject(req *requests.Request, c *client.Client, gm *managers.GameMana
 		return err
 	}
 	// Dont allow players to modify the packet and sending us ERO while not in editor.
-	if !c.Location.Cafe().InEditorMode() {
+	if c.Location.IsRunning() {
 		c.SendExtensionResponse("ero", "-1", "38", strconv.Itoa(objX), strconv.Itoa(objY))
 		return nil
 	}
-	obj := c.Location.Cafe().GetObjectByPos(objX, objY)
+	obj := c.Location.Cafe().GetObjectByPosXY(objX, objY)
 	if obj == nil {
 		c.SendExtensionResponse("ero", "-1", "39", strconv.Itoa(objX), strconv.Itoa(objY))
 		return nil
@@ -37,7 +37,7 @@ func RotateObject(req *requests.Request, c *client.Client, gm *managers.GameMana
 		c.SendExtensionResponse("ero", "-1", "39", strconv.Itoa(objX), strconv.Itoa(objY))
 		return nil
 	}
-	obj.SetRotation(cafetypes.CafeObjectRotation(objRotation))
+	obj.SetRotation(object.CafeObjectRotation(objRotation))
 	c.SendExtensionResponse("ero", "-1", "0", strconv.Itoa(objX), strconv.Itoa(objY), strconv.Itoa(objRotation))
 	return nil
 }

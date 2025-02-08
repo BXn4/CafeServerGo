@@ -6,35 +6,27 @@ import (
 	"cafego/internal/types/requests"
 	"fmt"
 	"slices"
-	"strconv"
 )
 
 func GiftAllReadySendPlayers(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	// Get friends
 	friends := c.Player.Friends
-
-	// Get friends who got gifts
-	friendsWithGifts, err := c.DB.GetFriendsWithGifts(c.Player.ID)
-	if err != nil {
-		return err
-	}
+	friendsWithGifts := []int(c.Player.FriendsWithGifts)
 
 	// Gather friends who didnt get gifts
-	var friendsWithoutGifts []string
+	var friendsWithoutGifts []int
 	for _, friend := range friends {
-		idStr := strconv.Itoa(friend)
-
 		// If got gift continue
-		if slices.Contains(friendsWithGifts, idStr) {
+		if slices.Contains(friendsWithGifts, friend) {
 			continue
 		}
 
-		friendsWithoutGifts = append(friendsWithoutGifts, strconv.Itoa(friend))
+		friendsWithoutGifts = append(friendsWithoutGifts, friend)
 	}
 
 	// DEBUG/TEST
-	err = SendSocialFriendsAvatar(req, c, gm)
+	err := SendSocialFriendsAvatar(req, c, gm)
 	if err != nil {
 		return err
 	}
@@ -44,8 +36,7 @@ func GiftAllReadySendPlayers(req *requests.Request, c *client.Client, gm *manage
 		// 0 - Majd holnap küldhetsz ajándékot a barátaidnak.
 		// 1 - Egy nap egy ajándékot adhatsz egy barátodat.
 		"1", // canSendGifts
-		// strings.Join(friendsWithoutGifts, "+"),
-		fmt.Sprintf("%v+%v+%v", c.Player.ID, c.Player.GetXP(), c.Player.Avatar.String(c.Player.Username)),
+		fmt.Sprintf("%v+%v+%v", c.Player.ID, c.Player.GetXP(), c.Player.Avatar.String()),
 	)
 	return nil
 }

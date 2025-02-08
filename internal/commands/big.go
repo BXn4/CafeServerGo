@@ -3,7 +3,7 @@ package commands
 import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
-	"cafego/internal/objects"
+	"cafego/internal/models/player"
 	"cafego/internal/types/requests"
 	"fmt"
 	"slices"
@@ -37,7 +37,7 @@ func SendFriendRequest(req *requests.Request, c *client.Client, gm *managers.Gam
 	// Get from player
 	item, err := gm.GetClient(fromPlayerID)
 	var fromClient *client.Client
-	var fromPlayer *objects.Player
+	var fromPlayer *player.Player
 	if err == nil {
 		fromClient = item.(*client.Client)
 		fromPlayer = fromClient.Player
@@ -46,7 +46,7 @@ func SendFriendRequest(req *requests.Request, c *client.Client, gm *managers.Gam
 	// Get to player
 	item, err = gm.GetClient(toPlayerID)
 	var toClient *client.Client
-	var toPlayer *objects.Player
+	var toPlayer *player.Player
 	if err == nil {
 		toClient = item.(*client.Client)
 		toPlayer = toClient.Player
@@ -90,7 +90,7 @@ func SendFriendRequest(req *requests.Request, c *client.Client, gm *managers.Gam
 		fromClient.SendExtensionResponse("big", "-1", "0", "2",
 			req.Args[3],
 			req.Args[4],
-			fmt.Sprintf("%v+%v+%v", toPlayer.ID, toPlayer.GetXP(), toPlayer.Avatar.String(toPlayer.Username)),
+			fmt.Sprintf("%v+%v+%v", toPlayer.ID, toPlayer.GetXP(), toPlayer.Avatar.String()),
 		)
 	case UNFRIEND:
 		// TODO: Test
@@ -103,7 +103,7 @@ func SendFriendRequest(req *requests.Request, c *client.Client, gm *managers.Gam
 			fromClient.SendExtensionResponse("big", "-1", "0", "3",
 				req.Args[3],
 				req.Args[4],
-				fmt.Sprintf("%v+%v+%v", toPlayer.ID, toPlayer.GetXP(), toPlayer.Avatar.String(toPlayer.Username)),
+				fmt.Sprintf("%v+%v+%v", toPlayer.ID, toPlayer.GetXP(), toPlayer.Avatar.String()),
 			)
 		} else {
 			// if player offline

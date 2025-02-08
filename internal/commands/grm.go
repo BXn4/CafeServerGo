@@ -14,7 +14,7 @@ func RemoveGift(req *requests.Request, c *client.Client, gm *managers.GameManage
 		return err
 	}
 
-	c.Player.RemoveGift(slot)
+	c.Player.Gifts.RemoveGift(slot)
 
 	c.SendExtensionResponse("gmg", "-1", "0", req.Args[2])
 

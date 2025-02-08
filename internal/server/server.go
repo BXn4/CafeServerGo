@@ -54,11 +54,10 @@ func (s *CafeServer) Run() {
 	// Set up MariaDB connection
 	db, err := database.ConnectToDB(s.dbConfig)
 	if err != nil {
-		log.Fatalf("%v", err)
 		return
 	}
 	defer db.Close()
-	log.Infof("Server connected to database...")
+	log.Infof("Server connected to database.")
 
 	s.gm.SetCafeDB(db)
 
@@ -70,7 +69,7 @@ func (s *CafeServer) Run() {
 	}
 	defer listener.Close()
 
-	log.Infof("Server started and listening on %s...", address)
+	log.Infof("Server started and listening on %s", address)
 
 	// Handle connections
 	go func() {

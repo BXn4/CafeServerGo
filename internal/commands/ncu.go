@@ -1,10 +1,9 @@
 package commands
 
 import (
-	"cafego/internal/agents"
 	"cafego/internal/client"
 	"cafego/internal/managers"
-	"cafego/internal/objects"
+	"cafego/internal/models/waiter"
 	"cafego/internal/types/requests"
 	"strconv"
 	"time"
@@ -22,36 +21,29 @@ func WaiterCustomize(req *requests.Request, c *client.Client, gm *managers.GameM
 		return err
 	}
 
-	var w *objects.Waiter
+	var w *waiter.Waiter
 	for _, w = range c.Location.Cafe().GetWaiters() {
-		if w.ID == selectedWaiter {
-			w.Name = req.Args[3]
-			w.Priority = newPriority
+		if w.GetID() == selectedWaiter {
+			a := w.GetAvatar()
+			a.Name = req.Args[3]
+			w.SetAvatar(a)
+			w.SetPriority(newPriority)
 			break
 		}
 	}
 
 	c.Location.Broadcast("ncu", "-1", "0",
-		req.Args[2],
-		req.Args[3],
-		req.Args[4],
+		req.Args[2], // waiter id
+		req.Args[3], // new waiter name
+		req.Args[4], // new waiter priority
 	)
 
 	// Stop waiter
+	println("DEBUG")
 	w.StopWorking()
 	time.Sleep(100 * time.Millisecond)
 
-	// Start it again
-	w.IsWorking = true
-	w.CurrentCounter = nil
-	w.CurrentCustomer = nil
-	go func() {
-		for w.IsWorking {
-			agents.IterateWaiter(c.Location, w)
-		}
-		w.CurrentCounter = nil
-		w.Dish = -1
-	}()
+	c.Location.Broadcast("nav", "-1", "0", w.SpawnString())
 
 	return nil
 }

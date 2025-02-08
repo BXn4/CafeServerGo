@@ -22,7 +22,7 @@ func InstantCook(req *requests.Request, c *client.Client, gm *managers.GameManag
 	}
 
 	// Dont allow players to modify the packet and sending us CIC while in editor.
-	if c.Location.Cafe().InEditorMode() {
+	if !c.Location.IsRunning() {
 		return nil
 	}
 
@@ -30,7 +30,7 @@ func InstantCook(req *requests.Request, c *client.Client, gm *managers.GameManag
 		c.Location.Broadcast("cic", "-1", "4")
 	}
 
-	stove := c.Location.Cafe().GetObjectByPos(objX, objY)
+	stove := c.Location.Cafe().GetObjectByPosXY(objX, objY)
 	if stove == nil {
 		return nil
 	}

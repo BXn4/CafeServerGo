@@ -3,29 +3,22 @@ package commands
 import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
+	"cafego/internal/models/gift"
 	"cafego/internal/types/requests"
 	"cafego/internal/utils"
-	"fmt"
 	"math/rand"
-	"strconv"
-	"strings"
 	"time"
 )
 
 func DailyGifts(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
-	// Get last time gifts were refreshed
-	refreshTime, err := c.DB.GetGiftRefreshTime(c.Player.ID)
-	if err != nil {
-		return err
-	}
-
 	// Sendable gifts
-	var gifts string
+	gifts := gift.GiftList{}
 
 	// If time is more tha 24 hours reset the time
-	if time.Now().Sub(*refreshTime) < time.Hour*24 { // DEBUG: < (fliped)
-		c.DB.ResetDailyLogin(c.Player.ID)
+	if time.Now().Sub(c.Player.GiftRefreshTime) < time.Hour*24 { // DEBUG: < (fliped)
+		// Reset daily login
+		c.Player.DailyLogin = time.Now()
 
 		// Get all possible gifts (TODO: add more items)
 		possibleGifts, err := GetPossibleGifts()
@@ -34,35 +27,33 @@ func DailyGifts(req *requests.Request, c *client.Client, gm *managers.GameManage
 		}
 
 		// Generate new gifts
-		giftsStr := []string{}
 		for i := 0; i < 6; i++ {
 			// Get gift and amount
 			choice := rand.Intn(len(possibleGifts))
-			gift := possibleGifts[choice]
+			id := possibleGifts[choice]
 			amount := rand.Intn(10) + 1
 
-			// Add to gifts list
-			giftStr := fmt.Sprintf("%v+%v", gift, amount)
-			giftsStr = append(giftsStr, giftStr)
-		}
-		gifts = strings.Join(giftsStr, "#")
+			g := &gift.Gift{
+				ID:     id,
+				Amount: amount,
+			}
 
-		// Save new Gifts
-		c.DB.UpdateSendableGifts(c.Player.ID, gifts)
+			gifts = append(gifts, g)
+		}
+
+		// Save new Gifts (update sendable gifts)
+		c.Player.SendableGifts = gifts
 	} else {
 		// Get gifts
-		gifts, err = c.DB.GetSendableGifts(c.Player.ID)
-		if err != nil {
-			return err
-		}
+		gifts = c.Player.SendableGifts
 	}
 
-	c.SendExtensionResponse("gag", "-1", "0", gifts)
+	c.SendExtensionResponse("gag", "-1", "0", gifts.String())
 	return nil
 }
 
-func GetPossibleGifts() ([]string, error) {
-	var possibleGifts []string
+func GetPossibleGifts() ([]int, error) {
+	var possibleGifts []int
 
 	// Add fancies to possible gifts
 	fancies, err := utils.GetItems("fancy")
@@ -71,7 +62,7 @@ func GetPossibleGifts() ([]string, error) {
 	}
 
 	for _, item := range fancies {
-		possibleGifts = append(possibleGifts, strconv.Itoa(item.ID))
+		possibleGifts = append(possibleGifts, item.ID)
 	}
 
 	// Add decorations to possible gifts
@@ -81,7 +72,7 @@ func GetPossibleGifts() ([]string, error) {
 	}
 
 	for _, item := range decos {
-		possibleGifts = append(possibleGifts, strconv.Itoa(item.ID))
+		possibleGifts = append(possibleGifts, item.ID)
 	}
 
 	// Add dishes to possible gifts
@@ -91,7 +82,7 @@ func GetPossibleGifts() ([]string, error) {
 	}
 
 	for _, item := range dishes {
-		possibleGifts = append(possibleGifts, strconv.Itoa(item.ID))
+		possibleGifts = append(possibleGifts, item.ID)
 	}
 
 	return possibleGifts, nil

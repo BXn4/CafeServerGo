@@ -3,6 +3,7 @@ package commands
 import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
+	"cafego/internal/models/simple"
 	"cafego/internal/types/requests"
 	"cafego/internal/utils"
 	"fmt"
@@ -12,34 +13,21 @@ import (
 // ebu - C2S_EDITOR_BUY_OBJECT
 // TODO: Need to check level.
 func BuyObject(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
-	objX, err := strconv.Atoi(req.Args[2])
-	if err != nil {
-		return err
-	}
 
-	objY, err := strconv.Atoi(req.Args[3])
+	items, err := utils.MultiAtoi(req.Args[2:]...)
 	if err != nil {
 		return err
 	}
-
-	objID, err := strconv.Atoi(req.Args[4])
-	if err != nil {
-		return err
-	}
-
-	objRotation, err := strconv.Atoi(req.Args[5])
-	if err != nil {
-		return err
-	}
+	objX, objY, objID, objRotation := items[0], items[1], items[2], items[3]
 
 	// Dont allow players to modify the packet and sending us EBU while not in editor.
-	if !c.Location.Cafe().InEditorMode() {
+	if c.Location.IsRunning() {
 		// Need to send the ID, because the client parse it / these.
 		c.SendExtensionResponse("ebu", "-1", "38", strconv.Itoa(objX), strconv.Itoa(objY), strconv.Itoa(objID), strconv.Itoa(objRotation))
 		return nil
 	}
 	// Theres a object in that space. The game removes the door render on door drag. We need to enable that to place back to the og. pos,
-	if obj := c.Location.Cafe().GetObjectByPos(objX, objY); obj != nil {
+	if obj := c.Location.Cafe().GetObjectByPosXY(objX, objY); obj != nil {
 		// If not a door, give error.
 		// I'm not sure if its really works, but if its works, we need to handle it.
 		if !obj.IsDoor() {
@@ -82,11 +70,11 @@ func BuyObject(req *requests.Request, c *client.Client, gm *managers.GameManager
 		c.Location.Cafe().SetTile(objX, objY, objID)
 
 	} else if objectInfo.Group == "Door" {
-		oldDoorPos := []int{
-			utils.If(c.Location.Cafe().GetPlayerStart()[0] == 1, 0, c.Location.Cafe().GetPlayerStart()[0]),
-			utils.If(c.Location.Cafe().GetPlayerStart()[1] == 1, 0, c.Location.Cafe().GetPlayerStart()[1]),
-		}
-		oldDoor := c.Location.Cafe().GetObjectByPos(oldDoorPos[0], oldDoorPos[1])
+		oldDoorPos := simple.NewPosition(
+			utils.If(c.Location.Cafe().GetPlayerStart().X == 1, 0, c.Location.Cafe().GetPlayerStart().X),
+			utils.If(c.Location.Cafe().GetPlayerStart().Y == 1, 0, c.Location.Cafe().GetPlayerStart().Y),
+		)
+		oldDoor := c.Location.Cafe().GetObjectByPos(oldDoorPos)
 		// If the old door have luxury value, remove it from the Cafe
 		obj, err := utils.GetDoor(int(oldDoor.GetKind()))
 		if err != nil {
@@ -96,7 +84,7 @@ func BuyObject(req *requests.Request, c *client.Client, gm *managers.GameManager
 		// KIND = ID!!!
 		c.Location.Cafe().GetFurnitureInventory()[int(oldDoor.GetKind())] = 1
 		c.Location.Cafe().AddNewObject(objX, objY, objID, objRotation)
-		c.Location.Cafe().RemoveObject(oldDoorPos[0], oldDoorPos[1])
+		c.Location.Cafe().RemoveObject(oldDoorPos)
 	} else {
 		c.Location.Cafe().AddNewObject(objX, objY, objID, objRotation)
 	}

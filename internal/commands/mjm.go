@@ -10,7 +10,7 @@ import (
 func JoinMarketplace(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	// Dont allow players to modify the packet and sending us MJM while in editor.
-	if c.Location.Cafe().InEditorMode() {
+	if !c.Location.IsRunning() {
 		return nil
 	}
 
@@ -24,10 +24,6 @@ func JoinMarketplace(req *requests.Request, c *client.Client, gm *managers.GameM
 	if c.Location != nil {
 		c.Location.Leave(c.Player.ID)
 
-		// Remove location if its empty and owner not online
-		if c.Location.IsEmpty() && !gm.IsOnline(c.Location.Cafe().GetID()) && c.Location.Cafe().GetID() > 0 {
-			gm.RemoveLocation(c.Location.Cafe().GetID())
-		}
 	}
 
 	// Join cafe

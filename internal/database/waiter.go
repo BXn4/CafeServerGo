@@ -1,13 +1,8 @@
 package database
 
-import (
-	"cafego/internal/objects"
-	"strconv"
-	"strings"
-)
-
-func NewWaiterFromString(s string) (*objects.Waiter, error) {
-	var waiter objects.Waiter
+/*
+func NewWaiterFromString(s string) (*waiter.Waiter, error) {
+	 var waiter waiter.Waiter
 
 	data := strings.Split(s, "+")
 	priority, err := strconv.Atoi(data[2])
@@ -15,14 +10,16 @@ func NewWaiterFromString(s string) (*objects.Waiter, error) {
 		return nil, err
 	}
 
+
 	// Fill simple waiter data
-	waiter.ID = -1
-	waiter.Name = data[0]
-	waiter.Priority = priority
+	waiter.id = -1
+	waiter.avatar.Name = data[0]
+	waiter.priority = priority
 
 	// Parse avatar
-	waiter.Avatar = *objects.NewAvatarFromString(data[1])
-	waiter.Avatar.IsNPC = true
+	waiter.avatar = *avatar.NewAvatarFromString(data[1])
+	waiter.avatar.IsNPC = true
 
 	return &waiter, nil
 }
+*/

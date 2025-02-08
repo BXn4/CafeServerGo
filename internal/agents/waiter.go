@@ -2,290 +2,290 @@ package agents
 
 import (
 	"cafego/internal/interfaces"
-	"cafego/internal/objects"
+	"cafego/internal/models/customer"
+	"cafego/internal/models/simple"
+	"cafego/internal/models/waiter"
 	"math/rand"
-	"strconv"
-	"strings"
 	"time"
-
-	"github.com/charmbracelet/log"
 )
 
-// Spawns a waiter at the location
-func SpawnWaiter(l interfaces.CafeLocation, w *objects.Waiter) {
+type TaskFunction func() TaskFunction
 
-	w.IsWorking = true
-	w.CurrentCounter = nil
-	w.CurrentCustomer = nil
-
-	// Set waiter starter position
-	w.Pos = [2]int{
-		l.Cafe().GetPlayerStart()[0],
-		l.Cafe().GetPlayerStart()[1],
-	}
-
-	// Send waiter info
-	args := []string{
-		strconv.Itoa(w.ID),
-		"1", // NPC type (1: Waiter)
-		strconv.Itoa(w.Priority),
-		"-1", // DishID (unnecessary for waiters)
-		w.Avatar.String(w.Name),
-	}
-	if !w.IsWorking {
-		return
-	}
-	l.Broadcast("nav", "-1", "0", strings.Join(args, "+"))
-
-	// Spawn waiter
-	l.Broadcast("nac", "-1", "0", args[0], "0")
-
-	// Wait to go in door
-	if !SleepWhileChecking(l, 1*time.Second, &w.IsWorking) {
-		return
-	}
-
-	// --- Spawn waiter ----------
-	log.Debugf("WAITER SPAWNED: %v", w.ID)
-
+type WaiterAgent struct {
+	l  interfaces.CafeLocation
+	w  *waiter.Waiter
+	fn TaskFunction
 }
 
-// Does one iteration of the waiter tasks
-func IterateWaiter(l interfaces.CafeLocation, w *objects.Waiter) {
+func SpawnWaiter(l interfaces.CafeLocation, w *waiter.Waiter, id int) *WaiterAgent {
 
-	time.Sleep(1 * time.Second)
-
-	job := rand.Intn(100) + 1 // 1-100
-
-	if job > w.Priority {
-		TakePlates(l, w)
-	} else {
-		ServeFood(l, w)
+	if w.IsWorking() {
+		return nil
 	}
 
+	wa := &WaiterAgent{l: l, w: w}
+
+	// Reset waiter properties
+	wa.w.SetIsWorking(true)
+	wa.w.SetID(id)
+	wa.w.SetPos(l.Cafe().GetPlayerStart())
+	wa.w.SetCurrentCounter(nil)
+	wa.w.SetCurrentCustomer(nil)
+
+	// Send waiter spawn response
+	wa.l.Broadcast("nav", "-1", "0", wa.w.SpawnString())
+	if wa.sleep(time.Second * 1) {
+		return nil
+	}
+
+	println("SPAWNED WAITER: ", id, w.GetAvatar().Name)
+
+	// Send action response
+	wa.doAction(waiter.INSERT, wa.w.GetPos(), 1*time.Second)
+
+	return wa
 }
 
-func TakePlates(l interfaces.CafeLocation, w *objects.Waiter) {
-
-	if !w.IsWorking { // We return if program is not running
+// Starts main waiter loop
+// This helps take full controll of waiter actions
+func (wa *WaiterAgent) Start() {
+	// If waiter doesent exits return
+	if wa == nil {
 		return
 	}
 
-	if w.CurrentCounter == nil {
-		w.CurrentCounter, _ = GetRandomCounter(l.Cafe())
-		if w.CurrentCounter == nil {
-			return
-		}
-	}
-	if !MoveWaiter(l, w, w.CurrentCounter.GetPos(), objects.MOVE_TO_COUNTER, 600*time.Millisecond) {
-		return
-	}
-
-	// Get space with dirty plates
-	space := l.GetDirtySpace()
-	if space == nil {
-		return
-	}
-	w.CurrentCounter = nil
-
-	// Move to dirty plates
-	if !MoveWaiter(l, w, space.GetPos(), objects.CLEAN, time.Duration(600)*time.Millisecond) {
-		return
-	}
-
-	// Wait until waiter takes plates
-	if !SleepWhileChecking(l, time.Second*5, &w.IsWorking) {
-		return
-	}
-
-	// Bring back to counter
-	for _, object := range l.Cafe().GetObjects() {
-		if object.IsCounter() {
-			if !MoveWaiter(l, w, space.GetPos(), objects.WAITER_MOVE_TO_COUNTER, time.Second) {
-				return
+	println("STARTED WAITER TASK LOOP: ", wa.w.GetID())
+	// Start waiter task loop
+	go func() {
+		defer wa.Stop()
+		wa.fn = wa.getAndMoveToCounter
+		for wa.fn != nil {
+			wa.fn = wa.fn()
+			if !wa.w.IsWorking() {
+				break
 			}
-
-			w.CurrentCounter = object
-			break
 		}
-	}
-
-	// Wait and set the table clean
-	if !SleepWhileChecking(l, time.Second, &w.IsWorking) {
-		return
-	}
-	space.SetDishID(-1)
-
-	// Wait until it puts back to counter
-	if !SleepWhileChecking(l, time.Second*3, &w.IsWorking) {
-		return
-	}
-
-	return
+	}()
 }
 
-func ServeFood(l interfaces.CafeLocation, w *objects.Waiter) {
-
-	if !w.IsWorking { // We return if program is not running
-		return
+// Stops waiter loop
+func (wa *WaiterAgent) Stop() {
+	wa.w.SetIsWorking(false)
+	if wa.w.GetCurrentCustomer() != nil {
+		wa.w.GetCurrentCustomer().SetAssignedWaiter(-1)
 	}
+}
 
-	//var distance int
-	if w.CurrentCounter == nil || w.CurrentCounter.GetDishID() == -1 {
-		// --- Get random counter (prioritizes counter with food) -------------------------------
-		counter, _ := GetRandomCounter(l.Cafe())
+// --- Private methods -----------------
+
+func (wa *WaiterAgent) getAndMoveToCounter() TaskFunction {
+
+	// if wa.sleep(time.Second * 2) {
+	// 	return nil
+	// }
+
+	if wa.w.GetCurrentCounter() == nil || wa.w.GetCurrentCounter().GetDishID() == -1 {
+
+		// Get random counter
+		counter, _ := GetRandomCounter(wa.l.Cafe())
 		if counter == nil {
-			return
+			return nil
 		}
 
 		// If counter has food change it
-		if w.CurrentCounter == nil {
-			w.CurrentCounter = counter
-		} else if counter.GetDishID() != -1 && w.CurrentCounter.GetDishID() == -1 {
-			w.CurrentCounter = counter
+		if wa.w.GetCurrentCounter() == nil || (counter.GetDishID() != -1 && wa.w.GetCurrentCounter().GetDishID() == -1) {
+			wa.w.SetCurrentCounter(counter)
 		}
 
-		// --- Move to counter ------------------------------------
-		if !MoveWaiter(l, w, w.CurrentCounter.GetPos(), objects.MOVE_TO_COUNTER, 600*time.Millisecond) {
-			return
+		// Move to counter
+		if wa.move(wa.w.GetCurrentCounter().GetPos(), waiter.MOVE_TO_COUNTER) {
+			return nil
 		}
+
+	}
+	return wa.selectJob
+}
+
+func (wa *WaiterAgent) selectJob() TaskFunction {
+
+	// Roll work (like in original)
+	job := rand.Intn(100) + 1 // 1-100
+
+	// Do work based on priority
+	if job > wa.w.GetPriority() {
+		return wa.takePlates
+	} else {
+		return wa.serveFood
+	}
+}
+
+func (wa *WaiterAgent) takePlates() TaskFunction {
+
+	// If we dont have a counter return
+	if wa.w.GetCurrentCounter() == nil {
+		return wa.getAndMoveToCounter
 	}
 
-	// If could not found counter (DONT TOUCH IT !!! IT WORKS!!!)
-	if w.CurrentCounter == nil {
-		return
+	// Get space with dirty plates
+	space := wa.l.GetDirtySpace()
+	if space == nil {
+		println("CANT FIND DIRTY SPACE")
+		return wa.getAndMoveToCounter
 	}
+
+	println("MOVE TO CLEAN")
+	// Move to dirty plates
+	if wa.move(space.GetPos(), waiter.CLEAN) {
+		return nil
+	}
+
+	println("WAIT UNTIL CLEANED")
+	//Wait until waiter takes plates
+	if wa.sleep(time.Second * 2) {
+		return nil
+	}
+
+	// Set space clean
+	space.SetDishID(-1)
+	space.SetDishStatus(0)
+
+	wa.w.SetCurrentCounter(nil)
+
+	return wa.getAndMoveToCounter
+}
+
+func (wa *WaiterAgent) serveFood() TaskFunction {
+
+	// If we dont have a counter return
+	if wa.w.GetCurrentCounter() == nil {
+		return wa.getAndMoveToCounter
+	}
+
 	// If counter is empty
-	if w.CurrentCounter.GetDishID() == -1 {
-		return
+	if wa.w.GetCurrentCounter().GetDishID() == -1 {
+		return wa.getAndMoveToCounter
 	}
 
 	// Get sitting customer without waiter
-	var customer *objects.Customer
-	for _, c := range l.Cafe().GetCustomers() {
-		if c.GetAction() == objects.CUSTOMER_SIT_DOWN && c.GetAssignedWaiter() == -1 {
-			customer = c
+	var cu *customer.Customer
+	for _, c := range wa.l.Cafe().GetCustomers() {
+		if c.GetAction() == customer.CUSTOMER_SIT_DOWN && c.GetAssignedWaiter() == -1 {
+			cu = c
 			break
 		}
 	}
 
 	// If every one has waiter return
-	if customer == nil {
-		return
+	if cu == nil {
+		return wa.getAndMoveToCounter
 	}
 
 	// Assign itself as its waiter
-	customer.SetAssignedWaiter(w.ID)
+	cu.SetAssignedWaiter(wa.w.GetID())
 
-	// Take dish from counter prematurely so
-	savedDish := w.CurrentCounter.GetDishID()
-	w.CurrentCounter.SetDishAmount(w.CurrentCounter.GetDishAmount() - 1)
-	if w.CurrentCounter.GetDishAmount() <= 0 {
-		w.CurrentCounter.SetDishID(-1)
+	// Take dish from counter prematurely so there will be one there
+	savedDish := wa.w.GetCurrentCounter().GetDishID()
+	wa.w.GetCurrentCounter().SetDishAmount(wa.w.GetCurrentCounter().GetDishAmount() - 1)
+	if wa.w.GetCurrentCounter().GetDishAmount() <= 0 {
+		wa.w.GetCurrentCounter().SetDishID(-1)
 	}
 
-	// --- Feed customer --------------------------
-	if !MoveWaiter(l, w, customer.GetPos(), objects.FEED, 750*time.Millisecond) {
-		return
+	// Move to customer and feed customer
+	if wa.move(cu.GetPos(), waiter.FEED) {
+		return nil
 	}
+
+	if wa.sleep(time.Second * 1) {
+		return nil
+	}
+
+	// Get chair at that pos
+	chair := wa.l.Cafe().GetObjectByPos(cu.GetPos())
 
 	// Set food to customer
-	customer.SetDish(savedDish)
+	chair.SetDishID(savedDish)
+	chair.SetDishStatus(1)
+
+	// Check
+	// if wa.w.GetCurrentCounter() == nil {
+	// 	return nil
+	// }
 
 	// Move back to counter
-	if !MoveWaiter(l, w, w.CurrentCounter.GetPos(), objects.MOVE_TO_COUNTER, 750*time.Millisecond) {
-		return
+	if wa.move(wa.w.GetCurrentCounter().GetPos(), waiter.MOVE_TO_COUNTER) {
+		return nil
 	}
-	w.CurrentCounter = nil
+
+	// Reset counter
+	wa.w.SetCurrentCounter(nil)
+
+	return wa.getAndMoveToCounter
 }
 
-/*
-Get a random counter,
-that is reachable,
-prioritizes counter with food,
-return counter, distance
-*/
-func GetRandomCounter(cafe *objects.Cafe) (*objects.CafeObject, int) {
-
-	var counters []*objects.CafeObject
-
-	// Gather counters
-	for _, object := range cafe.GetObjects() {
-
-		// If object is not counter
-		if !object.IsCounter() {
-			continue
-		}
-
-		counters = append(counters, object)
-
-		// Check if counter with food
-		if object.GetDishID() >= 0 {
-
-			// Check if blocked
-			start := NewCafePoint([2]int(cafe.GetPlayerStart()), cafe)
-			end := NewCafePoint(object.GetPos(), cafe)
-			_, distance, found := Path(start, end)
-
-			// If found path there return it
-			if found {
-				return object, distance
-			}
-		}
-	}
-
-	// check if th
-	for len(counters) != 0 {
-
-		i := rand.Intn(len(counters))
-		rc := counters[i] // random counter
-
-		// Search path
-		start := NewCafePoint([2]int(cafe.GetPlayerStart()), cafe)
-		end := NewCafePoint(rc.GetPos(), cafe)
-		_, distance, found := Path(start, end)
-
-		// If found path return
-		if found {
-			return rc, distance
-		}
-		counters = append(counters[:i], counters[i+1:]...)
-	}
-
-	return nil, -1
-}
+// --- Helper methods ---------------------
 
 // This searches for a path and moves it if possible
-// returns if found path and length of the found path
-func MoveWaiter(l interfaces.CafeLocation, w *objects.Waiter, pos [2]int, action objects.Action, duration time.Duration) bool {
+func (wa *WaiterAgent) move(pos simple.Position, action waiter.Action) bool {
 
-	// Get length of path
-	start := NewCafePoint(w.Pos, l.Cafe())
-	end := NewCafePoint(pos, l.Cafe())
+	// Get distance to location
+	start := NewCafePoint(wa.w.GetPos(), wa.l.Cafe())
+	end := NewCafePoint(pos, wa.l.Cafe())
 	path, distance, found := Path(start, end)
 	if !found {
 		return false
 	}
 
-	// Send move msg
-	waiterPos := path[1]
-	w.Pos[0] = waiterPos.x
-	w.Pos[1] = waiterPos.y
-	args := []string{
-		strconv.Itoa(w.ID),
-		strconv.Itoa(int(action)),
-		strconv.Itoa(pos[0]),
-		strconv.Itoa(pos[1]),
-	}
-
-	if !w.IsWorking {
-		return false
-	}
-	l.Broadcast("nac", "-1", "0", strings.Join(args, "+"))
-
-	if !SleepWhileChecking(l, time.Duration(distance)*duration, &w.IsWorking) {
+	if distance <= 1 {
 		return false
 	}
 
-	return found
+	// Set pos
+	wa.w.SetPos(path[1].Pos())
+
+	println("distance: ", distance)
+
+	// Set waiter pos
+	wa.doAction(action, pos, time.Duration(distance)*800*time.Millisecond)
+
+	return false
+}
+
+// Does action if it gets interupted returns true
+func (wa *WaiterAgent) doAction(action waiter.Action, pos simple.Position, delay time.Duration) bool {
+
+	// Set properties
+	wa.w.SetAction(action)
+	savedPos := wa.w.GetPos()
+	wa.w.SetPos(pos)
+
+	// Send task response
+	wa.l.Broadcast("nac", "-1", "0", wa.w.ActionString())
+
+	// Load last pos
+	wa.w.SetPos(savedPos)
+
+	// Wait until task ends
+	return wa.sleep(delay)
+}
+
+// Almost like time.Sleep but if it gets interupted returns true
+func (wa *WaiterAgent) sleep(delay time.Duration) bool {
+
+	// Escape if time expires
+	for {
+		// Wait spawn time
+		ticker := time.NewTicker(10 * time.Millisecond) // Tick every 100 ms
+		defer ticker.Stop()
+		expire := time.After(delay)
+		for {
+			select {
+			case <-ticker.C:
+				if !wa.w.IsWorking() {
+					return true
+				}
+			case <-expire:
+				return false
+			}
+		}
+	}
 }

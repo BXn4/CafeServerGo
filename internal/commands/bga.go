@@ -3,7 +3,7 @@ package commands
 import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
-	"cafego/internal/objects"
+	"cafego/internal/models/player"
 	"cafego/internal/types/requests"
 	"fmt"
 	"strings"
@@ -20,20 +20,20 @@ func SendFriendsAvatar(req *requests.Request, c *client.Client, gm *managers.Gam
 	var friendsStr []string
 	for _, f := range friends {
 
-		var player *objects.Player
+		var p *player.Player
 		// Check if online
 		item, err := gm.GetClient(f)
 		if err == nil {
 			oc := item.(*client.Client)
-			player = oc.Player
+			p = oc.Player
 		} else {
 			// Get it from db
-			player, err = c.DB.GetPlayer(f)
+			p, err = c.DB.GetPlayer(f)
 			if err != nil {
 				return fmt.Errorf("Player %v not in db: %v", f, err)
 			}
 		}
-		friendsStr = append(friendsStr, fmt.Sprintf("%v+%v+%v", c.Player.ID, player.GetXP(), player.Avatar.String(player.Username)))
+		friendsStr = append(friendsStr, fmt.Sprintf("%v+%v+%v", c.Player.ID, p.GetXP(), p.Avatar.String()))
 	}
 	c.SendExtensionResponse("bga", "-1", "0", strings.Join(friendsStr, "%"))
 	return nil

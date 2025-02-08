@@ -19,11 +19,11 @@ func StoreObject(req *requests.Request, c *client.Client, gm *managers.GameManag
 		return err
 	}
 	// Dont allow players to modify the packet and sending us EST while not in editor.
-	if !c.Location.Cafe().InEditorMode() {
+	if c.Location.IsRunning() {
 		c.SendExtensionResponse("est", "-1", "38", strconv.Itoa(objX), strconv.Itoa(objY))
 		return nil
 	}
-	obj := c.Location.Cafe().GetObjectByPos(objX, objY)
+	obj := c.Location.Cafe().GetObjectByPosXY(objX, objY)
 	if obj == nil || obj.IsDoor() {
 		c.SendExtensionResponse("est", "-1", "51", strconv.Itoa(objX), strconv.Itoa(objY))
 		return nil
@@ -60,7 +60,7 @@ func StoreObject(req *requests.Request, c *client.Client, gm *managers.GameManag
 	if err != nil {
 		return nil
 	}
-	c.Location.Cafe().RemoveObject(obj.GetPos()[0], obj.GetPos()[1])
+	c.Location.Cafe().RemoveObject(obj.GetPos())
 	c.Location.Cafe().AddLuxury(-(objectInfo.Cash / 4000) + (objectInfo.Gold * 2))
 	c.SendExtensionResponse("est", "-1", "0", strconv.Itoa(objX), strconv.Itoa(objY), strconv.Itoa(int(obj.GetKind())))
 	return nil

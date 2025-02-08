@@ -4,11 +4,11 @@ import (
 	"bufio"
 	"cafego/internal/database"
 	"cafego/internal/interfaces"
+	"cafego/internal/models/player"
 	"time"
 
 	"github.com/charmbracelet/log"
 
-	"cafego/internal/objects"
 	"cafego/internal/types/requests"
 	"cafego/internal/types/responses"
 	"net"
@@ -22,7 +22,7 @@ type Client struct {
 	Reader        *bufio.Reader           // Buffered read  connection to the client
 	DB            *database.CafeDB        // Connection to the database
 	Location      interfaces.CafeLocation // Players current location
-	Player        *objects.Player         // Player object
+	Player        *player.Player          // Player object
 	ClientManager interfaces.ClientManager
 
 	TimeoutStamp time.Time
@@ -53,6 +53,7 @@ func (c *Client) ID() int {
 func (c *Client) Start() {
 	go c.receiveRequests()
 	go c.sendResponses()
+	go c.autoSave()
 }
 
 func (c *Client) Disconnect() error {
@@ -109,5 +110,45 @@ func (c *Client) receiveRequests() {
 		}
 
 		c.RequestQueue <- req
+	}
+}
+
+func (c *Client) autoSave() {
+	ticker := time.NewTicker(5 * time.Minute)
+	defer ticker.Stop()
+
+	for {
+		if c == nil {
+			return
+		}
+		select {
+		case <-ticker.C:
+			// Check if player exists
+			if c.Player == nil {
+				continue
+			}
+
+			// Save player data
+			err := c.DB.SavePlayer(c.Player)
+			if err != nil {
+				log.Errorf("Failed to auto-save player data: %v", err)
+			} else {
+				log.Debugf("Auto-saved player %v data", c.Player.ID)
+			}
+
+			// Save cafe
+			cafe, err := c.DB.GetCafeByPlayerID(c.Player.ID)
+			if err != nil {
+				log.Errorf("Failed to get cafe for auto-save: %v", err)
+				continue
+			}
+
+			err = c.DB.SaveCafe(cafe)
+			if err != nil {
+				log.Error("Failed to auto-save cafe data: %v", err)
+			} else {
+				log.Debug("Auto-saved cafe %v data", cafe.ID)
+			}
+		}
 	}
 }

@@ -1,35 +1,35 @@
-package objects
+package cafe
 
 import "github.com/charmbracelet/log"
 
 func (c *Cafe) AddFurnitures(id, amount int) {
 
-	if c.id < 0 {
+	if c.ID < 0 {
 		log.Printf("You tried to add something to the marketplaces furniture inventory")
 		return
 	}
 
-	_, ok := c.furnitureInventory[id]
+	_, ok := c.FurnitureInventory[id]
 	if ok {
-		c.furnitureInventory[id] += amount
+		c.FurnitureInventory[id] += amount
 	} else {
-		c.furnitureInventory[id] = amount
+		c.FurnitureInventory[id] = amount
 	}
 }
 
 func (c *Cafe) RemoveFurnitures(id, amount int) bool {
 
-	if c.id < 0 {
+	if c.ID < 0 {
 		log.Printf("You tried to remove something from the marketplaces furniture inventory")
 		return false
 	}
 
-	_, ok := c.furnitureInventory[id]
+	_, ok := c.FurnitureInventory[id]
 	if ok {
-		if c.furnitureInventory[id]-amount < 0 {
+		if c.FurnitureInventory[id]-amount < 0 {
 			return false
 		}
-		c.furnitureInventory[id] -= amount
+		c.FurnitureInventory[id] -= amount
 	} else {
 		return false
 	}

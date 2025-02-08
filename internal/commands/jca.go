@@ -4,6 +4,7 @@ import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
 	"cafego/internal/types/requests"
+	"fmt"
 	"strconv"
 )
 
@@ -19,24 +20,25 @@ func JoinCafe(req *requests.Request, c *client.Client, gm *managers.GameManager)
 	// Adds cafe to manager (loads it if not loaded)
 	location := gm.AddLocation(id)
 
-	// Send cafe joined
-	c.SendExtensionResponse("jca", "-1", "0")
-
 	// Leave cafe if already in one
 	if c.Location != nil {
 		c.Location.Leave(c.Player.ID)
-
-		// Remove location if empty and owner is offline
-		if c.Location.IsEmpty() && !gm.IsOnline(c.Location.Cafe().GetID()) && c.Location.Cafe().GetID() > 0 {
-			gm.RemoveLocation(c.Location.Cafe().GetID())
-		}
 	}
 
-	// Join location
-	location.Join(c.Player.ID, c.ResponseQueue)
+	// Send cafe joined
+	c.SendExtensionResponse("jca", "-1", "0")
 
 	// Save location
 	c.Location = location
+
+	// Send fridge info (ifr)
+	err = SendFridgeInventory(req, c, gm)
+	if err != nil {
+		return fmt.Errorf("\nifr request: %v", err)
+	}
+
+	// Join location
+	c.Location.Join(c.Player.ID, c.ResponseQueue)
 
 	return nil
 }

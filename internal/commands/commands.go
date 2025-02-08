@@ -139,6 +139,16 @@ func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameMan
 		err = AllowEmails(req, c, gm)
 	case requests.C2S_CHANGE_PASSWORD:
 		err = ChangePassword(req, c, gm)
+	case requests.C2S_MARKETPLACE_JOBREFILL:
+		err = MarketplaceJobRefill(req, c, gm)
+	case requests.C2S_COOP_START:
+		err = CoopStart(req, c, gm)
+	case requests.C2S_COOP_ACTIVELIST:
+		err = CoopActiveList(req, c, gm)
+	case requests.C2S_FASTFOOD_COOK:
+		err = FastFoodCook(req, c, gm)
+	case requests.C2S_FASTFOOD_NPC:
+		err = FastFoodCook(req, c, gm)
 	default:
 		log.Infof("NOT IMPLEMENTED: %v", req.Args[0])
 	}
