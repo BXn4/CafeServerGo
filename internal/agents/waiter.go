@@ -34,9 +34,9 @@ func SpawnWaiter(l interfaces.CafeLocation, w *waiter.Waiter, id int) *WaiterAge
 
 	// Send waiter spawn response
 	wa.l.Broadcast("nav", "-1", "0", wa.w.SpawnString())
-	if wa.sleep(time.Second * 1) {
-		return nil
-	}
+	/*if wa.sleep(time.Second * 1) {
+	return nil
+	} */
 
 	println("SPAWNED WAITER: ", id, w.GetAvatar().Name)
 
@@ -129,7 +129,7 @@ func (wa *WaiterAgent) takePlates() TaskFunction {
 	// Get space with dirty plates
 	space := wa.l.GetDirtySpace()
 	if space == nil {
-		println("CANT FIND DIRTY SPACE")
+		//println("CANT FIND DIRTY SPACE")
 		return wa.getAndMoveToCounter
 	}
 
@@ -245,7 +245,9 @@ func (wa *WaiterAgent) move(pos simple.Position, action waiter.Action) bool {
 	println("distance: ", distance)
 
 	// Set waiter pos
-	wa.doAction(action, pos, time.Duration(distance)*800*time.Millisecond)
+	wa.doAction(action, pos, time.Duration(distance)*450*time.Millisecond)
+
+	println("Waiter arrived to the destination pos")
 
 	return false
 }

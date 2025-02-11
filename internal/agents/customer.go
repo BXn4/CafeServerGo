@@ -61,14 +61,26 @@ func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
 	}
 
 	// Walk to chair and wait until arrives
+	println("Customer started to walking to the chair")
 	CustomerDoAction(l, c,
 		customer.CUSTOMER_WALK_TO_CHAIR,
 		chair.GetPos(),
-		time.Duration(distanceToChair-2)*time.Second,
+		time.Duration(distanceToChair-1)*550*time.Millisecond,
 	)
 
+	println("Customer arrived to the chair")
+	println("Customer waiting 1sec before sit down")
+
 	// Sit down
-	CustomerDoAction(l, c, customer.CUSTOMER_SIT_DOWN, chair.GetPos(), 0)
+	CustomerDoAction(l, c,
+		customer.CUSTOMER_SIT_DOWN,
+		chair.GetPos(),
+		1*time.Second,
+	)
+
+	println("Customer sat down")
+
+	println("Customer started to waiting for food")
 
 	// Wait for assigned waiter
 	if WaitUntil(
@@ -81,6 +93,8 @@ func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
 		Leave(l, c) // Leaves sad :(
 		l.UnreserveObject(table)
 		l.UnreserveObject(chair)
+
+		println("Customer not got any food on time, leaving...")
 		return
 	}
 
@@ -97,14 +111,20 @@ func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
 		time.Sleep(100 * time.Millisecond)
 	}
 
+	println("Customer started to eating")
+
 	//  Eat food
 	CustomerDoAction(l, c, customer.CUSTOMER_EAT, c.GetPos(), 10*time.Second)
 
 	// After 10 sec set food to half eaten
-	chair.SetDishStatus(2) // Half eaten
+	// I think we dont need to set the dish status. Just need to set when its finishes.
+	// The game updates the dish status in visual to empty, when the customer finishes
+	// chair.SetDishStatus(2) // Half eaten
 
 	// Wait until customer finishes food
 	time.Sleep(15 * time.Second)
+
+	println("Customer finished eating, leaving....")
 
 	//  Add rewards to player
 	player, err := l.Owner()
@@ -122,7 +142,8 @@ func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
 
 	// Rewards
 	player.AddCash(dishInfo.IncomePerServing)
-	player.AddXP(dishInfo.XP)
+	// The dish only gave XP when delivered to the counter
+	// player.AddXP(dishInfo.XP)
 	l.Cafe().AddRating(1)
 
 	// Set plate dirty
@@ -199,15 +220,40 @@ func WaitUntil(condition func() bool, timeout time.Duration) bool {
 // 4. Stops if cafe is running,
 func CustomerDoAction(l interfaces.CafeLocation, c *customer.Customer, action customer.CustomerAction, pos simple.Position, delay time.Duration) {
 
-	// SEt properties
-	c.SetAction(action)
+	// Set properties
+	/* c.SetAction(action)
 	c.SetPos(pos)
+	I have moved these in the switch, because we set the customer action on sit down first, and theres 1 sec timer before the action,
+	so the waiters gave food when we set it to sit down action. We need to give them food after they have sat down */
 
-	// Send customer action
-	l.Broadcast("nac", "-1", "0", c.ActionString())
+	switch action {
+	case customer.CUSTOMER_WALK_TO_CHAIR:
+		// Set properties
+		c.SetAction(action)
+		c.SetPos(pos)
 
-	// Wait until customer walks in door
-	time.Sleep(delay)
+		// Send customer action
+		l.Broadcast("nac", "-1", "0", c.ActionString())
+
+		// Wait until customer walks in door
+		time.Sleep(delay)
+	case customer.CUSTOMER_SIT_DOWN:
+		// Wait 1 sec before sit down (to avoid fast sit down at very close chair, because the distance is less than 1)
+		time.Sleep(delay)
+
+		// Set properties
+		c.SetAction(action)
+		c.SetPos(pos)
+
+		l.Broadcast("nac", "-1", "0", c.ActionString())
+	default:
+		// Set properties
+		c.SetAction(action)
+		c.SetPos(pos)
+
+		l.Broadcast("nac", "-1", "0", c.ActionString())
+		time.Sleep(delay)
+	}
 
 	// Stop until cafe runs again
 	for !l.IsRunning() {
