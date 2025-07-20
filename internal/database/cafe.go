@@ -81,6 +81,8 @@ func ConvertCafeDAOToCafe(cafeDAO CafeDAO) (*objects.Cafe, error) {
 
 	// Parse furniture inventory
 	cafe.SetFurnitureInventory(map[int]int{})
+	// Dont try to parse if the inventory is empty
+	if (len(cafeDAO.FurnitureInventory) > 0) {
 	furnitureInv := strings.Split(cafeDAO.FurnitureInventory, "#")
 	for _, item := range furnitureInv {
 
@@ -97,6 +99,7 @@ func ConvertCafeDAOToCafe(cafeDAO CafeDAO) (*objects.Cafe, error) {
 
 		// Add to furnitures
 		cafe.AddFurnitures(id, count)
+	}
 	}
 
 	// Parse waiters
