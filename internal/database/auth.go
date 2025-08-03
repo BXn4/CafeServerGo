@@ -44,7 +44,7 @@ func (db *CafeDB) ChangePassword(id int, oldPass, newPass string) (int, error) {
 		return 1, fmt.Errorf("DB Error: %v", err)
 	}
 
-	if VerifyPassword(player.Password, oldPass) {
+	if !VerifyPassword(player.Password, oldPass) {
 		return 10, errors.New("Access Denied!")
 	}
 
