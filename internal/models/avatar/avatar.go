@@ -27,6 +27,12 @@ const (
 	Boy               = 2
 )
 
+type AvararWOD struct {
+	ID     string `xml:"id,attr"`
+	Gender string `xml:"gender,attr"`
+	Colors string `xml:"colors,attr"`
+}
+
 type Avatar struct {
 	ID        int          `gorm:"type:int;not null"`
 	Name      string       `gorm:"type:string;not null"`
@@ -127,4 +133,24 @@ func NewRandomAvatar() Avatar {
 		LegsColor: rand.Intn(17),
 		IsNPC:     true,
 	}
+}
+
+/*
+	<wod id="1001" n="Top" g="Avatar" t="Girl" gender="1" colors="798F8F#C5CBE3#76AFB7#61B866#FFE266#F6BCC4#FF7C91#CE8AC5#4A877D#568C49#6BA831#87C7A8#79AEB8#3C7385#B3B4B7#BB8731#BA5C33" />
+
+<wod id="1002" n="Top" g="Avatar" t="Boy" gender="2" colors="475454#C5CBE3#76AFB7#61B866#FFE266#F6BCC4#FF7C91#CE8AC5#4A877D#568C49#6BA831#87C7A8#79AEB8#3C7385#B3B4B7#BB8731#BA5C33" />
+<wod id="1021" n="Skin" g="Avatar" t="Girl" gender="1" colors="F4C0A6#F2B187#E89C73#AB6845#CE875C#F3BD90#EEA675#DC9467" />
+<wod id="1022" n="Skin" g="Avatar" t="Boy" gender="2" colors="F4C0A6#F2B187#E89C73#AB6845#CE875C#F3BD90#EEA675#DC9467" />
+<wod id="1041" n="Hair" g="Avatar" t="Girl" gender="1" colors="FFDC88#FFCC52#D9733B#D68B4A#AF5F3A#73462F#41291C#26120D#DDB25B#BA884C#C77833#9B6134#6C4424#523520#40301C" />
+<wod id="1042" n="Hair" g="Avatar" t="Boy" gender="2" colors="FFDC88#FFCC52#D9733B#D68B4A#AF5F3A#73462F#41291C#26120D#DDB25B#BA884C#C77833#9B6134#6C4424#523520#40301C" />
+<wod id="1051" n="Legs" g="Avatar" t="Girl" gender="1" colors="475454#C5CBE3#76AFB7#61B866#FFE266#F6BCC4#FF7C91#CE8AC5#4A877D#568C49#6BA831#87C7A8#79AEB8#3C7385#B3B4B7#BB8731#BA5C33" />
+<wod id="1052" n="Legs" g="Avatar" t="Boy" gender="2" colors="475454#C5CBE3#76AFB7#61B866#FFE266#F6BCC4#FF7C91#CE8AC5#4A877D#568C49#6BA831#87C7A8#79AEB8#3C7385#B3B4B7#BB8731#BA5C33" />
+<wod id="1061" n="Hat" g="Avatar" t="Normal" gender="0" colors="0" />
+<wod id="1062" n="Hat" g="Avatar" t="Cook" gender="-1" colors="EEEEEE" />
+<wod id="1063" n="Hat" g="Avatar" t="Cookxmas" gender="-1" colors="EEEEEE" />
+<wod id="1081" n="Face" g="Avatar" t="Girl" gender="1" colors="0" />
+<wod id="1082" n="Face" g="Avatar" t="Boy" gender="2" colors="0" />
+*/
+func isValidAvatar(s String) bool {
+
 }

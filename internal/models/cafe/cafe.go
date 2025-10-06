@@ -16,8 +16,8 @@ type CafeBackground string
 
 const (
 	DefaultBackground     CafeBackground = "1501"
-	MarketplaceBackground                = "1502"
-	WinterBackground                     = "1503"
+	MarketplaceBackground CafeBackground = "1502"
+	WinterBackground      CafeBackground = "1503"
 )
 
 type Cafe struct {
@@ -34,7 +34,7 @@ type Cafe struct {
 	fridgeCapacity     int                  `gorm:"-"`
 	FridgeInventory    simple.IntMap        `gorm:"column:fridge_inv;type:text"`
 	FurnitureInventory simple.IntMap        `gorm:"column:furniture_inv;type:text"`
-	Waiters            waiter.WaiterList    `gorm:"type:longtext"`
+	Waiters            waiter.WaiterList    `gorm:"type:longtext;"`
 	customers          []*customer.Customer `gorm:"-"`
 	playerStart        *simple.Position     `gorm:"-"`
 	mutex              sync.RWMutex         `gorm:"-"`
@@ -60,7 +60,17 @@ func NewCafeForCreation(id, playerID int, name string) *Cafe {
 		ID:        id,
 		PlayerID:  playerID,
 		OwnerName: name,
-	}
+		Objects:   *object.ParseObjectList("3+0+901+0#5+0+901+0#5+1+601+3+-1+0#0+2+201+0#5+2+401+0#7+2+601+3+-1+0#7+3+401+0#1+4+351+0#5+4+401+0#1+5+252+0+-1#3+5+301+0+-1+0#5+5+601+1+-1+0#7+5+401+0#1+6+252+0+-1#3+6+301+0+-1+0#7+6+601+1+-1+0#1+7+252+0+-1"),
+		Tiles: simple.IntMatrix{
+			{7, 101, 101, 101, 101, 101, 101, 101, 101},
+			{4, 4, 4, 4, 4, 4, 4, 101},
+			{4, 4, 4, 4, 4, 4, 4, 101},
+			{4, 4, 4, 4, 4, 4, 4, 101},
+			{1, 1, 1, 4, 4, 4, 4, 101},
+			{1, 1, 1, 4, 4, 4, 4, 101},
+			{1, 1, 1, 4, 4, 4, 4, 101},
+			{1, 1, 1, 4, 4, 4, 4},
+		}}
 }
 
 func (c *Cafe) AsResponse() []string {
@@ -68,7 +78,7 @@ func (c *Cafe) AsResponse() []string {
 	defer c.mutex.RUnlock()
 
 	if c.playerStart == nil {
-		println("NILOOLASODAOSDOL")
+		println("NO PLAYERSTART FOUND!") // NILOOLASODAOSDOL was here!
 		c.getPlayerStart()
 		println(c.playerStart == nil)
 	}

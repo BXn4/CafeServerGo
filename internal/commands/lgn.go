@@ -33,55 +33,58 @@ func Login(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 	c.SendExtensionResponse("lgn", "1", statusCodeStr)
 	if statusCode != 0 {
 		if statusCode == 15 {
-			return fmt.Errorf("Player %v is already logged in", name)
+			fmt.Errorf("Player %v is already logged in", name)
 		} else {
-			return fmt.Errorf("Access denied")
+			fmt.Errorf("Access denied")
 		}
 	}
 
-	// Set player
-	c.Player = p
+	if p != nil {
 
-	// Send room list (rlu)
-	err = RoomList(req, c, gm)
-	if err != nil {
-		return fmt.Errorf("\nrlu request: %v", err)
-	}
+		// Set player
+		c.Player = p
 
-	// Send user info (gui)
-	err = UserInfo(req, c, gm)
-	if err != nil {
-		return fmt.Errorf("\ngui request: %v", err)
-	}
+		// Send room list (rlu)
+		err = RoomList(req, c, gm)
+		if err != nil {
+			return fmt.Errorf("\nrlu request: %v", err)
+		}
 
-	// Send balancing constants (sbc)
-	err = SendBalancingConstant(req, c, gm)
-	if err != nil {
-		return fmt.Errorf("\nsbc request: %v", err)
-	}
+		// Send user info (gui)
+		err = UserInfo(req, c, gm)
+		if err != nil {
+			return fmt.Errorf("\ngui request: %v", err)
+		}
 
-	// Send mastery info (lmi)
-	err = SendMasteryInfo(req, c, gm)
-	if err != nil {
-		return fmt.Errorf("\nlmi request: %v", err)
-	}
+		// Send balancing constants (sbc)
+		err = SendBalancingConstant(req, c, gm)
+		if err != nil {
+			return fmt.Errorf("\nsbc request: %v", err)
+		}
 
-	// Handle login bonus (lbu)
-	err = LoginRewards(req, c, gm)
-	if err != nil {
-		return fmt.Errorf("\nlbu request: %v", err)
-	}
+		// Send mastery info (lmi)
+		err = SendMasteryInfo(req, c, gm)
+		if err != nil {
+			return fmt.Errorf("\nlmi request: %v", err)
+		}
 
-	// Send Ping (pin)
-	err = SendPing(req, c, gm)
-	if err != nil {
-		return fmt.Errorf("\npin request: %v", err)
-	}
+		// Handle login bonus (lbu)
+		err = LoginRewards(req, c, gm)
+		if err != nil {
+			return fmt.Errorf("\nlbu request: %v", err)
+		}
 
-	// Send Friends
-	err = SendFriendsAvatar(req, c, gm)
-	if err != nil {
-		return fmt.Errorf("\nbga request: %v", err)
+		// Send Ping (pin)
+		err = SendPing(req, c, gm)
+		if err != nil {
+			return fmt.Errorf("\npin request: %v", err)
+		}
+
+		// Send Friends
+		err = SendFriendsAvatar(req, c, gm)
+		if err != nil {
+			return fmt.Errorf("\nbga request: %v", err)
+		}
 	}
 
 	return nil

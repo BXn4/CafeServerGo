@@ -18,7 +18,7 @@ func (ol *ObjectList) Scan(value interface{}) error {
 
 	str := string(bytes)
 	if str == "" {
-		println("WTF")
+		println("Theres no objects found :(")
 		objectList := ObjectList{}
 		*ol = objectList
 		return nil

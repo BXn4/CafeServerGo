@@ -6,6 +6,8 @@ import (
 	"cafego/internal/types/requests"
 	"net/mail"
 	"strings"
+
+	"github.com/charmbracelet/log"
 )
 
 const (
@@ -99,13 +101,18 @@ func Register(req *requests.Request, c *client.Client, gm *managers.GameManager)
 		return nil
 	}
 
+	log.Debug("Everything is fine! Player register should start")
+
 	// TODO: Check if username contains a bad word
-	if false {
-		c.SendExtensionResponse("lre", "-1", BAD_WORD)
-		return nil
-	}
+	/* if false {
+	c.SendExtensionResponse("lre", "-1", BAD_WORD)
+	return nil
+	} */
 
 	avatar := c.Player.Avatar
+
+	log.Debug("Player avatar: %s", avatar)
+
 	player, err := c.DB.CreateAccount(username, email, password, avatar)
 	if err != nil {
 		return err

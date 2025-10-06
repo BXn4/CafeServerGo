@@ -12,7 +12,7 @@ import (
 
 func CreateAvatar(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
-	guestName := fmt.Sprintf("Guest_%v'", rand.Intn(89999999)+10000000)
+	guestName := fmt.Sprintf("Guest_%v", rand.Intn(89999999)+10000000)
 
 	avatar := avatar.NewAvatarFromString(req.Args[2])
 	if avatar == nil {
