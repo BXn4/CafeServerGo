@@ -21,7 +21,7 @@ func (db *CafeDB) Authenticate(name string, pass string) (*player.Player, int, e
 		return nil, 14, fmt.Errorf("DB Error: %v", err)
 	}
 
-	if VerifyPassword(p.Password, pass) {
+	if !VerifyPassword(p.Password, pass) {
 		return nil, 14, errors.New("Access Denied!")
 	}
 

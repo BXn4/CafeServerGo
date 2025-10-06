@@ -111,7 +111,7 @@ func Register(req *requests.Request, c *client.Client, gm *managers.GameManager)
 
 	avatar := c.Player.Avatar
 
-	log.Debug("Player avatar: %s", avatar)
+	log.Debugf("Player avatar: %s", avatar.Apperance())
 
 	player, err := c.DB.CreateAccount(username, email, password, avatar)
 	if err != nil {
