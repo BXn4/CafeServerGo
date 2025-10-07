@@ -20,8 +20,16 @@ func CreateAvatar(req *requests.Request, c *client.Client, gm *managers.GameMana
 	log.Debugf("LCA Register avatar received: %s", req.Args[2])
 
 	avatar := avatar.NewAvatarFromString(req.Args[2])
+	avatar.Name = guestName
+
 	if avatar == nil {
+		c.SendExtensionResponse("lca", "-1", "-1", "-1", "-1")
 		return fmt.Errorf("Cant parse avatar from string!")
+	}
+
+	if !avatar.IsValid() {
+		c.SendExtensionResponse("lca", "-1", "-1", "-1", "-1")
+		return fmt.Errorf("Invalid avatar structure!")
 	}
 
 	c.Player = &player.Player{

@@ -35,7 +35,7 @@ func UserInfo(req *requests.Request, c *client.Client, gm *managers.GameManager)
 		strconv.Itoa(c.Player.OpenJobs),
 		"0",
 		utils.If(c.Player.PlayedWheel, "1", "0"),
-		"0",
+		utils.If(c.Player.AvatarChanged, "1", "0"),
 		utils.If(c.Player.AllowFriendRequests, "1", "0"),
 		utils.If(c.Player.AllowEmails, "1", "0"),
 		utils.If(c.Player.EmailVerified, "1", "0"),

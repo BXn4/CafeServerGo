@@ -98,3 +98,53 @@ func (db *CafeDB) DeleteFriend(playerID, friendID int) error {
 	}
 	return nil
 }
+
+func (db *CafeDB) UpdateCash(playerID, playerCash int) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("cash", playerCash).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateGold(playerID, playerGold int) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("gold", playerGold).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) SetRegistered(playerID int) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("is_registered", true).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateAvatarChanged(playerID int, playerAvatarChanged bool) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("avatar_changed", playerAvatarChanged).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateAvatar(playerID int, avatar string) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("avatar", avatar).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}

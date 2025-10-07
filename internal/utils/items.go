@@ -36,6 +36,7 @@ type Wod struct {
 	Chips            int    `xml:"chips,attr,omitempty"`
 	RatingBonus      int    `xml:"ratingBonus,attr,omitempty"`
 	Dishes           string `xml:"dishes,attr,omitempty"`
+	Colors           string `xml:"colors,attr,omitempty"`
 }
 
 type Data struct {
@@ -263,6 +264,15 @@ func GetCoop(id int) (Wod, error) {
 
 func GetFastfood(id int) (Wod, error) {
 	for _, item := range itemCollection["fastfood"] {
+		if id == item.ID {
+			return item, nil
+		}
+	}
+	return Wod{}, fmt.Errorf("No item found with id: %v", id)
+}
+
+func GetAvatar(id int) (Wod, error) {
+	for _, item := range itemCollection["avatar"] {
 		if id == item.ID {
 			return item, nil
 		}

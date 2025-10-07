@@ -22,16 +22,17 @@ type Player struct {
 	XP                  int             `gorm:"column:xp;type:int;default:0"`
 	InstantCookings     int             `gorm:"column:instant_cookings;type:int;default:0"`
 	OpenJobs            int             `gorm:"column:open_jobs;type:int;default:0"`
-	PlayedWheel         bool            `gorm:"column:played_wheel;default:0;type:bool;default:false"`
-	AllowFriendRequests bool            `gorm:"column:allow_friend_requests;default:0;type:bool;default:true"`
+	PlayedWheel         bool            `gorm:"column:played_wheel;type:bool;default:false"`
+	AllowFriendRequests bool            `gorm:"column:allow_friend_requests;stype:bool;default:true"`
 	Friends             simple.IntSlice `gorm:"column:friends;type:text;default:null"`
 	FriendsWithGifts    simple.IntSlice `gorm:"column:friends_with_gifts;type:text;default:null"`
 	SendableGifts       gift.GiftList   `gorm:"column:sendable_gifts;type:text;default:null"`
-	AllowEmails         bool            `gorm:"column:allow_emails;default:0;type:bool;default:true"`
-	EmailVerified       bool            `gorm:"column:email_verified;default:0;type:bool;default:false"`
+	AllowEmails         bool            `gorm:"column:allow_emails;type:bool;default:true"`
+	EmailVerified       bool            `gorm:"column:email_verified;type:bool;default:false"`
 	Username            string          `gorm:"column:username;not null;type:text"`
 	IsBanned            bool            `gorm:"column:is_banned;default:0;type:bool"`
 	Avatar              avatar.Avatar   `gorm:"column:avatar;type:text"`
+	AvatarChanged       bool            `gorm:"column:avatar_changed;type:bool;default:false"`
 	Position            simple.Position `gorm:"-"`
 	Mastery             simple.IntMap   `gorm:"column:mastery;type:text;default:null"`
 	Achievement         simple.IntMap   `gorm:"column:achievement;type:text;default:null"`
@@ -42,6 +43,7 @@ type Player struct {
 	DailyLogin          time.Time       `gorm:"column:daily_login;type:datetime;default:CURRENT_TIMESTAMP"`
 	GiftRefreshTime     time.Time       `gorm:"column:gift_refresh_time;type:datetime;default:null"`
 	Gifts               gift.GiftList   `gorm:"column:gifts;type:text;default:null"`
+	IsRegistered        bool            `gorm:"column:is_registered;type:bool;default:false"`
 	AccessLevel         int             `gorm:"column:access_level;default:0;type:int"`
 }
 
