@@ -5,6 +5,7 @@ import (
 	"cafego/internal/models/cafe"
 	"cafego/internal/models/coop"
 	"cafego/internal/models/player"
+	"cafego/internal/models/simple"
 	"fmt"
 
 	"gorm.io/driver/mysql"
@@ -60,11 +61,23 @@ func (db *CafeDB) CreateAccount(name, email, password string, a avatar.Avatar) (
 		return nil, err
 	}
 
+	achievements := make(simple.IntMap)
+	for id := 2001; id <= 2030; id++ {
+		achievements[id] = 0
+	}
+
+	mastery := make(simple.IntMap)
+	for id := 1201; id <= 1255; id++ {
+		mastery[id] = 0
+	}
+
 	player := &player.Player{
-		Email:    email,
-		Password: hashedPasswd,
-		Username: name,
-		Avatar:   a,
+		Email:       email,
+		Password:    hashedPasswd,
+		Username:    name,
+		Avatar:      a,
+		Achievement: achievements,
+		Mastery:     mastery,
 	}
 
 	// Create player and get id

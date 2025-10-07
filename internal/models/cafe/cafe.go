@@ -56,7 +56,9 @@ func NewCafe(id int, playerID int, ownerName string, luxury int, size int) *Cafe
 }
 
 func NewCafeForCreation(id, playerID int, name string) *Cafe {
-	tiles := simple.IntMatrix{
+	defaultObjects := *object.ParseObjectList("3+0+901+0#5+0+901+0#5+1+601+3+-1+0#0+2+201+0#5+2+401+0#7+2+601+3+-1+0#7+3+401+0#1+4+351+0#5+4+401+0#1+5+252+0+-1#3+5+301+0+-1+0#5+5+601+1+-1+0#7+5+401+0#1+6+252+0+-1#3+6+301+0+-1+0#7+6+601+1+-1+0#1+7+252+0+-1")
+
+	defaultTiles := simple.IntMatrix{
 		{7, 101, 101, 101, 101, 101, 101, 101},
 		{101, 4, 4, 4, 4, 4, 4, 4},
 		{101, 4, 4, 4, 4, 4, 4, 4},
@@ -66,12 +68,20 @@ func NewCafeForCreation(id, playerID int, name string) *Cafe {
 		{101, 1, 1, 1, 4, 4, 4, 4},
 		{101, 1, 1, 1, 4, 4, 4, 4},
 	}
+
+	defaultFridgeInventory := simple.IntMap{
+		1314: 1, 1327: 1} // Players have 1-1 amount already after register: https://youtu.be/8A-BFfhGI5Y?si=8E7NzWJGmJ6_S6NM&t=27
+
+	defaultStartingWaiter := waiter.GetStartingWaiter()
+
 	return &Cafe{
-		ID:        id,
-		PlayerID:  playerID,
-		OwnerName: name,
-		Objects:   *object.ParseObjectList("3+0+901+0#5+0+901+0#5+1+601+3+-1+0#0+2+201+0#5+2+401+0#7+2+601+3+-1+0#7+3+401+0#1+4+351+0#5+4+401+0#1+5+252+0+-1#3+5+301+0+-1+0#5+5+601+1+-1+0#7+5+401+0#1+6+252+0+-1#3+6+301+0+-1+0#7+6+601+1+-1+0#1+7+252+0+-1"),
-		Tiles:     tiles,
+		ID:              id,
+		PlayerID:        playerID,
+		OwnerName:       name,
+		Objects:         defaultObjects,
+		Tiles:           defaultTiles,
+		FridgeInventory: defaultFridgeInventory,
+		Waiters:         defaultStartingWaiter,
 	}
 }
 

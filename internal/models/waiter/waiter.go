@@ -6,6 +6,7 @@ import (
 	"cafego/internal/models/object"
 	"cafego/internal/models/simple"
 	"fmt"
+	"math/rand"
 	"strconv"
 	"strings"
 	"sync"
@@ -30,9 +31,9 @@ type Action int
 
 const (
 	INSERT          Action = 0
-	MOVE_TO_COUNTER        = 5
-	FEED                   = 6
-	CLEAN                  = 7
+	MOVE_TO_COUNTER Action = 5
+	FEED            Action = 6
+	CLEAN           Action = 7
 )
 
 type Waiter struct {
@@ -55,6 +56,21 @@ func NewWaiter(id, priority int, a avatar.Avatar, isWorking bool) *Waiter {
 		avatar:    a,
 		isWorking: isWorking,
 	}
+}
+
+func GetStartingWaiter() WaiterList {
+	girlNames := []string{"Jane", "Lucy", "Emma", "Stacey", "Becky"}
+	boyNames := []string{"Oskar", "James", "Jeffrey", "Tom", "William"}
+
+	wa := NewWaiter(0, 50, avatar.NewRandomAvatar(), false)
+
+	if wa.avatar.Gender == avatar.Girl {
+		wa.avatar.Name = girlNames[rand.Intn(len(girlNames))]
+	} else {
+		wa.avatar.Name = boyNames[rand.Intn(len(boyNames))]
+	}
+
+	return WaiterList{wa}
 }
 
 func (w *Waiter) StopWorking() {
