@@ -4,6 +4,7 @@ import (
 	"cafego/internal/agents"
 	"cafego/internal/client"
 	"cafego/internal/models/cafe"
+	"cafego/internal/models/customer"
 	"cafego/internal/models/object"
 	"cafego/internal/models/player"
 	"cafego/internal/models/simple"
@@ -148,19 +149,27 @@ func (lc *LoadedLocation) Join(playerID int, channel chan<- responses.Response) 
 	lc.send(playerID, "jul", "-1", "0", strings.Join(playersStr, "$"))
 
 	// Send every customer in location
-	println("JOIN CUSTOMER DATA:")
+	log.Debug("JOIN CUSTOMER DATA:")
 	for _, cs := range lc.cafe.GetCustomers() {
-		println("- SENT CUSTOMER DATA")
-		lc.send(playerID, "nav", "-1", "0", cs.SpawnString())
-		lc.send(playerID, "nac", "-1", "0", cs.ActionString())
+		customerAction := cs.ActionString()
+		log.Debug("- SENT CUSTOMER DATA")
+
+		if cs.GetAction() == customer.CUSTOMER_WALK_TO_CHAIR {
+			customerAction = cs.ActionStringToSpawnBack(customer.CUSTOMER_SIT_DOWN)
+		}
+
+		if cs.GetAction() != customer.CUSTOMER_LEAVE {
+			lc.send(playerID, "nav", "-1", "0", cs.SpawnString())
+			lc.send(playerID, "nac", "-1", "0", customerAction)
+		}
 	}
 
-	println("CUSTOMER COUNT: ", len(lc.cafe.GetCustomers()))
+	log.Debugf("CUSTOMER COUNT: %d ", len(lc.cafe.GetCustomers()))
 
 	lc.running = true
 
 	// Respawn waiters if owner joined
-	println("WP COND ", playerID, lc.cafe.GetPlayerID())
+	log.Debugf("WP COND %d %d", playerID, lc.cafe.GetPlayerID())
 	if playerID == lc.cafe.GetPlayerID() {
 
 		// Start waiters

@@ -15,13 +15,13 @@ type CustomerAction int
 
 const (
 	CUSTOMER_INSERT               CustomerAction = 0
-	CUSTOMER_WALK_TO_CHAIR                       = 1
-	CUSTOMER_SIT_DOWN                            = 2
-	CUSTOMER_EAT                                 = 3
-	CUSTOMER_LEAVE                               = 4
-	CUSTOMER_FAST_FOOD                           = 8
-	CUSTOMER_GOTO_VENDING_MACHINE                = 9
-	CUSTOMER_LEAVE_COMPLETE                      = 41
+	CUSTOMER_WALK_TO_CHAIR        CustomerAction = 1
+	CUSTOMER_SIT_DOWN             CustomerAction = 2
+	CUSTOMER_EAT                  CustomerAction = 3
+	CUSTOMER_LEAVE                CustomerAction = 4
+	CUSTOMER_FAST_FOOD            CustomerAction = 8
+	CUSTOMER_GOTO_VENDING_MACHINE CustomerAction = 9
+	CUSTOMER_LEAVE_COMPLETE       CustomerAction = 41
 )
 
 type Customer struct {
@@ -84,6 +84,27 @@ func (c *Customer) ActionString() string {
 	}
 	// If there is no action return
 	if c.action == CUSTOMER_INSERT || c.action == CUSTOMER_LEAVE {
+		return strings.Join(args, "+")
+	}
+
+	args = append(args, strconv.Itoa(c.pos.X))
+	args = append(args, strconv.Itoa(c.pos.Y))
+
+	return strings.Join(args, "+")
+}
+
+// Modify the customer action to the visitor
+// If the customer is walking, dont send walking to the visitor, send sit down
+func (c *Customer) ActionStringToSpawnBack(action CustomerAction) string {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	args := []string{
+		strconv.Itoa(c.id),
+		strconv.Itoa(int(action)),
+	}
+
+	if action == CUSTOMER_INSERT || action == CUSTOMER_LEAVE {
 		return strings.Join(args, "+")
 	}
 
