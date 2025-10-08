@@ -39,8 +39,8 @@ type Player struct {
 	WorkTimeLeft        int             `gorm:"-"`
 	CoopID              int             `gorm:"column:coop_id;type:int;default:null"`
 	SeekingJob          bool            `gorm:"-"`
-	LastLogin           time.Time       `gorm:"column:last_login;type:datetime;default:CURRENT_TIMESTAMP"`
-	DailyLogin          time.Time       `gorm:"column:daily_login;type:datetime;default:CURRENT_TIMESTAMP"`
+	LastLogin           time.Time       `gorm:"column:last_login;type:datetime;default:null"`
+	DailyLogin          time.Time       `gorm:"column:daily_login;type:datetime;default:null"`
 	GiftRefreshTime     time.Time       `gorm:"column:gift_refresh_time;type:datetime;default:null"`
 	Gifts               gift.GiftList   `gorm:"column:gifts;type:text;default:null"`
 	IsRegistered        bool            `gorm:"column:is_registered;type:bool;default:false"`

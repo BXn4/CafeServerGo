@@ -8,6 +8,7 @@ import (
 	"cafego/internal/utils"
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"strconv"
 	"sync"
 )
@@ -169,13 +170,33 @@ func (c *Cafe) GetPlayerStart() simple.Position {
 func (c *Cafe) getPlayerStart() simple.Position {
 
 	// If we already have one dont search
-	if c.playerStart != nil {
-		return *c.playerStart
-	}
+	/* if c.playerStart != nil {
+	return *c.playerStart
+	} */
+	// If the door position is changed, need to check the new door position.
 
 	// If market
 	if c.ID < 0 {
-		pos := simple.NewPosition(1, 2)
+		var posX, posY int
+		forbidden := map[[2]int]bool{
+			{1, 9}:  true, // Object
+			{5, 11}: true, // Object
+			{6, 5}:  true, // Center object
+			{6, 6}:  true, // Center object
+			{5, 5}:  true, // Center object
+			{5, 6}:  true, // Center object
+		}
+
+		for {
+			posX = rand.IntN(11) + 1
+			posY = rand.IntN(11) + 1
+
+			if !forbidden[[2]int{posX, posY}] {
+				break
+			}
+		}
+
+		pos := simple.NewPosition(posX, posY)
 		c.playerStart = &pos
 		return pos
 	}
