@@ -43,7 +43,8 @@ type Player struct {
 	DailyLogin          time.Time       `gorm:"column:daily_login;type:datetime;default:null"`
 	GiftRefreshTime     time.Time       `gorm:"column:gift_refresh_time;type:datetime;default:null"`
 	Gifts               gift.GiftList   `gorm:"column:gifts;type:text;default:null"`
-	IsRegistered        bool            `gorm:"column:is_registered;type:bool;default:false"`
+	IsRegistered        bool            `gorm:"default:false"`
+	IsTutorialCompleted bool            `gorm:"default:false"`
 	AccessLevel         int             `gorm:"column:access_level;default:0;type:int"`
 }
 

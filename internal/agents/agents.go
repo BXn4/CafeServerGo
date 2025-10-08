@@ -4,8 +4,11 @@ import (
 	"cafego/internal/interfaces"
 	"cafego/internal/models/cafe"
 	"cafego/internal/models/object"
+	"math"
 	"math/rand"
 	"time"
+
+	"github.com/charmbracelet/log"
 )
 
 func StartAgentCycles(l interfaces.CafeLocation) {
@@ -23,19 +26,20 @@ func StartAgentCycles(l interfaces.CafeLocation) {
 	// Spawn customers
 	go func() {
 		for l != nil {
-			// Calcualte customer spawn time
-			rating := l.Cafe().GetRating()
-			var spawnInterval int
-			if rating < 150 {
-				spawnInterval = rand.Intn(10) + 10
-			} else if rating <= 150 && rating < 350 {
-				spawnInterval = rand.Intn(3) + 5
-			} else if rating <= 350 && rating < 500 {
-				spawnInterval = rand.Intn(2) + 4
-			} else {
-				spawnInterval = rand.Intn(4) + 1
-			}
-			time.Sleep(time.Duration(spawnInterval) * time.Second)
+			maxSpawn := 30.0
+			minSpawn := 2.0
+			rating := float64(l.Cafe().GetRating())
+			expansion := float64(l.Cafe().ExpansionID)
+			ratingFactor := math.Min(rating/1000.0, 10.0)
+			expansionFactor := math.Min(expansion/8.0, 1.0)
+			progress := ratingFactor*0.6 + expansionFactor*0.4
+			spawnBase := maxSpawn - progress*(maxSpawn-minSpawn)
+			variation := 0.8 + rand.Float64()*0.4
+			spawnInterval := time.Duration((spawnBase * variation) * float64(time.Second))
+
+			log.Debugf("NPC spawn interval: %s", spawnInterval)
+
+			time.Sleep(spawnInterval)
 
 			// Stop if we are not in area
 			for !l.IsRunning() {

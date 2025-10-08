@@ -29,8 +29,9 @@ func (cmd *Cmdlet) Run(c *client.Client, gm *managers.GameManager, args []string
 }
 
 var cmdlets = map[string]Cmdlet{
-	"ach": {Admin, SetAchivement},
-	"xp":  {Admin, SetXP},
+	"ach":    {Admin, SetAchivement},
+	"xp":     {Admin, SetXP},
+	"rating": {Admin, SetRating},
 }
 
 func HandleCmdlets(c *client.Client, gm *managers.GameManager, message string) {

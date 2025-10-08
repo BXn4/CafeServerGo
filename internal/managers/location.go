@@ -62,7 +62,14 @@ func (gm *GameManager) AddLocation(id int) *LoadedLocation {
 
 	println("LOADED CAFE: ", id)
 
-	go agents.StartAgentCycles(loc)
+	p, err := loc.Owner()
+	if err != nil {
+		panic("Cant get the location Owner! Something is shit!")
+	}
+
+	if p.IsTutorialCompleted && !loc.Cafe().AgentCycleBinded {
+		go agents.StartAgentCycles(loc)
+	}
 
 	return loc
 }

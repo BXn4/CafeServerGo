@@ -87,5 +87,8 @@ func Login(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 		}
 	}
 
+	c.Player.IsTutorialCompleted = true // Default false, because after register, the customers should not start.
+	// And we cant trigger the tutorial event in the game, so its just works after register. If the player disconnects after the tutorial, we cant trigger it.
+
 	return nil
 }

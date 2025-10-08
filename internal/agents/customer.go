@@ -87,7 +87,7 @@ func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
 		func() bool {
 			return c.GetAssignedWaiter() != -1
 		},
-		10*time.Second,
+		25*time.Second,
 	) {
 		l.Cafe().AddRating(-2)
 		Leave(l, c) // Leaves sad :(

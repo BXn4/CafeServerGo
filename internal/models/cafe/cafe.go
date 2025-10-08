@@ -29,6 +29,7 @@ type Cafe struct {
 	Luxury             int                  `gorm:"default:0"`
 	Size               int                  `gorm:"default:8"`
 	Background         CafeBackground       `gorm:"type:text"`
+	ExpansionID        int                  `gorm:"type:int;default:0"`
 	Tiles              simple.IntMatrix     `gorm:"type:longtext"`
 	Objects            object.ObjectList    `gorm:"type:longtext"`
 	availableTables    object.ObjectList    `gorm:"-"`
@@ -37,6 +38,7 @@ type Cafe struct {
 	FurnitureInventory simple.IntMap        `gorm:"column:furniture_inv;type:text"`
 	Waiters            waiter.WaiterList    `gorm:"type:longtext;"`
 	customers          []*customer.Customer `gorm:"-"`
+	AgentCycleBinded   bool                 `gorm:"-"`
 	playerStart        *simple.Position     `gorm:"-"`
 	mutex              sync.RWMutex         `gorm:"-"`
 }
@@ -70,8 +72,8 @@ func NewCafeForCreation(id, playerID int, name string) *Cafe {
 		{101, 1, 1, 1, 4, 4, 4, 4},
 	}
 
-	defaultFridgeInventory := simple.IntMap{
-		1314: 1, 1327: 1} // Players have 1-1 amount already after register: https://youtu.be/8A-BFfhGI5Y?si=8E7NzWJGmJ6_S6NM&t=27
+	// Players have 1-1 amount already after register: https://youtu.be/8A-BFfhGI5Y?si=8E7NzWJGmJ6_S6NM&t=27
+	defaultFridgeInventory := simple.IntMap{1314: 1, 1327: 1}
 
 	defaultStartingWaiter := waiter.GetStartingWaiter()
 
@@ -104,7 +106,7 @@ func (c *Cafe) AsResponse() []string {
 		c.OwnerName,
 		strconv.Itoa(c.Rating),
 		strconv.Itoa(c.Luxury),
-		strconv.Itoa(c.Size - 8),
+		strconv.Itoa(c.ExpansionID),
 		strconv.Itoa(c.Tiles.Size()),
 		strconv.Itoa(c.Tiles.Size()),
 		string(c.Background),
@@ -358,6 +360,12 @@ func (c *Cafe) GetSize() int {
 	return c.Size
 }
 
+func (c *Cafe) GetExpansionID() int {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	return c.ExpansionID
+}
+
 func (c *Cafe) GetBackground() CafeBackground {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
@@ -441,6 +449,19 @@ func (c *Cafe) SetRating(rating int) {
 func (c *Cafe) AddRating(rating int) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
+
+	if rating > 0 {
+		if c.Rating+rating > 1000 {
+			c.Rating = 1000
+			return
+		}
+	} else {
+		if c.Rating-rating < 10 {
+			c.Rating = 10
+			return
+		}
+	}
+
 	c.Rating += rating
 }
 
