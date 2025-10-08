@@ -198,7 +198,7 @@ func (lc *LoadedLocation) Leave(id int) {
 		lc.gm.RemoveLocation(lc.cafe.ID)
 	}
 
-	lc.running = false
+	// lc.running = false
 }
 
 func (lc *LoadedLocation) ClearReservedObjects() {
@@ -340,6 +340,7 @@ func (lc *LoadedLocation) broadcast(args ...string) {
 
 	resp := responses.NewExtensionResponse(args...)
 	log.Logf(log.Level(-1), "%s", resp.Wrap())
+	// log.Debugf("Broadcasted for: %d clients", len(lc.occupants))
 	for _, channel := range lc.occupants {
 		channel <- resp
 	}

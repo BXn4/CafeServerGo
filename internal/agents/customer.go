@@ -94,7 +94,7 @@ func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
 		l.UnreserveObject(table)
 		l.UnreserveObject(chair)
 
-		println("Customer not got any food on time, leaving...")
+		println("Customer not got any food on time, customer left sad...")
 		return
 	}
 
@@ -256,7 +256,8 @@ func CustomerDoAction(l interfaces.CafeLocation, c *customer.Customer, action cu
 	}
 
 	// Stop until cafe runs again
-	for !l.IsRunning() {
-		time.Sleep(10 * time.Millisecond)
-	}
+	// Not need to stop it
+	/* for !l.IsRunning() {
+	time.Sleep(10 * time.Millisecond)
+	} */
 }

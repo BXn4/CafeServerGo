@@ -12,7 +12,6 @@ import (
 )
 
 func StartAgentCycles(l interfaces.CafeLocation) {
-
 	// Clean tables and chairs
 	for _, obj := range l.Cafe().GetObjects() {
 		if obj.IsTable() || obj.IsChair() {
@@ -23,9 +22,13 @@ func StartAgentCycles(l interfaces.CafeLocation) {
 	// Empty reserved objects
 	l.ClearReservedObjects()
 
-	// Spawn customers
 	go func() {
-		for l != nil {
+		for {
+			if !l.IsRunning() {
+				time.Sleep(500 * time.Millisecond)
+				continue
+			}
+
 			maxSpawn := 30.0
 			minSpawn := 2.0
 			rating := float64(l.Cafe().GetRating())
@@ -39,28 +42,25 @@ func StartAgentCycles(l interfaces.CafeLocation) {
 
 			log.Debugf("NPC spawn interval: %s", spawnInterval)
 
-			time.Sleep(spawnInterval)
+			elapsed := time.Duration(0)
+			step := 100 * time.Millisecond
 
-			// Stop if we are not in area
-			for !l.IsRunning() {
-				if l == nil {
-					return
+			for elapsed < spawnInterval {
+				if !l.IsRunning() {
+					break
 				}
+				time.Sleep(step)
+				elapsed += step
+			}
+
+			if !l.IsRunning() {
+				log.Debugf("Agents cycle is stopped!")
+				continue
 			}
 
 			go IterateCustomer(l, SpawnCustomer(l))
-
 		}
 	}()
-
-	// IterateWaiters
-	// waiters := l.Cafe().GetWaiters()
-	// for i, w := range waiters {
-	// 	// Main cycle
-	// 	go func() {
-	// 		SpawnWaiter(l, w, i+1).Start()
-	// 	}()
-	// }
 }
 
 /*

@@ -64,7 +64,7 @@ func (gm *GameManager) AddLocation(id int) *LoadedLocation {
 
 	p, err := loc.Owner()
 	if err != nil {
-		panic("Cant get the location Owner! Something is shit!")
+		log.Errorf("Cant find owner of cafe: %v", loc.Cafe().GetPlayerID())
 	}
 
 	if p.IsTutorialCompleted && !loc.Cafe().AgentCycleBinded {
