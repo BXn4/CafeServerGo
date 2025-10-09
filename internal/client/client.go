@@ -62,6 +62,7 @@ func (c *Client) Disconnect() error {
 		c.ClientManager.DisconnectClient(id)
 	}
 	c.Conn.Close()
+	log.Infof("Client disconnected: %s", c.GetIP())
 	return nil
 }
 

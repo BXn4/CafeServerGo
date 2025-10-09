@@ -39,12 +39,14 @@ func (gm *GameManager) DisconnectClient(id int) {
 
 		// Leave current location
 		if c.Location != nil {
+			if loc, ok := c.Location.(*LoadedLocation); ok {
+				loc.Cancel()
+			}
 			c.Location.Leave(id)
 		}
 
 		// Remove client by re-slicing
 		gm.clients = append(gm.clients[:i], gm.clients[i+1:]...)
-
 		return
 
 	}

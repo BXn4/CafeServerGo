@@ -10,6 +10,7 @@ import (
 	"cafego/internal/models/simple"
 	"cafego/internal/models/waiter"
 	"cafego/internal/types/responses"
+	"context"
 	"slices"
 	"strconv"
 	"strings"
@@ -27,6 +28,7 @@ type LoadedLocation struct {
 	gm           *GameManager
 	running      bool
 	reservedObjs []*object.Object
+	cancelFunc   context.CancelFunc
 }
 
 func NewLoadedLocation(cafe *cafe.Cafe, gm *GameManager) *LoadedLocation {
@@ -388,5 +390,16 @@ func (lc *LoadedLocation) announce(playerID int, args ...string) {
 			continue
 		}
 		channel <- resp
+	}
+}
+
+func (lc *LoadedLocation) SetCancel(cancel context.CancelFunc) {
+	lc.cancelFunc = cancel
+}
+
+func (lc *LoadedLocation) Cancel() {
+	if lc.cancelFunc != nil {
+		lc.cancelFunc()
+		lc.cancelFunc = nil
 	}
 }

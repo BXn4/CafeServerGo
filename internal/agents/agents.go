@@ -4,6 +4,7 @@ import (
 	"cafego/internal/interfaces"
 	"cafego/internal/models/cafe"
 	"cafego/internal/models/object"
+	"context"
 	"math"
 	"math/rand"
 	"time"
@@ -11,7 +12,7 @@ import (
 	"github.com/charmbracelet/log"
 )
 
-func StartAgentCycles(l interfaces.CafeLocation) {
+func StartAgentCycles(l interfaces.CafeLocation, ctx context.Context) {
 	// Clean tables and chairs
 	for _, obj := range l.Cafe().GetObjects() {
 		if obj.IsTable() || obj.IsChair() {
@@ -23,42 +24,66 @@ func StartAgentCycles(l interfaces.CafeLocation) {
 	l.ClearReservedObjects()
 
 	go func() {
+		ticker := time.NewTicker(30 * time.Second)
+		defer ticker.Stop()
+
 		for {
-			if !l.IsRunning() {
-				time.Sleep(500 * time.Millisecond)
-				continue
-			}
-
-			maxSpawn := 30.0
-			minSpawn := 2.0
-			rating := float64(l.Cafe().GetRating())
-			expansion := float64(l.Cafe().ExpansionID)
-			ratingFactor := math.Min(rating/1000.0, 10.0)
-			expansionFactor := math.Min(expansion/8.0, 1.0)
-			progress := ratingFactor*0.6 + expansionFactor*0.4
-			spawnBase := maxSpawn - progress*(maxSpawn-minSpawn)
-			variation := 0.8 + rand.Float64()*0.4
-			spawnInterval := time.Duration((spawnBase * variation) * float64(time.Second))
-
-			log.Debugf("NPC spawn interval: %s", spawnInterval)
-
-			elapsed := time.Duration(0)
-			step := 100 * time.Millisecond
-
-			for elapsed < spawnInterval {
+			select {
+			case <-ctx.Done():
+				log.Debugf("Agents cycle cancelled for cafe %d", l.Cafe().GetID())
+				return
+			default:
 				if !l.IsRunning() {
-					break
+					time.Sleep(500 * time.Millisecond)
+					continue
 				}
-				time.Sleep(step)
-				elapsed += step
-			}
 
-			if !l.IsRunning() {
-				log.Debugf("Agents cycle is stopped!")
-				continue
-			}
+				maxSpawn := 30.0
+				minSpawn := 2.0
+				rating := float64(l.Cafe().GetRating())
+				expansion := float64(l.Cafe().ExpansionID)
+				ratingFactor := math.Min(rating/1000.0, 10.0)
+				expansionFactor := math.Min(expansion/8.0, 1.0)
+				progress := ratingFactor*0.6 + expansionFactor*0.4
+				spawnBase := maxSpawn - progress*(maxSpawn-minSpawn)
+				variation := 0.8 + rand.Float64()*0.4
+				spawnInterval := time.Duration((spawnBase * variation) * float64(time.Second))
 
-			go IterateCustomer(l, SpawnCustomer(l))
+				log.Debugf("NPC spawn interval: %s", spawnInterval)
+
+				elapsed := time.Duration(0)
+				step := 100 * time.Millisecond
+
+				for elapsed < spawnInterval {
+					select {
+					case <-ctx.Done():
+						log.Debugf("Agents cycle cancelled for cafe %d", l.Cafe().GetID())
+
+						return
+					default:
+						if !l.IsRunning() {
+							break
+						}
+						time.Sleep(step)
+						elapsed += step
+					}
+				}
+
+				if !l.IsRunning() {
+					log.Debugf("Agents cycle is paused!")
+					continue
+				}
+
+				go func() {
+					select {
+					case <-ctx.Done():
+						log.Debugf("Agents cycle cancelled for cafe %d", l.Cafe().GetID())
+						return
+					default:
+						IterateCustomer(l, SpawnCustomer(l))
+					}
+				}()
+			}
 		}
 	}()
 }
