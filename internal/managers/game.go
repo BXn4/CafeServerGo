@@ -20,7 +20,7 @@ type GameManager struct {
 func NewGameManager() (*GameManager, error) {
 
 	// Marketplace object
-	cafeObj, err := cafe.NewMarketplace(0) // Default marketplace
+	cafeObj, err := cafe.NewMarketplace(-1) // Default marketplace
 	if err != nil {
 		return nil, err
 	}

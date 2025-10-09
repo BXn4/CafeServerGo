@@ -168,8 +168,6 @@ func (lc *LoadedLocation) Join(playerID int, channel chan<- responses.Response) 
 
 		log.Debugf("CUSTOMER COUNT: %d ", len(lc.cafe.GetCustomers()))
 
-		lc.running = true
-
 		log.Debugf("WP COND %d %d", playerID, lc.cafe.GetPlayerID())
 
 		// Start waiters when the owner joins if not yet stared
@@ -204,6 +202,8 @@ func (lc *LoadedLocation) Join(playerID int, channel chan<- responses.Response) 
 			}
 		}
 	}
+
+	lc.running = true
 }
 
 // Leaves the location and broadcasts leave to every one
