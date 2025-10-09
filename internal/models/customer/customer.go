@@ -4,11 +4,10 @@ import (
 	"cafego/internal/models/avatar"
 	"cafego/internal/models/simple"
 	"cafego/internal/utils"
+	"math/rand/v2"
 	"strconv"
 	"strings"
 	"sync"
-
-	"golang.org/x/exp/rand"
 )
 
 type CustomerAction int
@@ -31,6 +30,7 @@ type Customer struct {
 	action         CustomerAction
 	isThirsty      bool
 	assignedWaiter int
+	dishID         int
 	mutex          sync.Mutex
 }
 
@@ -52,7 +52,8 @@ func NewRandomCustomer(id int, pos simple.Position) *Customer {
 		avatar:         avatar.NewRandomAvatar(),
 		pos:            pos,
 		action:         CUSTOMER_INSERT,
-		isThirsty:      rand.Intn(2) == 1,
+		isThirsty:      rand.Float64() <= 0.05, // 5 % to spawn a thirsty cusotmer
+		dishID:         -1,
 		assignedWaiter: -1,
 	}
 }
@@ -65,7 +66,7 @@ func (c *Customer) SpawnString() string {
 		strconv.Itoa(c.id),
 		"0", // NPC type (0: Customer)
 		"0",
-		"-1", // DishID
+		strconv.Itoa(c.dishID),
 		utils.If(c.isThirsty, "1", "0"),
 		c.avatar.String(),
 	}
@@ -151,6 +152,12 @@ func (c *Customer) GetAssignedWaiter() int {
 	return c.assignedWaiter
 }
 
+func (c *Customer) GetDishID() int {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	return c.dishID
+}
+
 // --- SETTERS -----------------------
 
 func (c *Customer) SetID(id int) {
@@ -187,4 +194,10 @@ func (c *Customer) SetAssignedWaiter(v int) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	c.assignedWaiter = v
+}
+
+func (c *Customer) SetDishID(dishID int) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	c.dishID = dishID
 }

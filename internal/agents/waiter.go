@@ -134,6 +134,13 @@ func (wa *WaiterAgent) takePlates() TaskFunction {
 	}
 
 	println("MOVE TO CLEAN")
+
+	// Set space clean
+	// Moved here, because we need to remove the dirty dishes from the table for the new client who joins the Café, because after it, we cant and it remains.
+	// Also I added SetFree and GetIsFree for the chair, so customers now checking this
+	space.SetDishID(-1)
+	space.SetDishStatus(0)
+
 	// Move to dirty plates
 	if wa.move(space.GetPos(), waiter.CLEAN) {
 		return nil
@@ -145,9 +152,7 @@ func (wa *WaiterAgent) takePlates() TaskFunction {
 		return nil
 	}
 
-	// Set space clean
-	space.SetDishID(-1)
-	space.SetDishStatus(0)
+	space.SetOccupied(false)
 
 	wa.w.SetCurrentCounter(nil)
 
@@ -190,6 +195,13 @@ func (wa *WaiterAgent) serveFood() TaskFunction {
 		wa.w.GetCurrentCounter().SetDishID(-1)
 	}
 
+	chair := wa.l.Cafe().GetObjectByPos(cu.GetPos())
+
+	// Set food to customer
+	// Set it earlier, because we need to send the chair dish id to the visitor, and if we not sending it on time, the customer will eat noting, and gives negative rating in visual
+	chair.SetDishID(savedDish)
+	chair.SetDishStatus(1)
+
 	// Move to customer and feed customer
 	if wa.move(cu.GetPos(), waiter.FEED) {
 		return nil
@@ -199,12 +211,8 @@ func (wa *WaiterAgent) serveFood() TaskFunction {
 		return nil
 	}
 
-	// Get chair at that pos
-	chair := wa.l.Cafe().GetObjectByPos(cu.GetPos())
-
-	// Set food to customer
-	chair.SetDishID(savedDish)
-	chair.SetDishStatus(1)
+	// Waiter arrived, food delivered
+	cu.SetDishID(savedDish)
 
 	// Check
 	// if wa.w.GetCurrentCounter() == nil {

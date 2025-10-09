@@ -98,12 +98,12 @@ func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
 		return
 	}
 
-	// Wait until food is placed
-	for chair.GetDishStatus() != 1 {
+	// Wait until waiter set food to the customer
+	for c.GetDishID() == -1 {
 		// Check if waiter abadoned customer
 		if c.GetAssignedWaiter() == -1 {
 			l.Cafe().AddRating(-2)
-			Leave(l, c) // Leaves sad :(
+			Leave(l, c) // Leaves sad :( // We should make it to wait, then leave. TODO!
 			l.UnreserveObject(table)
 			l.UnreserveObject(chair)
 			return
@@ -114,15 +114,12 @@ func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
 	println("Customer started to eating")
 
 	//  Eat food
-	CustomerDoAction(l, c, customer.CUSTOMER_EAT, c.GetPos(), 10*time.Second)
+	CustomerDoAction(l, c, customer.CUSTOMER_EAT, c.GetPos(), 25*time.Second) // Customers eating for 25 sec. Footage: https://www.youtube.com/watch?v=pSX2kXIFxtE
 
 	// After 10 sec set food to half eaten
 	// I think we dont need to set the dish status. Just need to set when its finishes.
 	// The game updates the dish status in visual to empty, when the customer finishes
 	// chair.SetDishStatus(2) // Half eaten
-
-	// Wait until customer finishes food
-	time.Sleep(15 * time.Second)
 
 	println("Customer finished eating, leaving....")
 
@@ -134,9 +131,9 @@ func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
 	}
 
 	// Get dish info
-	dishInfo, err := utils.GetDish(chair.GetDishID())
+	dishInfo, err := utils.GetDish(c.GetDishID())
 	if err != nil {
-		log.Errorf("Cant find dish! %v\n", chair.GetDishID())
+		log.Errorf("Cant find dish! %v\n", err)
 		return
 	}
 
@@ -176,6 +173,7 @@ func GetAvailableEatingSpace(l interfaces.CafeLocation) (*object.Object, *object
 			_, distance, found := Path(start, end)
 			if found {
 				l.ReserveObject(chair)
+				chair.SetOccupied(true)
 				return table, chair, distance
 			}
 		}

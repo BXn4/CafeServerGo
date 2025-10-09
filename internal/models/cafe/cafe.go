@@ -229,7 +229,7 @@ func (c *Cafe) GetEatingSpaces() (tablesAndChairs map[*object.Object][]*object.O
 	var chairs []*object.Object
 	var tables []*object.Object
 	for _, obj := range c.Objects {
-		if obj.IsChair() && obj.GetDishID() == -1 {
+		if obj.IsChair() && !obj.GetOccupied() {
 			chairs = append(chairs, obj)
 		}
 		if obj.IsTable() {

@@ -18,6 +18,7 @@ type Object struct {
 	dishID     int
 	dishStatus int
 	dishAmount int
+	occupied   bool
 
 	fancyIng   bool
 	startedAt  *time.Time
@@ -73,6 +74,7 @@ func NewObjectFromString(s string) (*Object, error) {
 	} else if obj.IsChair() {
 		obj.dishID = items[4]
 		obj.dishStatus = items[5]
+		obj.occupied = false
 	}
 
 	return obj, nil
@@ -262,6 +264,13 @@ func (c *Object) GetFinishesAt() *time.Time {
 	return c.finishesAt
 }
 
+func (c *Object) GetOccupied() bool {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	return c.occupied
+}
+
 // --- SETTERS -------------------------------------
 
 func (c *Object) SetKind(k CafeObjectKind) {
@@ -348,4 +357,11 @@ func (c *Object) SetFinishesAt(t *time.Time) {
 	defer c.mutex.Unlock()
 
 	c.finishesAt = t
+}
+
+func (c *Object) SetOccupied(b bool) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	c.occupied = b
 }

@@ -8,6 +8,7 @@ import (
 	"cafego/internal/models/object"
 	"cafego/internal/models/player"
 	"cafego/internal/models/simple"
+	"cafego/internal/models/waiter"
 	"cafego/internal/types/responses"
 	"slices"
 	"strconv"
@@ -151,16 +152,16 @@ func (lc *LoadedLocation) Join(playerID int, channel chan<- responses.Response) 
 	// Send every customer in location
 	log.Debug("JOIN CUSTOMER DATA:")
 	for _, cs := range lc.cafe.GetCustomers() {
-		customerAction := cs.ActionString()
+		customerActionString := cs.ActionString()
 		log.Debug("- SENT CUSTOMER DATA")
 
 		if cs.GetAction() == customer.CUSTOMER_WALK_TO_CHAIR {
-			customerAction = cs.ActionStringToSpawnBack(customer.CUSTOMER_SIT_DOWN)
+			customerActionString = cs.ActionStringToSpawnBack(customer.CUSTOMER_SIT_DOWN)
 		}
 
 		if cs.GetAction() != customer.CUSTOMER_LEAVE {
 			lc.send(playerID, "nav", "-1", "0", cs.SpawnString())
-			lc.send(playerID, "nac", "-1", "0", customerAction)
+			lc.send(playerID, "nac", "-1", "0", customerActionString)
 		}
 	}
 
@@ -168,18 +169,37 @@ func (lc *LoadedLocation) Join(playerID int, channel chan<- responses.Response) 
 
 	lc.running = true
 
-	// Respawn waiters if owner joined
 	log.Debugf("WP COND %d %d", playerID, lc.cafe.GetPlayerID())
-	if playerID == lc.cafe.GetPlayerID() {
 
+	// Start waiters when the owner joins if not yet stared
+	if playerID == lc.cafe.GetPlayerID() && !lc.cafe.AgentCycleBinded {
 		// Start waiters
+		log.Debug("Waiters spawned and started")
 		for i, w := range lc.cafe.Waiters {
 			w.SetIsWorking(false)
 			time.Sleep(10 * time.Millisecond)
-			// Respawn waiters
+			// Spawn waiters
 			go func() {
 				agents.SpawnWaiter(lc, w, i+1).Start()
 			}()
+		}
+
+		lc.cafe.AgentCycleBinded = true
+	} else if lc.cafe.AgentCycleBinded {
+		// Respawn waiters
+		for i, w := range lc.cafe.Waiters {
+
+			waiterActionString := w.ActionString()
+			if w.GetCurrentCounter() != nil {
+				// NOTE: Always spawn the waiter to a counter. In the main loop, the waiter will be updated.
+				waiterActionString = w.ActionStringToSpawnBack(waiter.MOVE_TO_COUNTER, w.GetCurrentCounter().GetPos())
+
+			} else {
+				// Fallback.
+				waiterActionString = w.ActionStringToSpawnBack(waiter.INSERT, lc.cafe.GetPlayerStart())
+			}
+			lc.send(playerID, "nav", "-1", strconv.Itoa(i), w.SpawnString())
+			lc.send(playerID, "nac", "-1", strconv.Itoa(i), waiterActionString)
 		}
 	}
 }

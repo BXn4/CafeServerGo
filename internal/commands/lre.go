@@ -160,5 +160,6 @@ func Register(req *requests.Request, c *client.Client, gm *managers.GameManager)
 	}
 
 	player.IsRegistered = true
+	c.DB.SetRegistered(player.ID)
 	return nil
 }

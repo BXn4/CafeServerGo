@@ -116,6 +116,19 @@ func (w *Waiter) ActionString() string {
 	return strings.Join(args, "+")
 }
 
+// nav - npc action string
+func (w *Waiter) ActionStringToSpawnBack(action Action, pos simple.Position) string {
+	w.mutex.RLock()
+	defer w.mutex.RUnlock()
+	args := []string{
+		strconv.Itoa(w.id),
+		strconv.Itoa(int(action)),
+		strconv.Itoa(pos.X),
+		strconv.Itoa(pos.Y),
+	}
+	return strings.Join(args, "+")
+}
+
 func NewWaiterFromString(s string) *Waiter {
 	parts := strings.Split(s, "+")
 
