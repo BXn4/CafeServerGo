@@ -8,9 +8,10 @@ import (
 
 func NewMarketplace(id int) (*Cafe, error) {
 	// Check if id is negative
-	if id >= 0 {
-		return nil, fmt.Errorf("Marketplace id cant be possitive!")
-	}
+	// Cafe is now having room types, so we can sepperate it
+	/* if id >= 0 {
+	return nil, fmt.Errorf("Marketplace id cant be possitive!")
+	} */
 
 	f := &simple.IntMatrix{}
 	tileString := "7+7+7+7+7+7+7+7+7+7+7+7+7+3+3+3+3+3+3+3+3+3+3+3+7+3+3+3+3+3+3+3+3+3+3+3+7+3+3+3+3+3+3+3+3+3+3+3+7+3+3+3+7+7+7+3+3+3+3+3+7+3+3+3+7+7+7+3+3+3+3+3+7+3+3+3+7+7+7+3+3+3+3+3+7+3+3+3+3+3+3+3+3+3+3+3+7+3+3+3+3+3+3+3+3+3+3+3+7+3+3+3+3+3+3+3+3+3+3+3+7+3+3+3+3+3+3+3+3+3+3+3+7+3+3+3+3+3+3+3+3+3+3+3"
@@ -36,5 +37,6 @@ func NewMarketplace(id int) (*Cafe, error) {
 		Size:       12,
 		Objects:    *objs,
 		Tiles:      *f,
+		roomType:   MarketRoom,
 	}, nil
 }

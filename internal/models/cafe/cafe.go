@@ -21,6 +21,13 @@ const (
 	WinterBackground      CafeBackground = "1503"
 )
 
+type RoomType int
+
+const (
+	CafeRoom RoomType = iota
+	MarketRoom
+)
+
 type Cafe struct {
 	ID                 int                  `gorm:"primaryKey;autoIncrement"`
 	PlayerID           int                  `gorm:"not null;type:int"`
@@ -40,6 +47,7 @@ type Cafe struct {
 	customers          []*customer.Customer `gorm:"-"`
 	AgentCycleBinded   bool                 `gorm:"-"`
 	playerStart        *simple.Position     `gorm:"-"`
+	roomType           RoomType             `gorm:"default:0"`
 	mutex              sync.RWMutex         `gorm:"-"`
 }
 
@@ -178,7 +186,8 @@ func (c *Cafe) getPlayerStart() simple.Position {
 	// If the door position is changed, need to check the new door position.
 
 	// If market
-	if c.ID < 0 {
+	// Cafe is now having room types, so we can sepperate it
+	if c.roomType == MarketRoom {
 		var posX, posY int
 		forbidden := map[[2]int]bool{
 			{1, 9}:  true, // Object
@@ -421,6 +430,12 @@ func (c *Cafe) GetCustomer(id int) *customer.Customer {
 	return nil
 }
 
+func (c *Cafe) GetRoomType() RoomType {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	return c.roomType
+}
+
 // Setters
 func (c *Cafe) SetID(id int) {
 	c.mutex.Lock()
@@ -586,4 +601,10 @@ func (c *Cafe) RemoveCustomer(id int) {
 
 	// Remove from slice
 	c.customers = append(c.customers[:index], c.customers[index+1:]...)
+}
+
+func (c *Cafe) SetRoomType(roomType RoomType) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	c.roomType = roomType
 }
