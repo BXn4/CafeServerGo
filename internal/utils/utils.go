@@ -1,6 +1,10 @@
 package utils
 
-import "strconv"
+import (
+	"fmt"
+	"strconv"
+	"time"
+)
 
 // This is a ternary operator
 //
@@ -15,12 +19,22 @@ func If[T any](condition bool, a T, b T) T {
 
 func MultiAtoi(args ...string) ([]int, error) {
 	result := []int{}
+	now := time.Now().UTC()
+
 	for _, arg := range args {
-		val, err := strconv.Atoi(arg)
-		if err != nil {
-			return nil, err
+		if val, err := strconv.Atoi(arg); err == nil {
+			result = append(result, val)
+			continue
 		}
-		result = append(result, val)
+
+		if t, err := time.Parse(time.RFC3339, arg); err == nil {
+			diff := int(t.Sub(now).Seconds())
+			result = append(result, diff)
+			continue
+		}
+
+		return nil, fmt.Errorf("Cannot parse %q as int or datetime", arg)
 	}
+
 	return result, nil
 }

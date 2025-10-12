@@ -48,8 +48,16 @@ func (ol ObjectList) String() string {
 	return strings.Join(objsStr, "#")
 }
 
-func ParseObjectList(str string) *ObjectList {
+func (ol ObjectList) StringForDB() string {
+	objsStr := []string{}
+	for _, obj := range ol {
+		objsStr = append(objsStr, obj.StringForDB())
+	}
 
+	return strings.Join(objsStr, "#")
+}
+
+func ParseObjectList(str string) *ObjectList {
 	parts := strings.Split(str, "#")
 	var result ObjectList
 	for _, objStr := range parts {

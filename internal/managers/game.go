@@ -53,7 +53,7 @@ func (gm *GameManager) SaveAll() error {
 
 	for _, location := range gm.locations {
 		if location != nil {
-			err := gm.db.SaveCafe(location.Cafe())
+			err := gm.db.SaveCafe(location.cafe)
 			if err != nil {
 				return err
 			}

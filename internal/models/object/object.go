@@ -37,7 +37,8 @@ func NewObject(posX int, posY int, objID int, objRotation int) (*Object, error) 
 }
 
 func NewObjectFromString(s string) (*Object, error) {
-	items, err := utils.MultiAtoi(strings.Split(s, "+")...)
+	parts := strings.Split(s, "+")
+	items, err := utils.MultiAtoi(parts...)
 	if err != nil || len(items) < 4 {
 		return nil, fmt.Errorf("Invalid object string format: %v", err)
 	}
@@ -62,12 +63,15 @@ func NewObjectFromString(s string) (*Object, error) {
 		obj.dishID = items[4]
 		obj.fancyIng = utils.If(items[5] == 1, true, false)
 		if items[6] != -1 {
-			currentTime := time.Now().UTC()
-			startedAt := currentTime.Add(time.Second * time.Duration(items[6]))
-			finishesAt := currentTime.Add(time.Second * time.Duration(items[6]+items[7]))
+			startedAt, err := time.Parse(time.RFC3339, parts[6])
+			finishesAt, err := time.Parse(time.RFC3339, parts[7])
+			if err != nil {
+				return nil, fmt.Errorf("Invalid object string format for stoves: %v", err)
+			}
 			obj.startedAt = &startedAt
 			obj.finishesAt = &finishesAt
 		}
+
 	} else if obj.isCounter() || obj.isVending() {
 		obj.dishID = items[4]
 		obj.dishAmount = items[5]
@@ -158,19 +162,15 @@ func (c *Object) String() string {
 	if c.isStove() {
 		args = append(args, strconv.Itoa(c.dishID))
 		if c.dishID > 0 {
-
 			fancyIngStr := utils.If(c.fancyIng, "1", "0")
 			args = append(args, fancyIngStr)
-
 			if c.startedAt != nil {
-				currentTime := time.Now().UTC()
-				passedTime := currentTime.Sub(*c.startedAt).Seconds()
-				remainingTime := c.finishesAt.Sub(currentTime).Seconds()
 
 				args = append(args,
-					strconv.Itoa(int(passedTime)),
-					strconv.Itoa(int(remainingTime)),
+					strconv.Itoa(c.GetPassedTime()),
+					strconv.Itoa(c.GetRemaingTime()),
 				)
+
 			} else {
 				args = append(args, "-1", "-1")
 			}
@@ -179,6 +179,42 @@ func (c *Object) String() string {
 		args = append(args, strconv.Itoa(c.dishID), strconv.Itoa(c.dishAmount))
 	} else if c.isChair() {
 		args = append(args, strconv.Itoa(c.dishID), strconv.Itoa(c.dishStatus))
+	}
+
+	return strings.Join(args, "+")
+}
+
+func (c *Object) StringForDB() string {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	args := []string{
+		strconv.Itoa(c.pos.X),
+		strconv.Itoa(c.pos.Y),
+		strconv.Itoa(int(c.kind)),
+		strconv.Itoa(int(c.rotation)),
+	}
+
+	if c.isStove() {
+		args = append(args, strconv.Itoa(c.dishID))
+		if c.dishID > 0 {
+
+			fancyIngStr := utils.If(c.fancyIng, "1", "0")
+			args = append(args, fancyIngStr)
+
+			if c.startedAt != nil {
+				args = append(args,
+					c.startedAt.Format(time.RFC3339),
+					c.finishesAt.Format(time.RFC3339),
+				)
+			} else {
+				args = append(args, "-1", "-1")
+			}
+		}
+	} else if c.isCounter() || c.isVending() {
+		args = append(args, strconv.Itoa(c.dishID), strconv.Itoa(c.dishAmount))
+	} else if c.isChair() {
+		args = append(args, "0", "0") // Not needed to save to DB
 	}
 
 	return strings.Join(args, "+")
@@ -255,6 +291,14 @@ func (c *Object) GetStartedAt() *time.Time {
 	defer c.mutex.Unlock()
 
 	return c.startedAt
+}
+
+func (c *Object) GetPassedTime() int {
+	return int(time.Now().UTC().Sub(*c.startedAt).Seconds())
+}
+
+func (c *Object) GetRemaingTime() int {
+	return int(c.finishesAt.Sub(time.Now().UTC()).Seconds())
 }
 
 func (c *Object) GetFinishesAt() *time.Time {

@@ -26,24 +26,33 @@ func (db *CafeDB) GetCafeByPlayerID(playerID int) (*cafe.Cafe, error) {
 	return &c, nil
 }
 
-func (db *CafeDB) SaveCafe(cafe *cafe.Cafe) error {
+func (db *CafeDB) SaveCafe(c *cafe.Cafe) error {
+	err := db.conn.Model(&cafe.Cafe{}).
+		Where("id = ?", c.ID).
+		Updates(map[string]any{
+			"rating":        c.GetRating(),
+			"luxury":        c.GetLuxury(),
+			"expansion_id":  c.GetExpansionID(),
+			"tiles":         c.Tiles.String(),
+			"objects":       c.Objects.StringForDB(),
+			"fridge_inv":    c.FridgeInventory.String(),
+			"furniture_inv": c.FurnitureInventory.String(),
+			"waiters":       c.Waiters.String(),
+		}).Error
 
-	// If it is a marketplace dont save it
-	if cafe.ID < 0 {
-		return nil
+	if err != nil {
+		return fmt.Errorf("Cant save Cafe: %v", err)
 	}
 
-	// Delete temporary info from objects
-	for _, obj := range cafe.Objects {
-		if obj.IsChair() {
-			obj.SetDishID(0)
-			obj.SetDishStatus(0)
-		}
-	}
+	return nil
+}
 
-	// Save to database
-	if err := db.conn.Save(&cafe).Error; err != nil {
-		return fmt.Errorf("Cannot save cafe: %v", err)
+func (db *CafeDB) UpdateObjects(cafeID int, objects string) error {
+	err := db.conn.Model(&cafe.Cafe{}).
+		Where("id = ?", cafeID).
+		Update("objects", objects).Error
+	if err != nil {
+		return fmt.Errorf("Cant update Cafe: %v", err)
 	}
 
 	return nil

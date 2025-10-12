@@ -44,6 +44,8 @@ func (db *CafeDB) GetPlayer(id int) (*player.Player, error) {
 
 func (db *CafeDB) SavePlayer(p *player.Player) error {
 
+	p.LastLogin = time.Now().UTC()
+
 	// Build friends
 	friendsStr := []string{}
 	for _, f := range p.Friends {
@@ -55,7 +57,7 @@ func (db *CafeDB) SavePlayer(p *player.Player) error {
 		friendsWithGiftsStr = append(friendsWithGiftsStr, strconv.Itoa(f))
 	}
 
-	updateData := map[string]interface{}{
+	updateData := map[string]any{
 		"cash":                  int(p.GetCash()),
 		"gold":                  p.GetGold(),
 		"xp":                    p.GetXP(),

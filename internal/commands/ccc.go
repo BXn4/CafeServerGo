@@ -105,6 +105,7 @@ func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameMana
 		stove.SetStartedAt(&currentTime)
 		finishesAt := stove.GetStartedAt().Add(time.Duration(cookingTime) * time.Second)
 		stove.SetFinishesAt(&finishesAt)
+
 	}
 
 	c.Location.Broadcast(
@@ -116,6 +117,8 @@ func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameMana
 		strconv.Itoa(usingFancy),
 		strconv.Itoa(int(cookingTime)),
 	)
+
+	c.DB.UpdateObjects(c.Location.Cafe().GetID(), c.Location.Cafe().Objects.StringForDB())
 
 	return nil
 }

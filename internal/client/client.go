@@ -59,6 +59,10 @@ func (c *Client) Start() {
 func (c *Client) Disconnect() error {
 	if c.Player != nil {
 		id := c.Player.ID
+
+		c.Player.LastLogin = time.Now().UTC()
+		c.DB.UpdateLastLogin(c.Player.ID, c.Player.LastLogin)
+
 		c.ClientManager.DisconnectClient(id)
 	}
 	c.Conn.Close()

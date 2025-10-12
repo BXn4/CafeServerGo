@@ -14,9 +14,9 @@ import (
 )
 
 func LoginRewards(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
-
 	// Check if time passed by daily login
-	timePassed := time.Now().Sub(c.Player.DailyLogin)
+	timePassedSinceLastLogin := time.Now().UTC().Sub(c.Player.LastLogin)
+	timePassed := time.Now().UTC().Sub(c.Player.DailyLogin)
 	isDaily := timePassed >= 24*time.Hour
 
 	if isDaily {
@@ -25,6 +25,7 @@ func LoginRewards(req *requests.Request, c *client.Client, gm *managers.GameMana
 
 	var args []string
 	loginBonusStr := ""
+
 	if isDaily {
 		// Get random fancy
 		fancies, err := utils.GetItems("fancy")
@@ -43,6 +44,7 @@ func LoginRewards(req *requests.Request, c *client.Client, gm *managers.GameMana
 
 	// Get my cafe
 	mycafe, err := c.DB.GetCafeByPlayerID(c.Player.ID)
+
 	if err != nil {
 		return err
 	}
@@ -50,21 +52,23 @@ func LoginRewards(req *requests.Request, c *client.Client, gm *managers.GameMana
 	// Calculate customer spawn time (we use max time so people dont try to cheat the system)
 	rating := mycafe.GetRating()
 	var customerSpawnTime int
+
 	if rating < 150 {
-		customerSpawnTime = 20
+		customerSpawnTime = 30
 	} else if rating <= 150 && rating < 350 {
-		customerSpawnTime = 8
+		customerSpawnTime = 20
 	} else if rating <= 350 && rating < 500 {
-		customerSpawnTime = 6
+		customerSpawnTime = 15
 	} else {
 		customerSpawnTime = 5
 	}
 
 	// Calculate passive income
-	passedSeconds := timePassed.Seconds()
+	passedSeconds := timePassedSinceLastLogin.Seconds()
 	passiveIncome := 0
 	soldDishes := 0
 	maxDishSellCount := int(passedSeconds / float64(customerSpawnTime))
+
 	for i := 0; i < maxDishSellCount; i++ {
 		// Get counter
 		counter, _ := agents.GetRandomCounter(mycafe)
@@ -96,16 +100,22 @@ func LoginRewards(req *requests.Request, c *client.Client, gm *managers.GameMana
 		passiveIncome += wod.Cash
 	}
 
-	soldDishesStr := strconv.Itoa(soldDishes)
+	if soldDishes > 0 {
 
-	// Add passive income to args
-	args = append(args, fmt.Sprintf("1901+%v", passiveIncome))
+		soldDishesStr := strconv.Itoa(soldDishes)
 
-	// Save modified cafe
-	c.DB.SaveCafe(mycafe)
+		c.Player.Cash += passiveIncome
 
-	// Send response
-	c.SendExtensionResponse("lbu", "-1", "0", strings.Join(args, "#"), soldDishesStr)
+		// Add passive income to args
+		args = append(args, fmt.Sprintf("1901+%v", passiveIncome))
+
+		// Save modified cafe
+		c.DB.UpdateObjects(mycafe.ID, mycafe.Objects.StringForDB())
+		c.DB.UpdateCash(c.Player.ID, c.Player.Cash)
+
+		// Send response
+		c.SendExtensionResponse("lbu", "-1", "0", strings.Join(args, "#"), soldDishesStr)
+	}
 
 	return nil
 }
