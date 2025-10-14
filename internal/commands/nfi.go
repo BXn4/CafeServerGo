@@ -23,5 +23,7 @@ func FireWaiter(req *requests.Request, c *client.Client, gm *managers.GameManage
 
 	c.SendExtensionResponse("nfi", "0", "0", req.Args[2])
 
+	c.DB.UpdateWaiters(c.Location.Cafe().ID, c.Location.Cafe().Waiters.String())
+
 	return nil
 }

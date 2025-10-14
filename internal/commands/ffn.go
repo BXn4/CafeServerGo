@@ -54,9 +54,14 @@ func FastFoodCustomer(req *requests.Request, c *client.Client, gm *managers.Game
 	// Add rewards
 	c.Player.AddXP(drink.XP)
 	c.Player.AddCash(drink.Cash)
-	c.Location.Cafe().AddRating(drink.RatingBonus)
+	c.Location.Cafe().AddRating(drink.RatingBonus / 10)
 
 	c.DB.UpdateAchievement(c.Player.ID, c.Player.GetAchivements().String())
+
+	c.DB.UpdateCash(c.Player.ID, c.Player.GetCash())
+	c.DB.UpdateXP(c.Player.ID, c.Player.GetXP())
+	c.DB.UpdateObjects(c.Location.Cafe().ID, c.Location.Cafe().Objects.StringForDB())
+	c.DB.UpdateRating(c.Location.Cafe().ID, c.Location.Cafe().GetRating())
 
 	c.SendExtensionResponse("vck", "-1", "0", req.Args[2], req.Args[3], req.Args[4])
 	return nil

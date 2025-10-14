@@ -18,6 +18,8 @@ func RemoveGift(req *requests.Request, c *client.Client, gm *managers.GameManage
 
 	c.SendExtensionResponse("gmg", "-1", "0", req.Args[2])
 
+	c.DB.UpdateGifts(c.Player.ID, c.Player.Gifts.String())
+
 	SendPlayerGifts(req, c, gm)
 	return nil
 }

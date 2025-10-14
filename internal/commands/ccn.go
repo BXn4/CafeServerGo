@@ -31,12 +31,18 @@ func Clean(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 		return err
 	}
 
-	var status string
 	if obj.IsStove() {
 		if c.Player.GetCash() < 15 {
-			status = "4"
+			c.SendExtensionResponse(
+				"ccn", "-1",
+				"4",
+				req.Args[2],
+				req.Args[3],
+				utils.If(obj.IsStove(), "1", "0"),
+			)
+
+			return nil
 		} else {
-			status = "0"
 			c.Player.AddCash(-15)
 
 			if obj.GetDishID() > 0 && obj.GetIsRotten() {
@@ -47,17 +53,27 @@ func Clean(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 			obj.SetDishID(-1)
 		}
 	} else {
-		obj.SetDishID(-1)
-		status = "0"
+		c.SendExtensionResponse(
+			"ccn", "-1",
+			"4",
+			req.Args[2],
+			req.Args[3],
+			utils.If(obj.IsStove(), "1", "0"),
+		)
+
+		return nil
 	}
 
 	c.SendExtensionResponse(
 		"ccn", "-1",
-		status,
+		"0",
 		req.Args[2],
 		req.Args[3],
 		utils.If(obj.IsStove(), "1", "0"),
 	)
+
+	c.DB.UpdateObjects(c.Location.Cafe().ID, c.Location.Cafe().Objects.StringForDB())
+	c.DB.UpdateCash(c.Player.ID, c.Player.GetCash())
 
 	return nil
 }

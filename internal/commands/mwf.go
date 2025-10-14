@@ -175,5 +175,11 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 		c.SendExtensionResponse("mwf", "-1", "0", rewardStr, idStr+"+1")
 	}
 
+	c.DB.UpdateCash(c.Player.ID, c.Player.GetCash())
+	c.DB.UpdateGold(c.Player.ID, c.Player.GetGold())
+	c.DB.UpdateXP(c.Player.ID, c.Player.GetXP())
+	c.DB.UpdateGifts(c.Player.ID, c.Player.Gifts.String())
+	c.DB.UpdateFurnitureInventory(c.Location.Cafe().ID, c.Location.Cafe().FurnitureInventory.String())
+
 	return nil
 }

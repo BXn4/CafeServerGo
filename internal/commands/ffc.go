@@ -42,5 +42,10 @@ func FastFoodCook(req *requests.Request, c *client.Client, gm *managers.GameMana
 		req.Args[3],
 		req.Args[4],
 	)
+
+	c.DB.UpdateCash(c.Player.ID, c.Player.GetCash())
+	c.DB.UpdateGold(c.Player.ID, c.Player.GetGold())
+	c.DB.UpdateObjects(c.Location.Cafe().ID, c.Location.Cafe().Objects.StringForDB())
+
 	return nil
 }

@@ -54,5 +54,8 @@ func SellIngredient(req *requests.Request, c *client.Client, gm *managers.GameMa
 
 	c.SendExtensionResponse("sdi", "-1", "0", strconv.Itoa(ingredientID), strconv.Itoa(sellAmount))
 
+	c.DB.UpdateCash(c.Player.ID, c.Player.GetCash())
+	c.DB.UpdateFridgeInventory(c.Location.Cafe().ID, c.Location.Cafe().GetFridgeInventory().String())
+
 	return nil
 }

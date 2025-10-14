@@ -50,6 +50,8 @@ func HireWaiter(req *requests.Request, c *client.Client, gm *managers.GameManage
 		agents.SpawnWaiter(c.Location, newWaiter, newID).Start()
 	}()
 
+	c.DB.UpdateWaiters(c.Location.Cafe().ID, c.Location.Cafe().Waiters.String())
+
 	c.SendExtensionResponse("nhi", "0", "0", req.Args[2], req.Args[3])
 	return nil
 }

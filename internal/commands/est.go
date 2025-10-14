@@ -62,6 +62,11 @@ func StoreObject(req *requests.Request, c *client.Client, gm *managers.GameManag
 	}
 	c.Location.Cafe().RemoveObject(obj.GetPos())
 	c.Location.Cafe().AddLuxury(-(objectInfo.Cash / 4000) + (objectInfo.Gold * 2))
+
+	c.DB.UpdateObjects(c.Location.Cafe().ID, c.Location.Cafe().Objects.StringForDB())
+	c.DB.UpdateLuxury(c.Location.Cafe().ID, c.Location.Cafe().GetLuxury())
+	c.DB.UpdateFurnitureInventory(c.Location.Cafe().ID, c.Location.Cafe().FurnitureInventory.String())
+
 	c.SendExtensionResponse("est", "-1", "0", strconv.Itoa(objX), strconv.Itoa(objY), strconv.Itoa(int(obj.GetKind())))
 	return nil
 }

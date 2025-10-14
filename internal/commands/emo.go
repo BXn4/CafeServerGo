@@ -58,6 +58,8 @@ func MoveObject(req *requests.Request, c *client.Client, gm *managers.GameManage
 
 	obj.SetPosXY(newObjPos.X, newObjPos.Y)
 
+	c.DB.UpdateObjects(c.Location.Cafe().ID, c.Location.Cafe().Objects.StringForDB())
+
 	c.SendExtensionResponse("emo", "-1", "0", strconv.Itoa(oldObjPos.X), strconv.Itoa(oldObjPos.Y), strconv.Itoa(newObjPos.X), strconv.Itoa(newObjPos.X))
 	return nil
 }

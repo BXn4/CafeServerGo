@@ -43,8 +43,10 @@ func InstantCook(req *requests.Request, c *client.Client, gm *managers.GameManag
 	stove.SetFinishesAt(&currentTime)
 
 	c.Player.UpdateAchivementInstantCount()
-
 	c.DB.UpdateAchievement(c.Player.ID, c.Player.GetAchivements().String())
+
+	c.DB.UpdateGold(c.Player.ID, c.Player.GetGold())
+	c.DB.UpdateObjects(c.Location.Cafe().ID, c.Location.Cafe().Objects.StringForDB())
 
 	c.Location.Broadcast("cic", "-1", "0", strconv.Itoa(objX), strconv.Itoa(objY))
 

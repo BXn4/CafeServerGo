@@ -38,6 +38,9 @@ func RotateObject(req *requests.Request, c *client.Client, gm *managers.GameMana
 		return nil
 	}
 	obj.SetRotation(object.CafeObjectRotation(objRotation))
+
+	c.DB.UpdateObjects(c.Location.Cafe().ID, c.Location.Cafe().Objects.StringForDB())
+
 	c.SendExtensionResponse("ero", "-1", "0", strconv.Itoa(objX), strconv.Itoa(objY), strconv.Itoa(objRotation))
 	return nil
 }

@@ -71,6 +71,9 @@ func SellObject(req *requests.Request, c *client.Client, gm *managers.GameManage
 	c.Player.UpdateAchivementSoldItems()
 
 	c.DB.UpdateAchievement(c.Player.ID, c.Player.GetAchivements().String())
+	c.DB.UpdateCash(c.Player.ID, c.Player.GetCash())
+	c.DB.UpdateObjects(c.Location.Cafe().ID, c.Location.Cafe().Objects.StringForDB())
+	c.DB.UpdateLuxury(c.Location.Cafe().ID, c.Location.Cafe().GetLuxury())
 
 	c.SendExtensionResponse("ese", "-1", "0", strconv.Itoa(objX), strconv.Itoa(objY), strconv.Itoa(objID), strconv.Itoa(sellAmount))
 	return nil

@@ -57,3 +57,91 @@ func (db *CafeDB) UpdateObjects(cafeID int, objects string) error {
 
 	return nil
 }
+
+func (db *CafeDB) UpdateRating(cafeID int, rating int) error {
+	err := db.conn.Model(&cafe.Cafe{}).
+		Where("id = ?", cafeID).
+		Update("rating", rating).Error
+	if err != nil {
+		return fmt.Errorf("Cant update Cafe: %v", err)
+	}
+
+	return nil
+}
+
+func (db *CafeDB) UpdateLuxury(cafeID int, luxury int) error {
+	err := db.conn.Model(&cafe.Cafe{}).
+		Where("id = ?", cafeID).
+		Update("luxury", luxury).Error
+	if err != nil {
+		return fmt.Errorf("Cant update Cafe: %v", err)
+	}
+
+	return nil
+}
+
+func (db *CafeDB) UpdateSize(cafeID int, size int) error {
+	err := db.conn.Model(&cafe.Cafe{}).
+		Where("id = ?", cafeID).
+		Update("size", size).Error
+	if err != nil {
+		return fmt.Errorf("Cant update Cafe: %v", err)
+	}
+
+	return nil
+}
+
+func (db *CafeDB) UpdateExpansionID(cafeID int, expansiondID int) error {
+	err := db.conn.Model(&cafe.Cafe{}).
+		Where("id = ?", cafeID).
+		Update("expansion_id", expansiondID).Error
+	if err != nil {
+		return fmt.Errorf("Cant update Cafe: %v", err)
+	}
+
+	return nil
+}
+
+func (db *CafeDB) UpdateTiles(cafeID int, tiles string) error {
+	err := db.conn.Model(&cafe.Cafe{}).
+		Where("id = ?", cafeID).
+		Update("tiles", tiles).Error
+	if err != nil {
+		return fmt.Errorf("Cant update Cafe: %v", err)
+	}
+
+	return nil
+}
+
+func (db *CafeDB) UpdateFridgeInventory(cafeID int, inventory string) error {
+	err := db.conn.Model(&cafe.Cafe{}).
+		Where("id = ?", cafeID).
+		Update("fridge_inv", inventory).Error
+	if err != nil {
+		return fmt.Errorf("Cant update Cafe: %v", err)
+	}
+
+	return nil
+}
+
+func (db *CafeDB) UpdateFurnitureInventory(cafeID int, inventory string) error {
+	err := db.conn.Model(&cafe.Cafe{}).
+		Where("id = ?", cafeID).
+		Update("furniture_inv", inventory).Error
+	if err != nil {
+		return fmt.Errorf("Cant update Cafe: %v", err)
+	}
+
+	return nil
+}
+
+func (db *CafeDB) UpdateWaiters(cafeID int, waiters string) error {
+	err := db.conn.Model(&cafe.Cafe{}).
+		Where("id = ?", cafeID).
+		Update("waiters", waiters).Error
+	if err != nil {
+		return fmt.Errorf("Cant update Cafe: %v", err)
+	}
+
+	return nil
+}

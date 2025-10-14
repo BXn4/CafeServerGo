@@ -63,7 +63,9 @@ func BuyIngredient(req *requests.Request, c *client.Client, gm *managers.GameMan
 
 	c.SendExtensionResponse("sbi", "-1", "0", strconv.Itoa(ingredientID), strconv.Itoa(ingredientAmount))
 
-	// TODO: Update it in the database
+	c.DB.UpdateCash(c.Player.ID, c.Player.GetCash())
+	c.DB.UpdateGold(c.Player.ID, c.Player.GetGold())
+	c.DB.UpdateFridgeInventory(c.Location.Cafe().ID, c.Location.Cafe().GetFridgeInventory().String())
 
 	return nil
 }

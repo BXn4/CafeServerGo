@@ -85,5 +85,8 @@ func BuyFloor(req *requests.Request, c *client.Client, gm *managers.GameManager)
 		strconv.Itoa(buyAmount),
 	)
 
+	c.DB.UpdateCash(c.Player.ID, c.Player.GetCash())
+	c.DB.UpdateObjects(c.Location.Cafe().ID, c.Location.Cafe().Objects.StringForDB())
+
 	return nil
 }

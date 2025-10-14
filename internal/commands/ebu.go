@@ -42,21 +42,21 @@ func BuyObject(req *requests.Request, c *client.Client, gm *managers.GameManager
 	}
 
 	// If the player does not have the object in their inventory, dont remove cash, gold
-	if c.Location.Cafe().GetFurnitureInventory()[objID] != 0 {
-		if objectInfo.Cash != 0 && objectInfo.Cash > c.Player.GetCash() {
-			// Need to send the ID, because the client parse it / these.
+	if c.Location.Cafe().GetFurnitureInventory()[objID] == 0 {
+		if objectInfo.Cash > c.Player.GetCash() {
 			c.SendExtensionResponse("ebu", "-1", "4", strconv.Itoa(objX), strconv.Itoa(objY), strconv.Itoa(objID), strconv.Itoa(objRotation))
 			return nil
+
+		} else if objectInfo.Cash > 0 {
+			c.Player.AddCash(-objectInfo.Cash)
 		}
 
-		if objectInfo.Gold != 0 && objectInfo.Gold > c.Player.GetGold() {
-			// Need to send the ID, because the client parse it / these.
+		if objectInfo.Gold > c.Player.GetGold() {
 			c.SendExtensionResponse("ebu", "-1", "4", strconv.Itoa(objX), strconv.Itoa(objY), strconv.Itoa(objID), strconv.Itoa(objRotation))
 			return nil
+		} else if objectInfo.Gold > 0 {
+			c.Player.AddGold(-objectInfo.Gold)
 		}
-
-		c.Player.AddCash(objectInfo.Cash)
-		c.Player.AddGold(objectInfo.Gold)
 	}
 
 	// Need to add back the old wall in the inventory
@@ -99,6 +99,12 @@ func BuyObject(req *requests.Request, c *client.Client, gm *managers.GameManager
 	// Works?
 	// 0 / 4000 + 0 * 2 = 0 (if not cost cash) (if not cost gold)
 	c.Location.Cafe().AddLuxury((objectInfo.Cash / 4000) + (objectInfo.Gold * 2))
+
+	c.DB.UpdateCash(c.Player.ID, c.Player.GetCash())
+	c.DB.UpdateGold(c.Player.ID, c.Player.GetGold())
+	c.DB.UpdateObjects(c.Location.Cafe().ID, c.Location.Cafe().Objects.StringForDB())
+	c.DB.UpdateLuxury(c.Location.Cafe().ID, c.Location.Cafe().GetLuxury())
+
 	c.SendExtensionResponse("ebu", "-1", "0", strconv.Itoa(objX), strconv.Itoa(objY), strconv.Itoa(objID), strconv.Itoa(objRotation))
 	return nil
 }

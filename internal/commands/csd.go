@@ -104,5 +104,8 @@ func StoveDeliver(req *requests.Request, c *client.Client, gm *managers.GameMana
 		strconv.Itoa(c.Player.ID),
 	)
 
+	c.DB.UpdateXP(c.Player.ID, c.Player.GetXP())
+	c.DB.UpdateObjects(c.Location.Cafe().ID, c.Location.Cafe().Objects.StringForDB())
+
 	return nil
 }

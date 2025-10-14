@@ -83,6 +83,9 @@ func SendFriendRequest(req *requests.Request, c *client.Client, gm *managers.Gam
 		if err != nil {
 			return err
 		}
+
+		toClient.DB.UpdateFriends(toClient.Player.ID, toClient.Player.Friends.String())
+		fromClient.DB.UpdateFriends(fromClient.Player.ID, fromClient.Player.Friends.String())
 	case DENY:
 		if toPlayer == nil {
 			break

@@ -52,6 +52,9 @@ func PlayMuffinGame(req *requests.Request, c *client.Client, gm *managers.GameMa
 
 		c.DB.UpdateAchievement(c.Player.ID, c.Player.GetAchivements().String())
 
+		c.DB.UpdateCash(c.Player.ID, c.Player.GetCash())
+		c.DB.UpdateGold(c.Player.ID, c.Player.GetGold())
+
 		c.SendExtensionResponse("mmu", "-1", "0", "1", strconv.Itoa(cash), strconv.Itoa(gold))
 	case false:
 		c.SendExtensionResponse("mmu", "-1", "0", "0", strconv.Itoa(-cash), strconv.Itoa(-gold))

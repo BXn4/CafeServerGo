@@ -62,6 +62,9 @@ func Recook(req *requests.Request, c *client.Client, gm *managers.GameManager) e
 
 		c.DB.UpdateAchievement(c.Player.ID, c.Player.GetAchivements().String())
 
+		c.DB.UpdateGold(c.Player.ID, c.Player.GetGold())
+		c.DB.UpdateObjects(c.Location.Cafe().ID, c.Location.Cafe().Objects.StringForDB())
+
 		c.Location.Broadcast("crc", "-1", "0", strconv.Itoa(objX), strconv.Itoa(objY))
 	} else {
 		c.SendExtensionResponse("crc", "-1", "4", strconv.Itoa(objX), strconv.Itoa(objY))

@@ -6,7 +6,6 @@ import (
 	"cafego/internal/models/waiter"
 	"cafego/internal/types/requests"
 	"strconv"
-	"time"
 )
 
 func WaiterCustomize(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
@@ -38,12 +37,7 @@ func WaiterCustomize(req *requests.Request, c *client.Client, gm *managers.GameM
 		req.Args[4], // new waiter priority
 	)
 
-	// Stop waiter
-	println("DEBUG")
-	w.StopWorking()
-	time.Sleep(100 * time.Millisecond)
-
-	c.Location.Broadcast("nav", "-1", "0", w.SpawnString())
+	c.DB.UpdateWaiters(c.Location.Cafe().ID, c.Location.Cafe().Waiters.String())
 
 	return nil
 }
