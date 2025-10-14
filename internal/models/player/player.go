@@ -190,7 +190,7 @@ func (p *Player) DeleteFriend(id int) {
 func (p *Player) AddCash(amount int) {
 	p.Cash += amount
 	if amount > 0 {
-		p.UpdateAchivementSpendChips(amount)
+		p.UpdateAchivementEarnedChips(amount)
 	} else if amount < 0 {
 		p.UpdateAchivementSpendChips(amount)
 	}

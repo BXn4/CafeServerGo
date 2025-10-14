@@ -4,10 +4,13 @@ import (
 	"cafego/internal/models/simple"
 	"cafego/internal/utils"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/charmbracelet/log"
 )
 
 type Object struct {
@@ -313,6 +316,26 @@ func (c *Object) GetOccupied() bool {
 	defer c.mutex.Unlock()
 
 	return c.occupied
+}
+
+func (c *Object) GetIsRotten() bool {
+	// Rotten Duration: return Math.max(CafeConstants.MIN_DISH_READY_TIME,this._baseDuration)
+	// if not yet rotten: currentDish.rottenDuration * 60 + this.stoveVO.timeLeft > 0
+	dishInfo, err := utils.GetDish(c.GetDishID())
+	if err != nil {
+		log.Printf("Invalid dish id: %s", err)
+		return true
+	}
+
+	rottenDuration := math.Max(60, float64(dishInfo.Duration))
+	if rottenDuration*60+float64(c.GetRemaingTime()) < 0 {
+		// log.Debugf("The dish is rotten!")
+		return true
+	}
+
+	// log.Debugf("The dish is not rotten!")
+
+	return false
 }
 
 // --- SETTERS -------------------------------------

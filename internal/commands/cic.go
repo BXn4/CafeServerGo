@@ -26,8 +26,9 @@ func InstantCook(req *requests.Request, c *client.Client, gm *managers.GameManag
 		return nil
 	}
 
-	if c.Player.GetGold() < 1 {
-		c.Location.Broadcast("cic", "-1", "4")
+	if c.Player.GetGold() < 1 /* && c.Player.GetInstantCookings < 1 */ {
+		c.SendExtensionResponse("crc", "-1", "4", strconv.Itoa(objX), strconv.Itoa(objY))
+		return nil
 	}
 
 	stove := c.Location.Cafe().GetObjectByPosXY(objX, objY)
@@ -35,9 +36,15 @@ func InstantCook(req *requests.Request, c *client.Client, gm *managers.GameManag
 		return nil
 	}
 
+	c.Player.AddGold(-1)
+
 	currentTime := time.Now().UTC()
 	stove.SetStartedAt(&currentTime)
 	stove.SetFinishesAt(&currentTime)
+
+	c.Player.UpdateAchivementInstantCount()
+
+	c.DB.UpdateAchievement(c.Player.ID, c.Player.GetAchivements().String())
 
 	c.Location.Broadcast("cic", "-1", "0", strconv.Itoa(objX), strconv.Itoa(objY))
 

@@ -25,7 +25,7 @@ func ChangeAvatar(req *requests.Request, c *client.Client, gm *managers.GameMana
 			c.SendExtensionResponse("cha", "-1", "4")
 			return fmt.Errorf("Player does not have enough gold to change the avatar")
 		}
-		c.Player.Gold -= 1
+		c.Player.AddGold(-1)
 		c.DB.UpdateGold(c.Player.ID, c.Player.Gold)
 	}
 

@@ -17,6 +17,10 @@ func FireWaiter(req *requests.Request, c *client.Client, gm *managers.GameManage
 
 	c.Location.Cafe().RemoveWaiter(id)
 
+	c.Player.UpdateAchivementFireNPC()
+
+	c.DB.UpdateAchievement(c.Player.ID, c.Player.GetAchivements().String())
+
 	c.SendExtensionResponse("nfi", "0", "0", req.Args[2])
 
 	return nil

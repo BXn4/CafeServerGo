@@ -146,6 +146,10 @@ func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
 	// Set plate dirty
 	chair.SetDishStatus(3) // Dirty
 
+	player.UpdateAchivementServingsCount(1)
+
+	// c.DB.UpdateAchievement(player.ID, player.GetAchivements().String())
+
 	Leave(l, c)
 }
 

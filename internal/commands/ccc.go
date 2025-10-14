@@ -98,14 +98,40 @@ func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameMana
 		stove.SetDishID(dishID)
 		stove.SetFancyIng(usingFancy != 0)
 
-	} else {
+		if usingFancy != 0 {
+			c.Player.UpdateAchivementFancyCount()
+		}
 
+		// sweets = 0
+		// meals = 1
+		// soup = 2
+		// salad = 3
+		// vega = 4
+		// snacks = 5
+
+		dishCategory := dishInfo.DishCategory
+
+		switch dishCategory {
+		case 0:
+			c.Player.UpdateAchivementServingCountSweets()
+		case 1:
+			c.Player.UpdateAchivementServingCountMeals()
+		case 2:
+			c.Player.UpdateAchivementServingCountSoups()
+		case 3:
+			c.Player.UpdateAchivementServingCountSalads()
+		case 4:
+			c.Player.UpdateAchivementServingCountVegans()
+		case 5:
+			c.Player.UpdateAchivementServingCountSnacks()
+		}
+
+	} else {
 		stove.SetDishID(dishID)
 		currentTime := time.Now().UTC()
 		stove.SetStartedAt(&currentTime)
 		finishesAt := stove.GetStartedAt().Add(time.Duration(cookingTime) * time.Second)
 		stove.SetFinishesAt(&finishesAt)
-
 	}
 
 	c.Location.Broadcast(
@@ -117,6 +143,8 @@ func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameMana
 		strconv.Itoa(usingFancy),
 		strconv.Itoa(int(cookingTime)),
 	)
+
+	c.DB.UpdateAchievement(c.Player.ID, c.Player.GetAchivements().String())
 
 	c.DB.UpdateObjects(c.Location.Cafe().GetID(), c.Location.Cafe().Objects.StringForDB())
 

@@ -69,8 +69,6 @@ func StoveDeliver(req *requests.Request, c *client.Client, gm *managers.GameMana
 		fancyXP := dishXP * (20 - loc1) / 100
 
 		dishXP += fancyXP
-
-		print(dishAmount)
 	}
 
 	if counter.GetDishID() == stove.GetDishID() {
@@ -91,6 +89,10 @@ func StoveDeliver(req *requests.Request, c *client.Client, gm *managers.GameMana
 
 	c.Player.UpdateMastery(dish.ID)
 	// TODO: Create masteryies
+
+	c.Player.UpdateAchivementCookingCount()
+
+	c.DB.UpdateAchievement(c.Player.ID, c.Player.GetAchivements().String())
 
 	// response = ExtensionResponse('csd', '-1', '0', stove_x, stove_y, counter_x, counter_y, str(player.id))
 	c.SendExtensionResponse(

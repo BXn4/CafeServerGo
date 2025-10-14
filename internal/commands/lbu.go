@@ -40,6 +40,10 @@ func LoginRewards(req *requests.Request, c *client.Client, gm *managers.GameMana
 		loginBonusStr = fmt.Sprintf("1906+%v#%v+1", loginBonus, fancy.ID)
 		args = append(args, loginBonusStr)
 
+		c.Player.Cash += loginBonus
+		c.Location.Cafe().AddToFridge(fancy.ID, 1)
+		// c.DB.UpdateFridge()
+
 	}
 
 	// Get my cafe
@@ -79,8 +83,8 @@ func LoginRewards(req *requests.Request, c *client.Client, gm *managers.GameMana
 		}
 
 		// If no food return
-		savedID := counter.GetDishID()
-		if savedID <= 0 {
+		dishID := counter.GetDishID()
+		if dishID == -1 {
 			break
 		}
 
@@ -91,30 +95,36 @@ func LoginRewards(req *requests.Request, c *client.Client, gm *managers.GameMana
 		soldDishes++
 
 		// Get dish info
-		wod, err := utils.GetDish(savedID)
+		wod, err := utils.GetDish(dishID)
 		if err != nil {
 			return err
 		}
 
 		// Add to passive income
-		passiveIncome += wod.Cash
+		passiveIncome += wod.IncomePerServing
 	}
 
-	if soldDishes > 0 {
-
+	if isDaily || soldDishes > 0 {
+		if soldDishes > 0 {
+			c.Player.UpdateAchivementServingsCount(soldDishes)
+		}
 		soldDishesStr := strconv.Itoa(soldDishes)
 
-		c.Player.Cash += passiveIncome
+		c.Player.AddCash(passiveIncome)
 
 		// Add passive income to args
-		args = append(args, fmt.Sprintf("1901+%v", passiveIncome))
+		args = append(args, fmt.Sprintf("1901+%d", passiveIncome))
 
 		// Save modified cafe
 		c.DB.UpdateObjects(mycafe.ID, mycafe.Objects.StringForDB())
 		c.DB.UpdateCash(c.Player.ID, c.Player.Cash)
+		c.DB.UpdateAchievement(c.Player.ID, c.Player.GetAchivements().String())
 
 		// Send response
 		c.SendExtensionResponse("lbu", "-1", "0", strings.Join(args, "#"), soldDishesStr)
+
+		AssetsSynchronize(c) // Updates force the player cash, gold in the game visually.
+		// Its used in the payments, but we can use it to update the cash, gold values force.
 	}
 
 	return nil

@@ -38,6 +38,12 @@ func Clean(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 		} else {
 			status = "0"
 			c.Player.AddCash(-15)
+
+			if obj.GetDishID() > 0 && obj.GetIsRotten() {
+				c.Player.UpdateAchivementOvercookedFoods() // if the player cleans rotten food
+
+				c.DB.UpdateAchievement(c.Player.ID, c.Player.GetAchivements().String())
+			}
 			obj.SetDishID(-1)
 		}
 	} else {

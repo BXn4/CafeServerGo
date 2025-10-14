@@ -27,6 +27,8 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 
 	c.Player.UpdateAchivementWheelOfFortune()
 
+	c.DB.UpdateAchievement(c.Player.ID, c.Player.GetAchivements().String())
+
 	reward := rand.Intn(16)
 	rewardStr := strconv.Itoa(reward)
 

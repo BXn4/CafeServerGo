@@ -60,7 +60,8 @@ func BuyObject(req *requests.Request, c *client.Client, gm *managers.GameManager
 	}
 
 	// Need to add back the old wall in the inventory
-	if objectInfo.Group == "Wall" {
+	switch objectInfo.Group {
+	case "Wall":
 		oldWallID := c.Location.Cafe().GetTiles()[objX][objY]
 		// If the old wall have luxury value, remove it from the Cafe
 		c.Location.Cafe().AddLuxury(-(objectInfo.Cash / 4000) + (objectInfo.Gold * 2))
@@ -69,7 +70,7 @@ func BuyObject(req *requests.Request, c *client.Client, gm *managers.GameManager
 		// Add the new wall
 		c.Location.Cafe().SetTile(objX, objY, objID)
 
-	} else if objectInfo.Group == "Door" {
+	case "Door":
 		oldDoorPos := simple.NewPosition(
 			utils.If(c.Location.Cafe().GetPlayerStart().X == 1, 0, c.Location.Cafe().GetPlayerStart().X),
 			utils.If(c.Location.Cafe().GetPlayerStart().Y == 1, 0, c.Location.Cafe().GetPlayerStart().Y),
@@ -85,7 +86,14 @@ func BuyObject(req *requests.Request, c *client.Client, gm *managers.GameManager
 		c.Location.Cafe().GetFurnitureInventory()[int(oldDoor.GetKind())] = 1
 		c.Location.Cafe().AddNewObject(objX, objY, objID, objRotation)
 		c.Location.Cafe().RemoveObject(oldDoorPos)
-	} else {
+	case "Deco":
+		c.Location.Cafe().AddNewObject(objX, objY, objID, objRotation)
+
+		c.Player.UpdateAchivementBoughtDecoration()
+
+		c.DB.UpdateAchievement(c.Player.ID, c.Player.GetAchivements().String())
+
+	default:
 		c.Location.Cafe().AddNewObject(objX, objY, objID, objRotation)
 	}
 	// Works?

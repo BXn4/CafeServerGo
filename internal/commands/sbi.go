@@ -43,6 +43,10 @@ func BuyIngredient(req *requests.Request, c *client.Client, gm *managers.GameMan
 			return nil
 		} else {
 			c.Player.AddCash(-ingredientInfo.Cash)
+
+			c.Player.UpdateAchivementBoughtIngredients()
+
+			c.DB.UpdateAchievement(c.Player.ID, c.Player.GetAchivements().String())
 		}
 	}
 

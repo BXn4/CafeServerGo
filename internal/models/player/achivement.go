@@ -32,7 +32,7 @@ func (p *Player) UpdateAchivementSpendGold(gold int) {
 }
 
 // <wod id="2004" n="Basic" g="Achievement" t="Boughtdeco" />
-func (p *Player) AchivementBoughtDecoration() {
+func (p *Player) UpdateAchivementBoughtDecoration() {
 	p.Achievement[2004]++
 }
 
@@ -47,8 +47,8 @@ func (p *Player) UpdateAchivementSoldItems() {
 }
 
 // <wod id="2007" n="Basic" g="Achievement" t="Servingscount" />
-func (p *Player) UpdateAchivementServingsCount() {
-	p.Achievement[2007]++
+func (p *Player) UpdateAchivementServingsCount(amount int) {
+	p.Achievement[2007] += amount
 }
 
 // <wod id="2008" n="Basic" g="Achievement" t="Overcookedfoods" />
