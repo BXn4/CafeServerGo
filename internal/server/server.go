@@ -76,7 +76,7 @@ func (s *CafeServer) Run() {
 		for {
 			conn, err := listener.Accept()
 			if err != nil {
-				continue
+				return
 			}
 			defer conn.Close()
 

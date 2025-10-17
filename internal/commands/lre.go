@@ -6,6 +6,7 @@ import (
 	"cafego/internal/types/requests"
 	"net/mail"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/log"
 )
@@ -160,6 +161,8 @@ func Register(req *requests.Request, c *client.Client, gm *managers.GameManager)
 	}
 
 	player.IsRegistered = true
+	player.DailyLogin = time.Now().UTC()
 	c.DB.SetRegistered(player.ID)
+	c.DB.UpdateDailyLogin(player.ID, player.DailyLogin)
 	return nil
 }

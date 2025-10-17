@@ -27,21 +27,23 @@ func (db *CafeDB) GetCafeByPlayerID(playerID int) (*cafe.Cafe, error) {
 }
 
 func (db *CafeDB) SaveCafe(c *cafe.Cafe) error {
-	err := db.conn.Model(&cafe.Cafe{}).
-		Where("id = ?", c.ID).
-		Updates(map[string]any{
-			"rating":        c.GetRating(),
-			"luxury":        c.GetLuxury(),
-			"expansion_id":  c.GetExpansionID(),
-			"tiles":         c.Tiles.String(),
-			"objects":       c.Objects.StringForDB(),
-			"fridge_inv":    c.FridgeInventory.String(),
-			"furniture_inv": c.FurnitureInventory.String(),
-			"waiters":       c.Waiters.String(),
-		}).Error
+	if c.ID > 0 {
+		err := db.conn.Model(&cafe.Cafe{}).
+			Where("id = ?", c.ID).
+			Updates(map[string]any{
+				"rating":        c.GetRating(),
+				"luxury":        c.GetLuxury(),
+				"expansion_id":  c.GetExpansionID(),
+				"tiles":         c.Tiles.String(),
+				"objects":       c.Objects.StringForDB(),
+				"fridge_inv":    c.FridgeInventory.String(),
+				"furniture_inv": c.FurnitureInventory.String(),
+				"waiters":       c.Waiters.String(),
+			}).Error
 
-	if err != nil {
-		return fmt.Errorf("Cant save Cafe: %v", err)
+		if err != nil {
+			return fmt.Errorf("Cant save Cafe: %v", err)
+		}
 	}
 
 	return nil

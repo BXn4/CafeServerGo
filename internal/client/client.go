@@ -54,6 +54,7 @@ func (c *Client) Start() {
 	go c.receiveRequests()
 	go c.sendResponses()
 	go c.autoSave()
+	go c.listenToPin()
 }
 
 func (c *Client) Disconnect() error {
@@ -154,6 +155,23 @@ func (c *Client) autoSave() {
 			} else {
 				log.Debug("Auto-saved cafe %v data", cafe.ID)
 			}
+		}
+	}
+}
+
+func (c *Client) listenToPin() {
+	const timeout = 1 * time.Minute // client sends pin command in every 1 minutes
+	ticker := time.NewTicker(10 * time.Second)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		if c.Conn == nil {
+			return
+		}
+		if time.Since(c.TimeoutStamp) > timeout {
+			log.Warnf("Client %v timed out", c.Player.ID)
+			c.Disconnect()
+			return
 		}
 	}
 }

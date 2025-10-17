@@ -21,9 +21,9 @@ func Login(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 		if searched, _ := gm.GetClientByName(name); searched != nil {
 			statusCode = 15
 			// Check if the same ip because than its most likely a bug
-			if c.GetIP() == searched.GetIP() {
-				err = searched.Disconnect() // Kick client out
-			}
+			/* if c.GetIP() == searched.GetIP() {
+			err = searched.Disconnect() // Kick client out
+			} */
 		}
 	}
 
@@ -33,14 +33,13 @@ func Login(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 	c.SendExtensionResponse("lgn", "1", statusCodeStr)
 	if statusCode != 0 {
 		if statusCode == 15 {
-			fmt.Errorf("Player %v is already logged in", name)
+			return fmt.Errorf("Player %v is already logged in", name)
 		} else {
-			fmt.Errorf("Access denied")
+			return fmt.Errorf("Access denied")
 		}
 	}
 
 	if p != nil {
-
 		// Set player
 		c.Player = p
 

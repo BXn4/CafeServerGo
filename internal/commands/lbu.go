@@ -20,7 +20,8 @@ func LoginRewards(req *requests.Request, c *client.Client, gm *managers.GameMana
 	isDaily := timePassed >= 24*time.Hour
 
 	if isDaily {
-		c.Player.DailyLogin = time.Now()
+		c.Player.DailyLogin = time.Now().UTC()
+		c.DB.UpdateDailyLogin(c.Player.ID, c.Player.DailyLogin)
 	}
 
 	var args []string

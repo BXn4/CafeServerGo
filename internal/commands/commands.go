@@ -5,7 +5,7 @@ import (
 	"cafego/internal/managers"
 	"cafego/internal/types/requests"
 	"cafego/internal/types/responses"
-	"time"
+	"fmt"
 
 	"github.com/charmbracelet/log"
 )
@@ -14,12 +14,6 @@ func HandleClient(c *client.Client, gm *managers.GameManager) {
 	defer c.Disconnect()
 	for req := range c.RequestQueue {
 		if req == nil {
-			return
-		}
-
-		// Check for timeout
-		if time.Now().Sub(c.TimeoutStamp) > 5*time.Minute {
-			log.Warnf("Client %v timed out", c.Player.ID)
 			return
 		}
 
@@ -160,5 +154,9 @@ func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameMan
 		log.Infof("NOT IMPLEMENTED: %v", req.Args[0])
 	}
 
-	return err
+	if err != nil {
+		return fmt.Errorf("Error during command handling: %s", err)
+	}
+
+	return nil
 }
