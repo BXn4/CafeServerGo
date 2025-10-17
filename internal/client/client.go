@@ -165,7 +165,7 @@ func (c *Client) listenToPin() {
 	defer ticker.Stop()
 
 	for range ticker.C {
-		if c.Conn == nil {
+		if c.Player == nil {
 			return
 		}
 		if time.Since(c.TimeoutStamp) > timeout {
