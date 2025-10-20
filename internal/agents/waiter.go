@@ -38,7 +38,7 @@ func SpawnWaiter(l interfaces.CafeLocation, w *waiter.Waiter, id int) *WaiterAge
 	return nil
 	} */
 
-	println("SPAWNED WAITER: ", id, w.GetAvatar().Name)
+	// println("SPAWNED WAITER: ", id, w.GetAvatar().Name)
 
 	// Send action response
 	wa.doAction(waiter.INSERT, wa.w.GetPos(), 1*time.Second)
@@ -54,7 +54,7 @@ func (wa *WaiterAgent) Start() {
 		return
 	}
 
-	println("STARTED WAITER TASK LOOP: ", wa.w.GetID())
+	// println("STARTED WAITER TASK LOOP: ", wa.w.GetID())
 	// Start waiter task loop
 	go func() {
 		defer wa.Stop()
@@ -129,11 +129,11 @@ func (wa *WaiterAgent) takePlates() TaskFunction {
 	// Get space with dirty plates
 	space := wa.l.GetDirtySpace()
 	if space == nil {
-		//println("CANT FIND DIRTY SPACE")
+		//// println("CANT FIND DIRTY SPACE")
 		return wa.getAndMoveToCounter
 	}
 
-	println("MOVE TO CLEAN")
+	// println("MOVE TO CLEAN")
 
 	// Set space clean
 	// Moved here, because we need to remove the dirty dishes from the table for the new client who joins the Café, because after it, we cant and it remains.
@@ -146,7 +146,7 @@ func (wa *WaiterAgent) takePlates() TaskFunction {
 		return nil
 	}
 
-	println("WAIT UNTIL CLEANED")
+	// println("WAIT UNTIL CLEANED")
 	//Wait until waiter takes plates
 	if wa.sleep(time.Second * 2) {
 		return nil
@@ -250,12 +250,12 @@ func (wa *WaiterAgent) move(pos simple.Position, action waiter.Action) bool {
 	// Set pos
 	wa.w.SetPos(path[1].Pos())
 
-	println("distance: ", distance)
+	// println("distance: ", distance)
 
 	// Set waiter pos
 	wa.doAction(action, pos, time.Duration(distance)*450*time.Millisecond)
 
-	println("Waiter arrived to the destination pos")
+	// println("Waiter arrived to the destination pos")
 
 	return false
 }

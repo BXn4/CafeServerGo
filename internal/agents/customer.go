@@ -61,15 +61,15 @@ func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
 	}
 
 	// Walk to chair and wait until arrives
-	println("Customer started to walking to the chair")
+	// println("Customer started to walking to the chair")
 	CustomerDoAction(l, c,
 		customer.CUSTOMER_WALK_TO_CHAIR,
 		chair.GetPos(),
 		time.Duration(distanceToChair-1)*550*time.Millisecond,
 	)
 
-	println("Customer arrived to the chair")
-	println("Customer waiting 1sec before sit down")
+	// println("Customer arrived to the chair")
+	// println("Customer waiting 1sec before sit down")
 
 	// Sit down
 	CustomerDoAction(l, c,
@@ -78,9 +78,9 @@ func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
 		1*time.Second,
 	)
 
-	println("Customer sat down")
+	// println("Customer sat down")
 
-	println("Customer started to waiting for food")
+	// println("Customer started to waiting for food")
 
 	// Wait for assigned waiter
 	if WaitUntil(
@@ -94,7 +94,7 @@ func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
 		l.UnreserveObject(table)
 		l.UnreserveObject(chair)
 
-		println("Customer not got any food on time, customer left sad...")
+		// println("Customer not got any food on time, customer left sad...")
 		return
 	}
 
@@ -111,7 +111,7 @@ func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
 		time.Sleep(100 * time.Millisecond)
 	}
 
-	println("Customer started to eating")
+	// println("Customer started to eating")
 
 	//  Eat food
 	CustomerDoAction(l, c, customer.CUSTOMER_EAT, c.GetPos(), 25*time.Second) // Customers eating for 25 sec. Footage: https://www.youtube.com/watch?v=pSX2kXIFxtE
@@ -121,7 +121,7 @@ func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
 	// The game updates the dish status in visual to empty, when the customer finishes
 	// chair.SetDishStatus(2) // Half eaten
 
-	println("Customer finished eating, leaving....")
+	// println("Customer finished eating, leaving....")
 
 	//  Add rewards to player
 	player, err := l.Owner()

@@ -81,6 +81,7 @@ func (s *CafeServer) Run() {
 			defer conn.Close()
 
 			c := client.New(conn, db, s.gm)
+			c.SetClientID(s.gm.NextClientID())
 			s.gm.AddClient(c)
 			c.Start()
 			go commands.HandleClient(c, s.gm)

@@ -4,7 +4,6 @@ import (
 	"cafego/internal/client"
 	"cafego/internal/interfaces"
 	"fmt"
-	"time"
 )
 
 // AddClient adds a new client to the list
@@ -22,34 +21,29 @@ func (gm *GameManager) DisconnectClient(id int) {
 	gm.clientMutex.Lock()
 	defer gm.clientMutex.Unlock()
 
+	newClients := make([]*client.Client, 0, len(gm.clients))
 	for i, c := range gm.clients {
-		if c.Player == nil {
+		if c.Player == nil && i != id {
 			continue
+		} else {
+			c.SetClientID(i)
+			newClients = append(newClients, c)
 		}
 
-		// Send signal to close connection
 		for len(c.RequestQueue) > 0 {
 			c.RequestQueue <- nil
 		}
-		time.Sleep(time.Millisecond * 100) // Wait until procceses stop
 
-		// Save player to db
-		gm.db.SavePlayer(gm.clients[i].Player)
-		c.Player = nil
-
-		// Leave current location
 		if c.Location != nil {
-			if loc, ok := c.Location.(*LoadedLocation); ok {
-				loc.Cancel()
-			}
 			c.Location.Leave(id)
 		}
-
-		// Remove client by re-slicing
-		gm.clients = append(gm.clients[:i], gm.clients[i+1:]...)
-		return
-
 	}
+
+	gm.clients = newClients
+
+	/* for client := range gm.clients {
+	println(client)
+	} */
 }
 
 // GetClient retrieves a client by its ID
@@ -67,6 +61,19 @@ func (gm *GameManager) GetClient(id int) (interfaces.ManagedItem, error) {
 	}
 
 	return nil, fmt.Errorf("Client with ID %v not found", id)
+}
+
+func (gm *GameManager) NextClientID() int {
+	gm.clientMutex.Lock()
+	defer gm.clientMutex.Unlock()
+
+	maxID := 0
+	for _, c := range gm.clients {
+		if c != nil && c.ClientID > maxID {
+			maxID = c.ClientID
+		}
+	}
+	return maxID + 1
 }
 
 // Checks if client is online

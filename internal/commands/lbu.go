@@ -27,6 +27,14 @@ func LoginRewards(req *requests.Request, c *client.Client, gm *managers.GameMana
 	var args []string
 	loginBonusStr := ""
 
+
+	// Get my cafe
+	mycafe, err := c.DB.GetCafeByPlayerID(c.Player.ID)
+
+	if err != nil {
+		return err
+	}
+
 	if isDaily {
 		// Get random fancy
 		fancies, err := utils.GetItems("fancy")
@@ -42,17 +50,11 @@ func LoginRewards(req *requests.Request, c *client.Client, gm *managers.GameMana
 		args = append(args, loginBonusStr)
 
 		c.Player.Cash += loginBonus
-		c.Location.Cafe().AddToFridge(fancy.ID, 1)
+
+		mycafe.AddToFridge(fancy.ID, 1)
 		// c.DB.UpdateFridge()
-
 	}
 
-	// Get my cafe
-	mycafe, err := c.DB.GetCafeByPlayerID(c.Player.ID)
-
-	if err != nil {
-		return err
-	}
 
 	// Calculate customer spawn time (we use max time so people dont try to cheat the system)
 	rating := mycafe.GetRating()

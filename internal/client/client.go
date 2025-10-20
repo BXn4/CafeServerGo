@@ -17,6 +17,7 @@ import (
 
 // Client
 type Client struct {
+	ClientID      int
 	Conn          net.Conn
 	Writer        *bufio.Writer           // Buffered write connection to the client
 	Reader        *bufio.Reader           // Buffered read  connection to the client
@@ -33,6 +34,7 @@ type Client struct {
 
 func New(conn net.Conn, dbc *database.CafeDB, cm interfaces.ClientManager) *Client {
 	return &Client{
+		ClientID:      0,
 		Conn:          conn,
 		Reader:        bufio.NewReader(conn),
 		Writer:        bufio.NewWriter(conn),
@@ -47,7 +49,11 @@ func New(conn net.Conn, dbc *database.CafeDB, cm interfaces.ClientManager) *Clie
 }
 
 func (c *Client) ID() int {
-	return c.Player.ID
+	return c.ClientID
+}
+
+func (c *Client) SetClientID(id int) {
+	c.ClientID = id
 }
 
 func (c *Client) Start() {
@@ -64,10 +70,16 @@ func (c *Client) Disconnect() error {
 		c.Player.LastLogin = time.Now().UTC()
 		c.DB.UpdateLastLogin(c.Player.ID, c.Player.LastLogin)
 
+		c.DB.SavePlayer(c.Player)
+		c.DB.SaveCafe(c.Location.Cafe())
+
+		c.Player = nil
+
 		c.ClientManager.DisconnectClient(id)
 	}
 	c.Conn.Close()
 	log.Infof("Client disconnected: %s", c.GetIP())
+
 	return nil
 }
 
