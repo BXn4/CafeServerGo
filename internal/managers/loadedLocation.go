@@ -13,7 +13,6 @@ import (
 	"context"
 	"slices"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -130,7 +129,7 @@ func (lc *LoadedLocation) Join(playerID int, channel chan<- responses.Response) 
 	// Add to players in cafe
 	lc.occupants[playerID] = channel
 
-	var playersStr []string
+	playersStr := []string{}
 
 	// Get all players in location
 	for id := range lc.occupants {
@@ -148,8 +147,10 @@ func (lc *LoadedLocation) Join(playerID int, channel chan<- responses.Response) 
 	args = append(args, lc.cafe.AsResponse()...)
 	lc.send(playerID, args...)
 
+	julArgs := append([]string{"jul", "-1", "0"}, playersStr...)
+
 	// Send it to joined player
-	lc.send(playerID, "jul", "-1", "0", strings.Join(playersStr, "$"))
+	lc.send(playerID, julArgs...)
 
 	if lc.cafe.GetRoomType() == cafe.CafeRoom {
 		// Send every customer in location
