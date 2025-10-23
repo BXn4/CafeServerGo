@@ -37,8 +37,8 @@ func StartAgentCycles(l interfaces.CafeLocation) {
 				continue
 			}
 
-			maxSpawn := 0.0
-			minSpawn := 0.0
+			maxSpawn := 30.0
+			minSpawn := 2.0
 			rating := float64(l.Cafe().GetRating())
 			expansion := float64(l.Cafe().ExpansionID)
 			ratingFactor := math.Min(rating/1000.0, 10.0)
