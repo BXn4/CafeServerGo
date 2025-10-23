@@ -42,26 +42,22 @@ func Clean(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 			)
 
 			return nil
-		} else {
-			c.Player.AddCash(-15)
+		}
 
-			if obj.GetDishID() > 0 && obj.GetIsRotten() {
-				c.Player.UpdateAchivementOvercookedFoods() // if the player cleans rotten food
+		c.Player.AddCash(-15)
 
-				c.DB.UpdateAchievement(c.Player.ID, c.Player.GetAchivements().String())
-			}
+		if obj.GetDishID() > 0 && obj.GetIsRotten() {
+			c.Player.UpdateAchivementOvercookedFoods() // if the player cleans rotten food
+
+			c.DB.UpdateAchievement(c.Player.ID, c.Player.GetAchivements().String())
+		}
+		obj.SetDishID(-1)
+	}
+
+	if obj.IsCounter() {
+		if obj.GetDishID() > 0 {
 			obj.SetDishID(-1)
 		}
-	} else {
-		c.SendExtensionResponse(
-			"ccn", "-1",
-			"4",
-			req.Args[2],
-			req.Args[3],
-			utils.If(obj.IsStove(), "1", "0"),
-		)
-
-		return nil
 	}
 
 	c.SendExtensionResponse(

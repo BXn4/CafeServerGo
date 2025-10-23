@@ -356,6 +356,17 @@ func (c *Cafe) GetOwnerName() string {
 func (c *Cafe) GetRating() int {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
+
+	minRating := c.GetMinimumRating(c.Rating)
+
+	if min(minRating, c.Rating) < 10 {
+		return 10
+	}
+
+	if max(minRating, c.Rating) >= 1000 {
+		return 1000
+	}
+
 	return c.Rating
 }
 
