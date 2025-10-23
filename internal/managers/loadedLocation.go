@@ -10,7 +10,6 @@ import (
 	"cafego/internal/models/simple"
 	"cafego/internal/models/waiter"
 	"cafego/internal/types/responses"
-	"context"
 	"slices"
 	"strconv"
 	"sync"
@@ -27,7 +26,6 @@ type LoadedLocation struct {
 	gm           *GameManager
 	running      bool
 	reservedObjs []*object.Object
-	cancelFunc   context.CancelFunc
 }
 
 func NewLoadedLocation(cafe *cafe.Cafe, gm *GameManager) *LoadedLocation {
@@ -240,6 +238,7 @@ func (lc *LoadedLocation) ClearReservedObjects() {
 		if obj.IsChair() {
 			obj.SetDishID(-1)
 			obj.SetDishStatus(0)
+			obj.SetOccupied(false)
 		}
 	}
 	lc.reservedObjs = []*object.Object{}
@@ -309,6 +308,8 @@ func (lc *LoadedLocation) ReserveObject(obj *object.Object) bool {
 		}
 	}
 
+	obj.SetOccupied(true)
+
 	// Add to reserved
 	lc.reservedObjs = append(lc.reservedObjs, obj)
 
@@ -332,6 +333,8 @@ func (lc *LoadedLocation) UnreserveObject(obj *object.Object) {
 	if index == -1 {
 		return
 	}
+
+	obj.SetOccupied(false)
 
 	// Delete reservation
 	lc.reservedObjs = append(lc.reservedObjs[:index], lc.reservedObjs[index+1:]...)
@@ -394,13 +397,17 @@ func (lc *LoadedLocation) announce(playerID int, args ...string) {
 	}
 }
 
-func (lc *LoadedLocation) SetCancel(cancel context.CancelFunc) {
-	lc.cancelFunc = cancel
-}
+func (lc *LoadedLocation) TryStepSleep(d time.Duration) bool {
+	step := 100 * time.Millisecond
+	elapsed := time.Duration(0)
+	for elapsed < d {
+		if !*lc.GetIsRunning() || !lc.Cafe().AgentCycleBinded {
+			return false
+		}
 
-func (lc *LoadedLocation) Cancel() {
-	if lc.cancelFunc != nil {
-		lc.cancelFunc()
-		lc.cancelFunc = nil
+		time.Sleep(step)
+		elapsed += step
 	}
+
+	return true
 }

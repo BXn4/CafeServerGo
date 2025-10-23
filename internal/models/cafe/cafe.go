@@ -304,8 +304,10 @@ func (c *Cafe) GetMinimumRating(rating int) int {
 	defer c.mutex.RUnlock()
 
 	minimumRating := min(int((1+0.05*float64(c.Luxury))*10), 500)
-	if rating < minimumRating {
-		return minimumRating
+	if minimumRating > 10 {
+		if rating < minimumRating {
+			return minimumRating
+		}
 	}
 
 	return rating

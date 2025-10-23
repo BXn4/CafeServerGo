@@ -4,7 +4,6 @@ import (
 	"cafego/internal/agents"
 	"cafego/internal/database"
 	"cafego/internal/models/cafe"
-	"context"
 	"fmt"
 
 	"github.com/charmbracelet/log"
@@ -69,9 +68,7 @@ func (gm *GameManager) AddLocation(id int) *LoadedLocation {
 	}
 
 	if p.IsTutorialCompleted && !loc.Cafe().AgentCycleBinded {
-		ctx, cancel := context.WithCancel(context.Background())
-		loc.SetCancel(cancel)
-		go agents.StartAgentCycles(loc, ctx)
+		go agents.StartAgentCycles(loc)
 	}
 
 	return loc

@@ -217,7 +217,7 @@ func (c *Object) StringForDB() string {
 	} else if c.isCounter() || c.isVending() {
 		args = append(args, strconv.Itoa(c.dishID), strconv.Itoa(c.dishAmount))
 	} else if c.isChair() {
-		args = append(args, "0", "0") // Not needed to save to DB
+		args = append(args, "-1", "0") // Not needed to save to DB
 	}
 
 	return strings.Join(args, "+")

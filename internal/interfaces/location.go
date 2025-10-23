@@ -6,6 +6,7 @@ import (
 	"cafego/internal/models/player"
 	"cafego/internal/models/simple"
 	"cafego/internal/types/responses"
+	"time"
 )
 
 // This is a wrapper for a cafe
@@ -66,4 +67,6 @@ type CafeLocation interface {
 
 	//
 	GetIsRunning() *bool
+
+	TryStepSleep(time.Duration) bool
 }

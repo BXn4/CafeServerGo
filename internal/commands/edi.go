@@ -4,7 +4,6 @@ import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
 	"cafego/internal/types/requests"
-	"cafego/internal/utils"
 	"strconv"
 )
 
@@ -22,12 +21,14 @@ func EditorMode(req *requests.Request, c *client.Client, gm *managers.GameManage
 		return nil
 	}
 
-	if status == 0 {
-		// If the player places an object where he stayed
+	switch status {
+	case 0:
+		c.Location.SetRunning(true)
+		c.Location.ClearReservedObjects()
 		c.Player.Position = c.Location.Cafe().GetPlayerStart()
+	case 1:
+		c.Location.SetRunning(false)
 	}
-
-	c.Location.SetRunning(utils.If(status == 0, true, false))
 
 	c.SendExtensionResponse("edi", "-1", "0",
 		strconv.Itoa(status),

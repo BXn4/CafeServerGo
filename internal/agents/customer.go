@@ -43,20 +43,22 @@ func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
 	}
 
 	// Declare varaibles
-	var table *object.Object
 	var chair *object.Object
 	var distanceToChair int
 
 	// Wait until a eating space frees up
 	if WaitUntil(
 		func() bool {
-			table, chair, distanceToChair = GetAvailableEatingSpace(l)
+			chair, distanceToChair = GetAvailableEatingSpace(l)
 			return chair != nil
 		},
-		10*time.Second,
-	) {
+		10*time.Second, l) {
 		l.Cafe().AddRating(-2)
 		Leave(l, c) // Leaves sad :(
+		return
+	}
+
+	if !l.IsRunning() {
 		return
 	}
 
@@ -87,11 +89,9 @@ func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
 		func() bool {
 			return c.GetAssignedWaiter() != -1
 		},
-		25*time.Second,
-	) {
+		25*time.Second, l) {
 		l.Cafe().AddRating(-2)
 		Leave(l, c) // Leaves sad :(
-		l.UnreserveObject(table)
 		l.UnreserveObject(chair)
 
 		// println("Customer not got any food on time, customer left sad...")
@@ -104,11 +104,12 @@ func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
 		if c.GetAssignedWaiter() == -1 {
 			l.Cafe().AddRating(-2)
 			Leave(l, c) // Leaves sad :( // We should make it to wait, then leave. TODO!
-			l.UnreserveObject(table)
 			l.UnreserveObject(chair)
 			return
 		}
-		time.Sleep(100 * time.Millisecond)
+		if !l.TryStepSleep(100 * time.Millisecond) {
+			return
+		}
 	}
 
 	// println("Customer started to eating")
@@ -155,18 +156,13 @@ func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
 
 // Returns a chair and a table
 // which are empty and approachable
-func GetAvailableEatingSpace(l interfaces.CafeLocation) (*object.Object, *object.Object, int) {
+func GetAvailableEatingSpace(l interfaces.CafeLocation) (*object.Object, int) {
 
 	spaces := l.Cafe().GetEatingSpaces()
-	for table, chairs := range spaces {
+	for _, chairs := range spaces {
 
 		// If there are no connected chairs skip
 		if len(chairs) == 0 {
-			continue
-		}
-
-		// Try to reserve table
-		if !l.ReserveObject(table) {
 			continue
 		}
 
@@ -177,13 +173,12 @@ func GetAvailableEatingSpace(l interfaces.CafeLocation) (*object.Object, *object
 			_, distance, found := Path(start, end)
 			if found {
 				l.ReserveObject(chair)
-				chair.SetOccupied(true)
-				return table, chair, distance
+				return chair, distance
 			}
 		}
 
 	}
-	return nil, nil, 0
+	return nil, 0
 }
 
 func Leave(l interfaces.CafeLocation, c *customer.Customer) {
@@ -197,7 +192,10 @@ func Leave(l interfaces.CafeLocation, c *customer.Customer) {
 	CustomerDoAction(l, c, customer.CUSTOMER_LEAVE, l.Cafe().GetPlayerStart(), time.Duration(distance)*time.Second)
 
 	// Wait 5 sec to make sure client deleted customer
-	time.Sleep(5 * time.Second)
+	// And instant cancel the sleeping it when the Café is not running
+	if !l.TryStepSleep(5 * time.Second) {
+		return
+	}
 
 	// Delete customer from customers
 	l.Cafe().RemoveCustomer(c.GetID())
@@ -205,13 +203,15 @@ func Leave(l interfaces.CafeLocation, c *customer.Customer) {
 
 // Wait until function is true,
 // returns true if timed out
-func WaitUntil(condition func() bool, timeout time.Duration) bool {
+func WaitUntil(condition func() bool, timeout time.Duration, l interfaces.CafeLocation) bool {
 	startTime := time.Now()
 	for !condition() {
 		if time.Since(startTime) >= timeout {
 			return true
 		}
-		time.Sleep(10 * time.Millisecond)
+		if !l.TryStepSleep(10 * time.Millisecond) {
+			return false
+		}
 	}
 	return false
 }
@@ -224,9 +224,9 @@ func CustomerDoAction(l interfaces.CafeLocation, c *customer.Customer, action cu
 
 	// Set properties
 	/* c.SetAction(action)
-	c.SetPos(pos)
-	I have moved these in the switch, because we set the customer action on sit down first, and theres 1 sec timer before the action,
-	so the waiters gave food when we set it to sit down action. We need to give them food after they have sat down */
+	   c.SetPos(pos)
+	   I have moved these in the switch, because we set the customer action on sit down first, and theres 1 sec timer before the action,
+	   so the waiters gave food when we set it to sit down action. We need to give them food after they have sat down */
 
 	switch action {
 	case customer.CUSTOMER_WALK_TO_CHAIR:
@@ -238,10 +238,14 @@ func CustomerDoAction(l interfaces.CafeLocation, c *customer.Customer, action cu
 		l.Broadcast("nac", "-1", "0", c.ActionString())
 
 		// Wait until customer walks in door
-		time.Sleep(delay)
+		if !l.TryStepSleep(delay) {
+			return
+		}
 	case customer.CUSTOMER_SIT_DOWN:
 		// Wait 1 sec before sit down (to avoid fast sit down at very close chair, because the distance is less than 1)
-		time.Sleep(delay)
+		if !l.TryStepSleep(delay) {
+			return
+		}
 
 		// Set properties
 		c.SetAction(action)
@@ -254,12 +258,9 @@ func CustomerDoAction(l interfaces.CafeLocation, c *customer.Customer, action cu
 		c.SetPos(pos)
 
 		l.Broadcast("nac", "-1", "0", c.ActionString())
-		time.Sleep(delay)
+		if !l.TryStepSleep(delay) {
+			return
+		}
 	}
 
-	// Stop until cafe runs again
-	// Not need to stop it
-	/* for !l.IsRunning() {
-	time.Sleep(10 * time.Millisecond)
-	} */
 }
