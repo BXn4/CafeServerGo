@@ -49,6 +49,7 @@ func SpawnWaiter(l interfaces.CafeLocation, w *waiter.Waiter, id int) *WaiterAge
 // Starts main waiter loop
 // This helps take full controll of waiter actions
 func (wa *WaiterAgent) Start() {
+
 	// If waiter doesent exits return
 	if wa == nil {
 		return

@@ -1,7 +1,6 @@
 package managers
 
 import (
-	"cafego/internal/agents"
 	"cafego/internal/database"
 	"cafego/internal/models/cafe"
 	"fmt"
@@ -61,15 +60,6 @@ func (gm *GameManager) AddLocation(id int) *LoadedLocation {
 	gm.locations[id] = loc
 
 	println("LOADED CAFE: ", id)
-
-	p, err := loc.Owner()
-	if err != nil {
-		log.Errorf("Cant find owner of cafe: %v", loc.Cafe().GetPlayerID())
-	}
-
-	if p.IsTutorialCompleted && !loc.Cafe().AgentCycleBinded {
-		go agents.StartAgentCycles(loc)
-	}
 
 	return loc
 }

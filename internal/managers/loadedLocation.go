@@ -175,6 +175,16 @@ func (lc *LoadedLocation) Join(playerID int, channel chan<- responses.Response) 
 		if playerID == lc.cafe.GetPlayerID() && !lc.cafe.AgentCycleBinded {
 			// Start waiters
 			log.Debug("Waiters spawned and started")
+
+			p, err := lc.Owner()
+			if err != nil {
+				log.Errorf("Cant find owner of cafe: %v", lc.Cafe().GetPlayerID())
+			}
+
+			if p.IsTutorialCompleted && !lc.Cafe().AgentCycleBinded {
+				go agents.StartAgentCycles(lc)
+			}
+
 			for i, w := range lc.cafe.Waiters {
 				w.SetIsWorking(false)
 				time.Sleep(10 * time.Millisecond)
@@ -183,8 +193,6 @@ func (lc *LoadedLocation) Join(playerID int, channel chan<- responses.Response) 
 					agents.SpawnWaiter(lc, w, i+1).Start()
 				}()
 			}
-
-			lc.cafe.AgentCycleBinded = true
 		} else if lc.cafe.AgentCycleBinded {
 			// Respawn waiters
 			for i, w := range lc.cafe.Waiters {

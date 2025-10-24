@@ -9,7 +9,6 @@ import (
 
 // edit - C2S_EDITOR_MODE
 func EditorMode(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
-
 	// Parse status
 	status, err := strconv.Atoi(req.Args[2])
 	if err != nil {
