@@ -48,6 +48,10 @@ type Cafe struct {
 	AgentCycleBinded   bool                 `gorm:"-"`
 	playerStart        *simple.Position     `gorm:"-"`
 	roomType           RoomType             `gorm:"default:0"`
+	fridgesLimit       int                  `gorm:"default:1"`
+	countersLimit      int                  `gorm:"default:3"`
+	stovesLimit        int                  `gorm:"default:3"`
+	waitersLimit       int                  `gorm:"default:1"`
 	mutex              sync.RWMutex         `gorm:"-"`
 }
 

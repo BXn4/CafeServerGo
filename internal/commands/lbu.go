@@ -22,11 +22,16 @@ func LoginRewards(req *requests.Request, c *client.Client, gm *managers.GameMana
 	if isDaily {
 		c.Player.DailyLogin = time.Now().UTC()
 		c.DB.UpdateDailyLogin(c.Player.ID, c.Player.DailyLogin)
+
+		maxInstants := utils.GetLevelInstantCookingsLimit(c.Player.GetLevel())
+		c.Player.SetMaxInstantCookings(maxInstants)
+		c.Player.SetInstantCookings(maxInstants)
+
+		c.DB.UpdateInstantCookings(c.Player.ID, maxInstants)
 	}
 
 	var args []string
 	loginBonusStr := ""
-
 
 	// Get my cafe
 	mycafe, err := c.DB.GetCafeByPlayerID(c.Player.ID)
@@ -54,7 +59,6 @@ func LoginRewards(req *requests.Request, c *client.Client, gm *managers.GameMana
 		mycafe.AddToFridge(fancy.ID, 1)
 		// c.DB.UpdateFridge()
 	}
-
 
 	// Calculate customer spawn time (we use max time so people dont try to cheat the system)
 	rating := mycafe.GetRating()

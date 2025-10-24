@@ -46,6 +46,7 @@ type Player struct {
 	IsRegistered        bool            `gorm:"default:false"`
 	IsTutorialCompleted bool            `gorm:"default:false"`
 	AccessLevel         int             `gorm:"column:access_level;default:0;type:int"`
+	MaxInstants         int             `gorm:"default:12"`
 }
 
 func (player *Player) TableName() string {
@@ -210,4 +211,24 @@ func (p *Player) AddGold(amount int) {
 	if amount < 0 {
 		p.UpdateAchivementSpendGold(amount)
 	}
+}
+
+func (p *Player) GetInstantCookings() int {
+	return p.InstantCookings
+}
+
+func (p *Player) SetInstantCookings(value int) {
+	p.InstantCookings = value
+}
+
+func (p *Player) RemoveInstantCooking() {
+	p.InstantCookings--
+}
+
+func (p *Player) GetMaxInstantCookings() int {
+	return p.MaxInstants
+}
+
+func (p *Player) SetMaxInstantCookings(value int) {
+	p.MaxInstants = value
 }

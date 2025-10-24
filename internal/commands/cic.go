@@ -26,7 +26,7 @@ func InstantCook(req *requests.Request, c *client.Client, gm *managers.GameManag
 		return nil
 	}
 
-	if c.Player.GetGold() < 1 /* && c.Player.GetInstantCookings < 1 */ {
+	if c.Player.GetGold() < 1 && c.Player.GetInstantCookings() < 1 {
 		c.SendExtensionResponse("crc", "-1", "4", strconv.Itoa(objX), strconv.Itoa(objY))
 		return nil
 	}
@@ -38,6 +38,7 @@ func InstantCook(req *requests.Request, c *client.Client, gm *managers.GameManag
 
 	if c.Player.IsTutorialCompleted {
 		c.Player.AddGold(-1)
+		c.Player.InstantCookings--
 	}
 
 	currentTime := time.Now().UTC()
@@ -49,6 +50,7 @@ func InstantCook(req *requests.Request, c *client.Client, gm *managers.GameManag
 
 	c.DB.UpdateGold(c.Player.ID, c.Player.GetGold())
 	c.DB.UpdateObjects(c.Location.Cafe().ID, c.Location.Cafe().Objects.StringForDB())
+	c.DB.UpdateInstantCookings(c.Player.ID, c.Player.GetInstantCookings())
 
 	c.Location.Broadcast("cic", "-1", "0", strconv.Itoa(objX), strconv.Itoa(objY))
 

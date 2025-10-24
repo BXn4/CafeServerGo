@@ -20,6 +20,8 @@ func (p *Player) AddXP(amount int) {
 		if utils.GetLevelGoldReward(nextLevel) > 0 {
 			p.AddGold(utils.GetLevelGoldReward(nextLevel))
 		}
+
+		p.SetMaxInstantCookings(utils.GetLevelInstantCookingsLimit(nextLevel))
 	}
 
 	p.XP += amount
