@@ -61,6 +61,11 @@ func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameMana
 			return fmt.Errorf("Invalid ingredient ID: %w", err)
 		}
 
+		if gm.GetEvent() < dishInfo.Events {
+			return fmt.Errorf("Invalid dish ID:, because theres no holiday %w", err)
+
+		}
+
 		ingredientsStr := dishInfo.Requirements
 		ingredientsMap := make(map[int]int)
 		ingredients := strings.Split(ingredientsStr, "#")
