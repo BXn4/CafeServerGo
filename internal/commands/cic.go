@@ -36,7 +36,9 @@ func InstantCook(req *requests.Request, c *client.Client, gm *managers.GameManag
 		return nil
 	}
 
-	c.Player.AddGold(-1)
+	if c.Player.IsTutorialCompleted {
+		c.Player.AddGold(-1)
+	}
 
 	currentTime := time.Now().UTC()
 	stove.SetStartedAt(&currentTime)

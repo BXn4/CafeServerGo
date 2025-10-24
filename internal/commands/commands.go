@@ -150,6 +150,8 @@ func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameMan
 		err = ChangeAvatar(req, c, gm)
 	case requests.C2S_CAFE_RECOOK:
 		err = Recook(req, c, gm)
+	case requests.C2S_CAFE_TUTORIAL_FINISH:
+		err = TutorialComplete(c, gm)
 	default:
 		log.Infof("NOT IMPLEMENTED: %v", req.Args[0])
 	}
