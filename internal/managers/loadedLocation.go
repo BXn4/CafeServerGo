@@ -270,19 +270,6 @@ func (lc *LoadedLocation) GetDirtySpace() (*object.Object, *object.Object) {
 
 	chair := lc.reservedObjs[chairIndex]
 
-	tableIndex := -1
-	for i, o := range lc.reservedObjs {
-		if o.IsTable() && chair.GetDishStatus() == 3 {
-			tableIndex = i
-		}
-	}
-
-	if tableIndex == -1 {
-		return nil, nil
-	}
-
-	table := lc.reservedObjs[tableIndex]
-
 	// Get associated table
 	for _, o := range lc.reservedObjs {
 		if !o.IsTable() {
@@ -290,6 +277,7 @@ func (lc *LoadedLocation) GetDirtySpace() (*object.Object, *object.Object) {
 		}
 		nr := chair.GetNormalizedRotation()
 		if o.GetPos().X == chair.GetPos().X+nr[0] && o.GetPos().Y == chair.GetPos().Y+nr[1] {
+			table := o
 			return table, chair
 		}
 	}
