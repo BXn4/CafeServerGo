@@ -5,6 +5,7 @@ import (
 	"cafego/internal/database"
 	"cafego/internal/models/cafe"
 	"sync"
+	"time"
 )
 
 type GameManager struct {
@@ -15,6 +16,8 @@ type GameManager struct {
 
 	clientMutex sync.Mutex
 	clients     []*client.Client
+
+	gameEvent int
 }
 
 func NewGameManager() (*GameManager, error) {
@@ -36,6 +39,9 @@ func NewGameManager() (*GameManager, error) {
 
 	// Add marketplace to cafe list
 	gm.SetLocation(-1, marketplace)
+
+	go gm.CheckForEvent(10 * time.Minute) // Its sets the current event on player join, but we need to force check it.
+	// Its not really important, but when no players joins, the game remains on the same event.
 
 	return gm, nil
 }

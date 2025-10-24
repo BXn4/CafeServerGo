@@ -152,6 +152,8 @@ func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameMan
 		err = Recook(req, c, gm)
 	case requests.C2S_CAFE_TUTORIAL_FINISH:
 		err = TutorialComplete(c, gm)
+	case requests.C2S_SPECIAL_EVENT:
+		err = SendSpecialEvent(c, gm)
 	default:
 		log.Infof("NOT IMPLEMENTED: %v", req.Args[0])
 	}

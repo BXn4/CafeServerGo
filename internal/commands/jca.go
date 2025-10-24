@@ -37,6 +37,11 @@ func JoinCafe(req *requests.Request, c *client.Client, gm *managers.GameManager)
 		return fmt.Errorf("\nifr request: %v", err)
 	}
 
+	err = SendFurnitureInventory(req, c, gm)
+	if err != nil {
+		return fmt.Errorf("\nein request: %v", err)
+	}
+
 	// Join location
 	c.Location.Join(c.Player.ID, c.ResponseQueue)
 

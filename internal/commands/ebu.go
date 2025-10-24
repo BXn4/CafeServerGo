@@ -41,6 +41,12 @@ func BuyObject(req *requests.Request, c *client.Client, gm *managers.GameManager
 		return fmt.Errorf("Invalid object ID: %w", err)
 	}
 
+	// 2 0 0
+	if (c.Location.Cafe().GetFurnitureInventory()[objID] == 0) && (gm.GetEvent() < objectInfo.Events) {
+		c.SendExtensionResponse("ebu", "-1", "1", strconv.Itoa(objX), strconv.Itoa(objY), strconv.Itoa(objID), strconv.Itoa(objRotation))
+		return nil
+	}
+
 	// If the player does not have the object in their inventory, dont remove cash, gold
 	if c.Location.Cafe().GetFurnitureInventory()[objID] == 0 {
 		if objectInfo.Cash > c.Player.GetCash() {
@@ -57,6 +63,8 @@ func BuyObject(req *requests.Request, c *client.Client, gm *managers.GameManager
 		} else if objectInfo.Gold > 0 {
 			c.Player.AddGold(-objectInfo.Gold)
 		}
+	} else {
+		c.Location.Cafe().RemoveFurnitures(objID, 1)
 	}
 
 	// Need to add back the old wall in the inventory
@@ -143,6 +151,7 @@ func BuyObject(req *requests.Request, c *client.Client, gm *managers.GameManager
 	c.DB.UpdateGold(c.Player.ID, c.Player.GetGold())
 	c.DB.UpdateObjects(c.Location.Cafe().ID, c.Location.Cafe().Objects.StringForDB())
 	c.DB.UpdateLuxury(c.Location.Cafe().ID, c.Location.Cafe().GetLuxury())
+	c.DB.UpdateFurnitureInventory(c.Location.Cafe().ID, c.Location.Cafe().FurnitureInventory.String())
 
 	c.SendExtensionResponse("ebu", "-1", "0", strconv.Itoa(objX), strconv.Itoa(objY), strconv.Itoa(objID), strconv.Itoa(objRotation))
 	return nil
