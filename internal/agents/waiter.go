@@ -128,8 +128,8 @@ func (wa *WaiterAgent) takePlates() TaskFunction {
 	}
 
 	// Get space with dirty plates
-	space := wa.l.GetDirtySpace()
-	if space == nil {
+	table, chair := wa.l.GetDirtySpace()
+	if table == nil {
 		//// println("CANT FIND DIRTY SPACE")
 		return wa.getAndMoveToCounter
 	}
@@ -139,11 +139,11 @@ func (wa *WaiterAgent) takePlates() TaskFunction {
 	// Set space clean
 	// Moved here, because we need to remove the dirty dishes from the table for the new client who joins the Café, because after it, we cant and it remains.
 	// Also I added SetFree and GetIsFree for the chair, so customers now checking this
-	space.SetDishID(-1)
-	space.SetDishStatus(0)
+	chair.SetDishID(-1)
+	chair.SetDishStatus(0)
 
 	// Move to dirty plates
-	if wa.move(space.GetPos(), waiter.CLEAN) {
+	if wa.move(chair.GetPos(), waiter.CLEAN) {
 		return nil
 	}
 
@@ -153,7 +153,10 @@ func (wa *WaiterAgent) takePlates() TaskFunction {
 		return nil
 	}
 
-	space.SetOccupied(false)
+	chair.SetOccupied(false)
+
+	wa.l.UnreserveObject(chair)
+	wa.l.UnreserveObject(table)
 
 	wa.w.SetCurrentCounter(nil)
 

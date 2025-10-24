@@ -40,7 +40,7 @@ type CafeLocation interface {
 
 	// This unreserves a dirty table and a chair
 	// returns the chair
-	GetDirtySpace() *object.Object
+	GetDirtySpace() (*object.Object, *object.Object)
 
 	// This unreserves the reserved object
 	UnreserveObject(*object.Object)

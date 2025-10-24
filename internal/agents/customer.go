@@ -43,13 +43,14 @@ func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
 	}
 
 	// Declare varaibles
+	var table *object.Object
 	var chair *object.Object
 	var distanceToChair int
 
 	// Wait until a eating space frees up
 	if WaitUntil(
 		func() bool {
-			chair, distanceToChair = GetAvailableEatingSpace(l)
+			table, chair, distanceToChair = GetAvailableEatingSpace(l)
 			return chair != nil
 		},
 		10*time.Second, l) {
@@ -92,6 +93,7 @@ func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
 		25*time.Second, l) {
 		l.Cafe().AddRating(-2)
 		Leave(l, c) // Leaves sad :(
+		l.UnreserveObject(table)
 		l.UnreserveObject(chair)
 
 		// println("Customer not got any food on time, customer left sad...")
@@ -104,6 +106,7 @@ func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
 		if c.GetAssignedWaiter() == -1 {
 			l.Cafe().AddRating(-2)
 			Leave(l, c) // Leaves sad :( // We should make it to wait, then leave. TODO!
+			l.UnreserveObject(table)
 			l.UnreserveObject(chair)
 			return
 		}
@@ -156,13 +159,18 @@ func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
 
 // Returns a chair and a table
 // which are empty and approachable
-func GetAvailableEatingSpace(l interfaces.CafeLocation) (*object.Object, int) {
+func GetAvailableEatingSpace(l interfaces.CafeLocation) (*object.Object, *object.Object, int) {
 
 	spaces := l.Cafe().GetEatingSpaces()
-	for _, chairs := range spaces {
+	for table, chairs := range spaces {
 
 		// If there are no connected chairs skip
 		if len(chairs) == 0 {
+			continue
+		}
+
+		// Try to reserve table
+		if !l.ReserveObject(table) {
 			continue
 		}
 
@@ -173,12 +181,12 @@ func GetAvailableEatingSpace(l interfaces.CafeLocation) (*object.Object, int) {
 			_, distance, found := Path(start, end)
 			if found {
 				l.ReserveObject(chair)
-				return chair, distance
+				return table, chair, distance
 			}
 		}
 
 	}
-	return nil, 0
+	return nil, nil, 0
 }
 
 func Leave(l interfaces.CafeLocation, c *customer.Customer) {

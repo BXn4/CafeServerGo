@@ -252,8 +252,8 @@ func (lc *LoadedLocation) ClearReservedObjects() {
 	lc.reservedObjs = []*object.Object{}
 }
 
-// Returns the first table and unreserves it
-func (lc *LoadedLocation) GetDirtySpace() *object.Object {
+// Returns the first table
+func (lc *LoadedLocation) GetDirtySpace() (*object.Object, *object.Object) {
 	lc.mu.Lock()
 	defer lc.mu.Unlock()
 
@@ -263,32 +263,38 @@ func (lc *LoadedLocation) GetDirtySpace() *object.Object {
 			chairIndex = i
 		}
 	}
+
 	if chairIndex == -1 {
-		return nil
+		return nil, nil
 	}
+
 	chair := lc.reservedObjs[chairIndex]
 
+	tableIndex := -1
+	for i, o := range lc.reservedObjs {
+		if o.IsTable() && chair.GetDishStatus() == 3 {
+			tableIndex = i
+		}
+	}
+
+	if tableIndex == -1 {
+		return nil, nil
+	}
+
+	table := lc.reservedObjs[tableIndex]
+
 	// Get associated table
-	for j, o := range lc.reservedObjs {
+	for _, o := range lc.reservedObjs {
 		if !o.IsTable() {
 			continue
 		}
 		nr := chair.GetNormalizedRotation()
 		if o.GetPos().X == chair.GetPos().X+nr[0] && o.GetPos().Y == chair.GetPos().Y+nr[1] {
-			// Unreserve chair
-			lc.reservedObjs = append(lc.reservedObjs[:chairIndex], lc.reservedObjs[chairIndex+1:]...)
-			if chairIndex < j {
-				j--
-			}
-
-			// Unreserve table
-			lc.reservedObjs = append(lc.reservedObjs[:j], lc.reservedObjs[j+1:]...)
-
-			return chair
+			return table, chair
 		}
 	}
 
-	return nil
+	return nil, nil
 }
 
 // Get reserved item by pos
