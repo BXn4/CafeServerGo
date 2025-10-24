@@ -51,6 +51,9 @@ func (s *CafeServer) Run() {
 	// Read the items XML file and cache it
 	utils.ReadAndCacheItems()
 
+	// Read the levels XML file and cache it
+	utils.ReadAndCacheLevels()
+
 	// Set up MariaDB connection
 	db, err := database.ConnectToDB(s.dbConfig)
 	if err != nil {
