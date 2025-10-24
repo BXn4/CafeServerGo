@@ -69,13 +69,6 @@ func (p *Player) String() string {
 	return strings.Join(params, "+")
 }
 
-func (p *Player) GetLevel() int {
-	if p.XP < 90 {
-		return int(math.Pow(math.Floor(float64(p.XP)/10), 1/2))
-	}
-	return int(math.Pow(math.Floor(float64(p.XP)/5), 1/3.72))
-}
-
 func (p *Player) GetUsername() string {
 	return p.Avatar.Name
 }
@@ -217,21 +210,4 @@ func (p *Player) AddGold(amount int) {
 	if amount < 0 {
 		p.UpdateAchivementSpendGold(amount)
 	}
-}
-
-func (p *Player) GetXP() int {
-	return p.XP
-}
-
-func (p *Player) AddXP(amount int) {
-	beforeLvl := p.GetLevel()
-	p.XP += amount
-	if beforeLvl < p.GetLevel() {
-		p.AddCash(500)
-		p.AddGold(1)
-	}
-}
-
-func (p *Player) SetXP(amount int) {
-	p.XP = amount
 }

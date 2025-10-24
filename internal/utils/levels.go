@@ -63,58 +63,65 @@ func GetLevelRewards(level int) (LevelWod, error) {
 	return LevelWod{}, fmt.Errorf("No level data found to level: %v", level)
 }
 
-func GetLevelFridgesLimit(level int) (int, error) {
+func GetLevelFridgesLimit(level int) int {
 	levelRewards, err := GetLevelRewards(level)
 	if err != nil {
-		return 1, fmt.Errorf("No fridges data found to level: %v, using default: 1", level)
+		fmt.Printf("No fridges data found to level: %v, using default: 1", level)
+		return 1
 	}
-	return levelRewards.Fridges, nil
+	return levelRewards.Fridges
 }
 
-func GetLevelCountersLimit(level int) (int, error) {
+func GetLevelCountersLimit(level int) int {
 	levelRewards, err := GetLevelRewards(level)
 	if err != nil {
-		return 3, fmt.Errorf("No counters data found to level: %v, using default: 3", level)
+		fmt.Printf("No counters data found to level: %v, using default: 3", level)
+		return 3
 	}
-	return levelRewards.Counters, nil
+	return levelRewards.Counters
 }
 
-func GetLevelInstantCookingsLimit(level int) (int, error) {
+func GetLevelInstantCookingsLimit(level int) int {
 	levelRewards, err := GetLevelRewards(level)
 	if err != nil {
-		return 12, fmt.Errorf("No instant cooking data found to level: %v, using default: 12", level)
+		fmt.Printf("No instant cooking data found to level: %v, using default: 12", level)
+		return 12
 	}
-	return levelRewards.Instants, nil
+	return levelRewards.Instants
 }
 
-func GetLevelStovesLimit(level int) (int, error) {
+func GetLevelStovesLimit(level int) int {
 	levelRewards, err := GetLevelRewards(level)
 	if err != nil {
-		return 3, fmt.Errorf("No stoves data found to level: %v, using default: 3", level)
+		fmt.Printf("No stoves data found to level: %v, using default: 3", level)
+		return 3
 	}
-	return levelRewards.Stoves, nil
+	return levelRewards.Stoves
 }
 
-func GetLevelWaitersLimit(level int) (int, error) {
+func GetLevelWaitersLimit(level int) int {
 	levelRewards, err := GetLevelRewards(level)
 	if err != nil {
-		return 1, fmt.Errorf("No waiters data found to level: %v, using default: 1", level)
+		fmt.Printf("No waiters data found to level: %v, using default: 1", level)
+		return 1
 	}
-	return levelRewards.Waiters, nil
+	return levelRewards.Waiters
 }
 
-func GetLevelCashReward(level int) (int, error) {
+func GetLevelCashReward(level int) int {
 	levelRewards, err := GetLevelRewards(level)
 	if err != nil {
-		return 0, fmt.Errorf("No cash reward data found to level: %v, using default: 0", level)
+		fmt.Printf("No cash reward data found to level: %v, using default: 0", level)
+		return 0
 	}
-	return levelRewards.CashReward, nil
+	return levelRewards.CashReward
 }
 
-func GetLevelGoldReward(level int) (int, error) {
+func GetLevelGoldReward(level int) int {
 	levelRewards, err := GetLevelRewards(level)
 	if err != nil {
-		return 0, fmt.Errorf("No gold reward data found to level: %v, using default: 0", level)
+		fmt.Printf("No gold reward data found to level: %v, using default: 0", level)
+		return 0
 	}
-	return levelRewards.GoldReward, nil
+	return levelRewards.GoldReward
 }
