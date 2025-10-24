@@ -15,7 +15,16 @@ func HireWaiter(req *requests.Request, c *client.Client, gm *managers.GameManage
 
 	// Checl if we have enough money
 	if c.Player.GetGold() < 2 {
+		c.SendExtensionResponse("nhi", "0", "4", req.Args[2], req.Args[3])
 		return nil
+	}
+
+	waiters := len(c.Location.Cafe().Waiters)
+
+	if waiters > utils.GetLevelWaitersLimit(c.Player.ID) {
+		c.SendExtensionResponse("nhi", "0", "1", req.Args[2], req.Args[3])
+		return nil
+
 	}
 
 	// Pay price

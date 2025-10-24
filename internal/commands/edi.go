@@ -26,7 +26,7 @@ func EditorMode(req *requests.Request, c *client.Client, gm *managers.GameManage
 		c.Location.ClearReservedObjects()
 		c.Player.Position = c.Location.Cafe().GetPlayerStart()
 	case 1:
-		println(len(c.Location.Cafe().GetCustomers()))
+		// println(len(c.Location.Cafe().GetCustomers()))
 		c.Location.SetRunning(false)
 	}
 

@@ -92,6 +92,45 @@ func BuyObject(req *requests.Request, c *client.Client, gm *managers.GameManager
 		c.Player.UpdateAchivementBoughtDecoration()
 
 		c.DB.UpdateAchievement(c.Player.ID, c.Player.GetAchivements().String())
+	case "Fridge":
+		numberOfFridges := c.Location.Cafe().GetFridgeMaxCapacity() / 50
+
+		if numberOfFridges < utils.GetLevelFridgesLimit(c.Player.GetLevel()) {
+			c.Location.Cafe().AddNewObject(objX, objY, objID, objRotation)
+		} else {
+			c.SendExtensionResponse("ebu", "-1", "3", strconv.Itoa(objX), strconv.Itoa(objY), strconv.Itoa(objID), strconv.Itoa(objRotation))
+			return nil // dont allow players to purchase more
+		}
+	case "Stove":
+		numberOfStoves := 0
+
+		for _, obj := range c.Location.Cafe().Objects {
+			if obj.IsStove() {
+				numberOfStoves++
+			}
+		}
+
+		if numberOfStoves < utils.GetLevelStovesLimit(c.Player.GetLevel()) {
+			c.Location.Cafe().AddNewObject(objX, objY, objID, objRotation)
+		} else {
+			c.SendExtensionResponse("ebu", "-1", "3", strconv.Itoa(objX), strconv.Itoa(objY), strconv.Itoa(objID), strconv.Itoa(objRotation))
+			return nil // dont allow players to purchase more
+		}
+	case "Counter":
+		numberOfCounters := 0
+
+		for _, obj := range c.Location.Cafe().Objects {
+			if obj.IsCounter() {
+				numberOfCounters++
+			}
+		}
+
+		if numberOfCounters < utils.GetLevelStovesLimit(c.Player.GetLevel()) {
+			c.Location.Cafe().AddNewObject(objX, objY, objID, objRotation)
+		} else {
+			c.SendExtensionResponse("ebu", "-1", "3", strconv.Itoa(objX), strconv.Itoa(objY), strconv.Itoa(objID), strconv.Itoa(objRotation))
+			return nil // dont allow players to purchase more
+		}
 
 	default:
 		c.Location.Cafe().AddNewObject(objX, objY, objID, objRotation)
