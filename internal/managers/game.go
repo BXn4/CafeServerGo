@@ -17,7 +17,8 @@ type GameManager struct {
 	clientMutex sync.Mutex
 	clients     []*client.Client
 
-	gameEvent int
+	gameEvent         int
+	gameEventDaysLeft int
 }
 
 func NewGameManager() (*GameManager, error) {
@@ -40,8 +41,7 @@ func NewGameManager() (*GameManager, error) {
 	// Add marketplace to cafe list
 	gm.SetLocation(-1, marketplace)
 
-	go gm.CheckForEvent(10 * time.Minute) // Its sets the current event on player join, but we need to force check it.
-	// Its not really important, but when no players joins, the game remains on the same event.
+	go gm.CheckForEvent(10 * time.Minute)
 
 	return gm, nil
 }

@@ -55,6 +55,12 @@ func (gm *GameManager) AddLocation(id int) *LoadedLocation {
 		return nil
 	}
 
+	if gm.GetEvent() == 3 {
+		cafeObj.Background = cafe.WinterBackground
+	} else {
+		cafeObj.Background = cafe.DefaultBackground
+	}
+
 	//
 	loc := NewLoadedLocation(cafeObj, gm)
 	gm.locations[id] = loc

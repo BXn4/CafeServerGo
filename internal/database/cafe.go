@@ -20,7 +20,6 @@ func (db *CafeDB) GetCafeByPlayerID(playerID int) (*cafe.Cafe, error) {
 		return nil, fmt.Errorf("Database error: %v", err)
 	}
 
-	c.Background = cafe.DefaultBackground
 	c.GetPlayerStart()
 
 	return &c, nil

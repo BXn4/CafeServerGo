@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type AvatarGender int
@@ -24,6 +25,7 @@ type Avatar struct {
 	TopColor  int          `gorm:"type:int;not null"`
 	HairColor int          `gorm:"type:int;not null"`
 	LegsColor int          `gorm:"type:int;not null"`
+	hat       int          `gorm:"type:int;default:1061"`
 	IsNPC     bool         `gorm:"type:boolean;default:0"`
 }
 
@@ -121,12 +123,31 @@ func (a *Avatar) String() string {
 
 func (a *Avatar) Apperance() string {
 	face := fmt.Sprintf("%v$0", 1080+int(a.Gender))
-	hat := utils.If(a.IsNPC, "1061$0", "1062$0")
+	hat := fmt.Sprintf("%v$0", a.GetAvatarHat())
 	top := fmt.Sprintf("%v$%v", 1000+int(a.Gender), a.TopColor)
 	skin := fmt.Sprintf("%v$%v", 1020+int(a.Gender), a.SkinColor)
 	hair := fmt.Sprintf("%v$%v", 1040+int(a.Gender), a.HairColor)
 	legs := fmt.Sprintf("%v$%v", 1050+int(a.Gender), a.LegsColor)
 	return strings.Join([]string{top, skin, hair, legs, hat, face}, "#")
+}
+
+func (a *Avatar) GetAvatarHat() int {
+	if a.hat == 0 {
+		if a.IsNPC {
+			a.SetAvatarHat(1061)
+		} else {
+			if utils.GetEventType(time.Now().UTC()) == 3 {
+				a.SetAvatarHat(1063)
+			} else {
+				a.SetAvatarHat(1062)
+			}
+		}
+	}
+	return a.hat
+}
+
+func (a *Avatar) SetAvatarHat(id int) {
+	a.hat = id
 }
 
 func NewRandomAvatar() Avatar {
