@@ -8,7 +8,7 @@ import (
 
 // see - S2C_SPECIAL_EVENT
 func SendSpecialEvent(c *client.Client, gm *managers.GameManager) error {
-	if gm.GetEvent() == 0 {
+	if gm.GetEvent() == 0 || c.Player == nil {
 		return nil
 	}
 

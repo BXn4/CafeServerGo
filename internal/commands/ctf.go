@@ -11,6 +11,9 @@ func TutorialComplete(c *client.Client, gm *managers.GameManager) error {
 		c.Player.IsTutorialCompleted = true
 
 		c.Player.AddXP(5) // 5 XP reward for tutorial complete
+
+		SendSpecialEvent(c, gm)
+
 		go agents.StartAgentCycles(c.Location)
 
 	}
