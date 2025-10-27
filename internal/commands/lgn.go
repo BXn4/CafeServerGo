@@ -3,6 +3,7 @@ package commands
 import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
+	"cafego/internal/models/player"
 	"cafego/internal/types/requests"
 	"fmt"
 	"strconv"
@@ -84,6 +85,12 @@ func Login(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 		if err != nil {
 			return fmt.Errorf("\nbga request: %v", err)
 		}
+
+		p.OnAchievementEarned = func(id int, level int, p *player.Player) {
+			gm.SendEarnAchievement(id, level, p.Username)
+		}
+
+		p.MakeAchievementCurrentLevels() // only make if its not exist
 
 		c.Player.IsTutorialCompleted = true // Default false, because after register, the customers should not start.
 		// And we cant trigger the tutorial event in the game, so its just works after register. If the player disconnects after the tutorial, we cant trigger it.

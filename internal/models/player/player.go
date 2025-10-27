@@ -14,39 +14,41 @@ import (
 )
 
 type Player struct {
-	ID                  int             `gorm:"primaryKey;autoIncrement;type:int"`
-	Email               string          `gorm:"not null;type:text"`
-	Password            string          `gorm:"not null;type:text"`
-	Cash                int             `gorm:"column:cash;type:int;default:2000"`
-	Gold                int             `gorm:"column:gold;type:int;default:11"`
-	XP                  int             `gorm:"column:xp;type:int;default:0"`
-	InstantCookings     int             `gorm:"column:instant_cookings;type:int;default:0"`
-	OpenJobs            int             `gorm:"column:open_jobs;type:int;default:0"`
-	PlayedWheel         bool            `gorm:"column:played_wheel;type:bool;default:false"`
-	AllowFriendRequests bool            `gorm:"column:allow_friend_requests;stype:bool;default:true"`
-	Friends             simple.IntSlice `gorm:"column:friends;type:text;default:null"`
-	FriendsWithGifts    simple.IntSlice `gorm:"column:friends_with_gifts;type:text;default:null"`
-	SendableGifts       gift.GiftList   `gorm:"column:sendable_gifts;type:text;default:null"`
-	AllowEmails         bool            `gorm:"column:allow_emails;type:bool;default:true"`
-	EmailVerified       bool            `gorm:"column:email_verified;type:bool;default:false"`
-	Username            string          `gorm:"column:username;not null;type:text"`
-	IsBanned            bool            `gorm:"column:is_banned;default:0;type:bool"`
-	Avatar              avatar.Avatar   `gorm:"column:avatar;type:text"`
-	AvatarChanged       bool            `gorm:"column:avatar_changed;type:bool;default:false"`
-	Position            simple.Position `gorm:"-"`
-	Mastery             simple.IntMap   `gorm:"column:mastery;type:text;default:null"`
-	Achievement         simple.IntMap   `gorm:"column:achievement;type:text;default:null"`
-	WorkTimeLeft        int             `gorm:"-"`
-	CoopID              int             `gorm:"column:coop_id;type:int;default:null"`
-	SeekingJob          bool            `gorm:"-"`
-	LastLogin           time.Time       `gorm:"column:last_login;type:datetime;default:null"`
-	DailyLogin          time.Time       `gorm:"column:daily_login;type:datetime;default:null"`
-	GiftRefreshTime     time.Time       `gorm:"column:gift_refresh_time;type:datetime;default:null"`
-	Gifts               gift.GiftList   `gorm:"column:gifts;type:text;default:null"`
-	IsRegistered        bool            `gorm:"default:false"`
-	IsTutorialCompleted bool            `gorm:"default:false"`
-	AccessLevel         int             `gorm:"column:access_level;default:0;type:int"`
-	MaxInstants         int             `gorm:"default:12"`
+	ID                  int                                           `gorm:"primaryKey;autoIncrement;type:int"`
+	Email               string                                        `gorm:"not null;type:text"`
+	Password            string                                        `gorm:"not null;type:text"`
+	Cash                int                                           `gorm:"column:cash;type:int;default:2000"`
+	Gold                int                                           `gorm:"column:gold;type:int;default:11"`
+	XP                  int                                           `gorm:"column:xp;type:int;default:0"`
+	InstantCookings     int                                           `gorm:"column:instant_cookings;type:int;default:0"`
+	OpenJobs            int                                           `gorm:"column:open_jobs;type:int;default:0"`
+	PlayedWheel         bool                                          `gorm:"column:played_wheel;type:bool;default:false"`
+	AllowFriendRequests bool                                          `gorm:"column:allow_friend_requests;stype:bool;default:true"`
+	Friends             simple.IntSlice                               `gorm:"column:friends;type:text;default:null"`
+	FriendsWithGifts    simple.IntSlice                               `gorm:"column:friends_with_gifts;type:text;default:null"`
+	SendableGifts       gift.GiftList                                 `gorm:"column:sendable_gifts;type:text;default:null"`
+	AllowEmails         bool                                          `gorm:"column:allow_emails;type:bool;default:true"`
+	EmailVerified       bool                                          `gorm:"column:email_verified;type:bool;default:false"`
+	Username            string                                        `gorm:"column:username;not null;type:text"`
+	IsBanned            bool                                          `gorm:"column:is_banned;default:0;type:bool"`
+	Avatar              avatar.Avatar                                 `gorm:"column:avatar;type:text"`
+	AvatarChanged       bool                                          `gorm:"column:avatar_changed;type:bool;default:false"`
+	Position            simple.Position                               `gorm:"-"`
+	Mastery             simple.IntMap                                 `gorm:"column:mastery;type:text;default:null"`
+	Achievement         simple.IntMap                                 `gorm:"column:achievement;type:text;default:null"`
+	AchievementLevel    simple.IntMap                                 `gorm:"-"`
+	WorkTimeLeft        int                                           `gorm:"-"`
+	CoopID              int                                           `gorm:"column:coop_id;type:int;default:null"`
+	SeekingJob          bool                                          `gorm:"-"`
+	LastLogin           time.Time                                     `gorm:"column:last_login;type:datetime;default:null"`
+	DailyLogin          time.Time                                     `gorm:"column:daily_login;type:datetime;default:null"`
+	GiftRefreshTime     time.Time                                     `gorm:"column:gift_refresh_time;type:datetime;default:null"`
+	Gifts               gift.GiftList                                 `gorm:"column:gifts;type:text;default:null"`
+	IsRegistered        bool                                          `gorm:"default:false"`
+	IsTutorialCompleted bool                                          `gorm:"default:false"`
+	AccessLevel         int                                           `gorm:"column:access_level;default:0;type:int"`
+	MaxInstants         int                                           `gorm:"default:12"`
+	OnAchievementEarned func(achievementID int, level int, p *Player) `gorm:"-"`
 }
 
 func (player *Player) TableName() string {
@@ -186,7 +188,7 @@ func (p *Player) AddCash(amount int) {
 	if amount > 0 {
 		p.UpdateAchivementEarnedChips(amount)
 	} else if amount < 0 {
-		p.UpdateAchivementSpendChips(amount)
+		p.UpdateAchivementSpendChips(-amount)
 	}
 }
 
@@ -208,8 +210,10 @@ func (p *Player) GetGold() int {
 
 func (p *Player) AddGold(amount int) {
 	p.Gold += amount
-	if amount < 0 {
+	if amount > 0 {
 		p.UpdateAchivementSpendGold(amount)
+	} else if amount < 0 {
+		p.UpdateAchivementSpendGold(-amount)
 	}
 }
 

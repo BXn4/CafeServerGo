@@ -54,6 +54,9 @@ func (s *CafeServer) Run() {
 	// Read the levels XML file and cache it
 	utils.ReadAndCacheLevels()
 
+	// Read the achievements XML file and cache it
+	utils.ReadAndCacheAchievements()
+
 	// Set up MariaDB connection
 	db, err := database.ConnectToDB(s.dbConfig)
 	if err != nil {

@@ -68,7 +68,7 @@ func SellObject(req *requests.Request, c *client.Client, gm *managers.GameManage
 
 	c.Player.AddCash(sellAmount * int(math.Round(float64(objectInfo.Cash)*0.2+float64(objectInfo.Gold)*0.2)))
 
-	c.Player.UpdateAchivementSoldItems()
+	c.Player.UpdateAchivementSoldItems(sellAmount)
 
 	c.DB.UpdateAchievement(c.Player.ID, c.Player.GetAchivements().String())
 	c.DB.UpdateCash(c.Player.ID, c.Player.GetCash())
