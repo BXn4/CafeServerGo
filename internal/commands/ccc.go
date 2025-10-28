@@ -82,11 +82,9 @@ func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameMana
 				return fmt.Errorf("Error converting amount: %w", err)
 			}
 
-			if ingredientID < 1401 {
-				// Dont add fancy in the req if the player is not using fancy
+			if ingredientID >= 1401 && usingFancy == 1 {
 				ingredientsMap[ingredientID] = ingredientAmount
-			} else if ingredientID >= 1401 && usingFancy != 0 {
-				// Add fancy in the req
+			} else if ingredientID < 1401 && usingFancy == 0 {
 				ingredientsMap[ingredientID] = ingredientAmount
 			}
 		}

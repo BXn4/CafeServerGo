@@ -44,6 +44,14 @@ func Login(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 		// Set player
 		c.Player = p
 
+		p.MakeAchievementCurrentLevels() // only make if its not exist
+
+		// Handle login bonus (lbu)
+		err = LoginRewards(req, c, gm)
+		if err != nil {
+			return fmt.Errorf("\nlbu request: %v", err)
+		}
+
 		// Send room list (rlu)
 		err = RoomList(req, c, gm)
 		if err != nil {
@@ -68,12 +76,6 @@ func Login(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 			return fmt.Errorf("\nlmi request: %v", err)
 		}
 
-		// Handle login bonus (lbu)
-		err = LoginRewards(req, c, gm)
-		if err != nil {
-			return fmt.Errorf("\nlbu request: %v", err)
-		}
-
 		// Send Ping (pin)
 		err = SendPing(req, c, gm)
 		if err != nil {
@@ -89,8 +91,6 @@ func Login(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 		p.OnAchievementEarned = func(id int, level int, p *player.Player) {
 			gm.SendEarnAchievement(id, level, p.Username)
 		}
-
-		p.MakeAchievementCurrentLevels() // only make if its not exist
 
 		c.Player.IsTutorialCompleted = true // Default false, because after register, the customers should not start.
 		// And we cant trigger the tutorial event in the game, so its just works after register. If the player disconnects after the tutorial, we cant trigger it.

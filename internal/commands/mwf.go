@@ -20,14 +20,16 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 	}
 
 	// If you already played the wheel
-	if c.Player.PlayedWheel {
+	if c.Player.PlayedWheel && c.Player.GetGold() == 0 {
 		c.SendExtensionResponse("mwf", "-1", "4")
 	}
-	// TODO: Set wheel timer and set played wheel
+
+	c.Player.PlayedWheel = true
 
 	c.Player.UpdateAchivementWheelOfFortune()
 
 	c.DB.UpdateAchievement(c.Player.ID, c.Player.GetAchivements().String())
+	c.DB.UpdatePlayedWheel(c.Player.ID, c.Player.PlayedWheel)
 
 	reward := rand.Intn(16)
 	rewardStr := strconv.Itoa(reward)

@@ -236,3 +236,8 @@ func (p *Player) GetMaxInstantCookings() int {
 func (p *Player) SetMaxInstantCookings(value int) {
 	p.MaxInstants = value
 }
+
+func (p *Player) GetIsDailyLogin() bool {
+	timePassed := time.Now().UTC().Sub(p.DailyLogin)
+	return timePassed >= 24*time.Hour
+}

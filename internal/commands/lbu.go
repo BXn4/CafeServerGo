@@ -14,124 +14,124 @@ import (
 )
 
 func LoginRewards(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
-	// Check if time passed by daily login
-	timePassedSinceLastLogin := time.Now().UTC().Sub(c.Player.LastLogin)
-	timePassed := time.Now().UTC().Sub(c.Player.DailyLogin)
-	isDaily := timePassed >= 24*time.Hour
-
-	if isDaily {
-		c.Player.DailyLogin = time.Now().UTC()
-		c.DB.UpdateDailyLogin(c.Player.ID, c.Player.DailyLogin)
-
-		maxInstants := utils.GetLevelInstantCookingsLimit(c.Player.GetLevel())
-		c.Player.SetMaxInstantCookings(maxInstants)
-		c.Player.SetInstantCookings(maxInstants)
-
-		c.DB.UpdateInstantCookings(c.Player.ID, maxInstants)
-	}
-
 	var args []string
-	loginBonusStr := ""
 
 	// Get my cafe
-	mycafe, err := c.DB.GetCafeByPlayerID(c.Player.ID)
+	cafe, err := c.DB.GetCafeByPlayerID(c.Player.ID)
 
 	if err != nil {
 		return err
 	}
 
-	if isDaily {
-		// Get random fancy
+	if c.Player.GetIsDailyLogin() {
+		c.Player.DailyLogin = time.Now().UTC()
+
+		maxInstants := utils.GetLevelInstantCookingsLimit(c.Player.GetLevel())
+		c.Player.SetMaxInstantCookings(maxInstants)
+		c.Player.SetInstantCookings(0) // 0 because its counts used, and not how much still have
+
+		c.Player.PlayedWheel = false
+
 		fancies, err := utils.GetItems("fancy")
 		if err != nil {
 			return err
 		}
 		choice := rand.Intn(len(fancies))
 		fancy := fancies[choice]
+		amount := 1
 
 		// Calculate login bonus
 		loginBonus := 500 * (int(c.Player.GetLevel()/10) + 1)
-		loginBonusStr = fmt.Sprintf("1906+%v#%v+1", loginBonus, fancy.ID)
-		args = append(args, loginBonusStr)
+		dailyLoginBonusStr := fmt.Sprintf("1906+%d#%d+%d", loginBonus, fancy.ID, amount)
+		args = append(args, dailyLoginBonusStr)
 
-		c.Player.Cash += loginBonus
+		c.Player.AddCash(loginBonus)
+		cafe.AddToFridge(fancy.ID, amount)
 
-		mycafe.AddToFridge(fancy.ID, 1)
-		// c.DB.UpdateFridge()
+		c.DB.UpdateDailyLogin(c.Player.ID, c.Player.DailyLogin)
+		c.DB.UpdatePlayedWheel(c.Player.ID, c.Player.PlayedWheel)
+		c.DB.UpdateInstantCookings(c.Player.ID, maxInstants)
+		c.DB.UpdateFridgeInventory(cafe.ID, cafe.FridgeInventory.String())
 	}
 
-	// Calculate customer spawn time (we use max time so people dont try to cheat the system)
-	rating := mycafe.GetRating()
-	var customerSpawnTime int
-
-	if rating < 150 {
-		customerSpawnTime = 30
-	} else if rating <= 150 && rating < 350 {
-		customerSpawnTime = 20
-	} else if rating <= 350 && rating < 500 {
-		customerSpawnTime = 15
-	} else {
-		customerSpawnTime = 5
-	}
-
-	// Calculate passive income
-	passedSeconds := timePassedSinceLastLogin.Seconds()
-	passiveIncome := 0
+	canSellDishes := false
 	soldDishes := 0
-	maxDishSellCount := int(passedSeconds / float64(customerSpawnTime))
 
-	for i := 0; i < maxDishSellCount; i++ {
-		// Get counter
-		counter, _ := agents.GetRandomCounter(mycafe)
-
-		// If cant find counter break
-		if counter == nil {
-			break
+	for _, obj := range cafe.GetObjects() {
+		if obj.IsCounter() {
+			if obj.GetDishAmount() > 0 {
+				canSellDishes = true
+				break
+			}
 		}
-
-		// If no food return
-		dishID := counter.GetDishID()
-		if dishID == -1 {
-			break
-		}
-
-		// If cant sell more continue
-		if !counter.AddDishAmount(-1) {
-			continue
-		}
-		soldDishes++
-
-		// Get dish info
-		wod, err := utils.GetDish(dishID)
-		if err != nil {
-			return err
-		}
-
-		// Add to passive income
-		passiveIncome += wod.IncomePerServing
 	}
 
-	if isDaily || soldDishes > 0 {
-		if soldDishes > 0 {
-			c.Player.UpdateAchivementServingsCount(soldDishes)
+	if canSellDishes {
+		rating := cafe.GetRating()
+		var customerSpawnTime int
+
+		if rating < 150 {
+			customerSpawnTime = 30
+		} else if rating <= 150 && rating < 350 {
+			customerSpawnTime = 20
+		} else if rating <= 350 && rating < 500 {
+			customerSpawnTime = 15
+		} else {
+			customerSpawnTime = 5
 		}
-		soldDishesStr := strconv.Itoa(soldDishes)
 
-		c.Player.AddCash(passiveIncome)
+		secondsPassedSinceLastLogin := time.Now().UTC().Sub(c.Player.LastLogin).Seconds()
+		maxShouldSellDishCount := int(secondsPassedSinceLastLogin / float64(customerSpawnTime))
 
-		// Add passive income to args
-		args = append(args, fmt.Sprintf("1901+%d", passiveIncome))
+		passiveIncome := 0
 
-		// Save modified cafe
-		c.DB.UpdateObjects(mycafe.ID, mycafe.Objects.StringForDB())
+		for i := 0; i < maxShouldSellDishCount; i++ {
+			// Get counter
+			counter, _ := agents.GetRandomCounter(cafe)
+
+			if counter == nil {
+				break
+			}
+
+			dishID := counter.GetDishID()
+			dishAmount := counter.GetDishAmount()
+
+			if dishID == -1 || dishAmount <= 0 {
+				break
+			}
+
+			if !counter.AddDishAmount(-1) {
+				continue
+			}
+
+			soldDishes++
+
+			wod, err := utils.GetDish(dishID)
+			if err != nil {
+				return err
+			}
+
+			passiveIncome += wod.IncomePerServing
+		}
+
+		if soldDishes > 0 {
+			dishesSoldOffline := fmt.Sprintf("1901+%d", passiveIncome)
+			args = append(args, dishesSoldOffline)
+
+			c.Player.AddCash(passiveIncome)
+
+			c.Player.UpdateAchivementServingsCount(soldDishes)
+			c.DB.UpdateObjects(cafe.ID, cafe.Objects.StringForDB())
+			c.DB.UpdateAchievement(c.Player.ID, c.Player.GetAchivements().String())
+		}
+	}
+
+	if len(args) > 0 {
+		c.SendExtensionResponse("lbu", "-1", "0", strings.Join(args, "#"), strconv.Itoa(soldDishes))
+
 		c.DB.UpdateCash(c.Player.ID, c.Player.Cash)
 		c.DB.UpdateAchievement(c.Player.ID, c.Player.GetAchivements().String())
-
-		// Send response
-		c.SendExtensionResponse("lbu", "-1", "0", strings.Join(args, "#"), soldDishesStr)
-
-		AssetsSynchronize(c) // Updates force the player cash, gold in the game visually.
-		// Its used in the payments, but we can use it to update the cash, gold values force.
+		c.DB.UpdateCash(c.Player.ID, c.Player.Cash)
 	}
 
 	return nil

@@ -26,8 +26,8 @@ func InstantCook(req *requests.Request, c *client.Client, gm *managers.GameManag
 		return nil
 	}
 
-	if c.Player.GetGold() < 1 && c.Player.GetInstantCookings() < 1 {
-		c.SendExtensionResponse("crc", "-1", "4", strconv.Itoa(objX), strconv.Itoa(objY))
+	if c.Player.GetGold() < 1 || c.Player.GetInstantCookings() > c.Player.GetMaxInstantCookings() {
+		c.SendExtensionResponse("cic", "-1", "4", strconv.Itoa(objX), strconv.Itoa(objY))
 		return nil
 	}
 
