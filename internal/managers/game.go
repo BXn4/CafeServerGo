@@ -17,8 +17,9 @@ type GameManager struct {
 	clientMutex sync.Mutex
 	clients     []*client.Client
 
-	gameEvent         int
-	gameEventDaysLeft int
+	gameEvent              int
+	gameEventDaysLeft      int
+	unavailableIngredients []int
 }
 
 func NewGameManager() (*GameManager, error) {

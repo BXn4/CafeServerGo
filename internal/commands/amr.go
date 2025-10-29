@@ -13,7 +13,7 @@ func AllowEmails(req *requests.Request, c *client.Client, gm *managers.GameManag
 
 	c.Player.AllowEmails = utils.If(req.Args[2] == "1", true, false)
 
-	c.Location.Broadcast("abr", "-1", req.Args[2], strconv.Itoa(c.Player.ID))
+	c.SendExtensionResponse("amr", "-1", req.Args[2], strconv.Itoa(c.Player.ID))
 
 	c.DB.UpdateAllowEmails(c.Player.ID, c.Player.AllowEmails)
 	return nil

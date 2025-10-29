@@ -8,9 +8,7 @@ import (
 
 // sga - C2S_SHOP_AVAILIBILITY
 func ShopAvailibility(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
-	// TODO: Set what ingredients are not available.
 
-	c.SendExtensionResponse("sga", "-1", "0", "#")
-
+	c.SendExtensionResponse("sga", "-1", "0", "1314#1315")
 	return nil
 }
