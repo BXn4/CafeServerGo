@@ -37,6 +37,11 @@ func BuyIngredient(req *requests.Request, c *client.Client, gm *managers.GameMan
 		return nil
 	}
 
+	if gm.IsIngredientUnavailable(ingredientID) { // SCP command hanles when buying from currior
+		c.SendExtensionResponse("sbi", "-1", "4")
+		return nil
+	}
+
 	if ingredientInfo.Cash != 0 {
 		if c.Player.GetCash() < ingredientInfo.Cash {
 			c.SendExtensionResponse("sbi", "-1", "4")
@@ -55,7 +60,7 @@ func BuyIngredient(req *requests.Request, c *client.Client, gm *managers.GameMan
 			c.SendExtensionResponse("sbi", "-1", "4")
 			return nil
 		} else {
-			c.Player.AddGold(ingredientInfo.Gold)
+			c.Player.AddGold(-ingredientInfo.Gold)
 		}
 	}
 

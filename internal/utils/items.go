@@ -79,6 +79,7 @@ func GetItems(s string) ([]Wod, error) {
 		category = "ingredient"
 	}
 	items, ok := itemCollection[strings.ToLower(category)]
+
 	if !ok {
 		return nil, fmt.Errorf("Item category with name %v not exist", category)
 

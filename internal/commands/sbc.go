@@ -19,8 +19,8 @@ func SendBalancingConstant(req *requests.Request, c *client.Client, gm *managers
 		"1",  // timeFactor
 		"1",  // rating_guest_happy
 		"-2", // rating_guest_unhappy
-		"0",  // courierPrice (NOT READY)
-		"0",  // maxCourierSize (NOT READY)
+		"1",  // courierPrice (value not yet known)
+		"8",  // maxCourierSize (value not yet known)
 		"0",  // instantCookHourPerGold (NOT READY)
 		strconv.FormatInt(time.Now().UTC().Unix(), 10), // serverTimeStamp
 		"5",    // jobsPerDay

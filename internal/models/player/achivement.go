@@ -22,7 +22,7 @@ func (p *Player) MakeAchievementCurrentLevels() {
 			progress := p.GetAchievementProgress(id)
 			level := p.GetAchievementLevelByProgress(id, progress)
 			p.AchievementLevel[id] = level
-			println("SET ACHIEVEMENT LEVELS FOR: ID:", id, "Progress:", progress, "Current level:", level)
+			// println("SET ACHIEVEMENT LEVELS FOR: ID:", id, "Progress:", progress, "Current level:", level)
 		}
 	}
 }
@@ -57,15 +57,15 @@ func (p *Player) CheckProgress(achievementID int) {
 	levelProgressTarget := utils.GetAchievementTarget(achievementID, currentLevel)
 	maxLevelForAchievement := utils.GetAchievementMAXLevel(achievementID)
 
-	println(progress)
+	/* println(progress)
 	println(currentLevel)
-	println(levelProgressTarget)
+	println(levelProgressTarget) */
 
 	// time.Sleep(5 * time.Second)
 	// nested loops happened here. fuck im out. PLEASE KEEP THIS
 
 	if progress >= levelProgressTarget && currentLevel <= maxLevelForAchievement {
-		println("LEVEL UP!")
+		// println("LEVEL UP!")
 		p.SetAchievementLevel(achievementID, currentLevel+1)
 		p.OnAchievementEarned(achievementID, currentLevel+1, p)
 	} else {
@@ -152,8 +152,8 @@ func (p *Player) SetAchivementFriendsCount() {
 }
 
 // <wod id="2011" n="Basic" g="Achievement" t="Curiercount" />
-func (p *Player) UpdateAchivementCurierCount() {
-	p.UpdateAchievement(2011, 1)
+func (p *Player) UpdateAchivementCurierCount(amount int) {
+	p.UpdateAchievement(2011, amount)
 }
 
 // <wod id="2012" n="Basic" g="Achievement" t="Coopcount" />

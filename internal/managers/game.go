@@ -43,6 +43,7 @@ func NewGameManager() (*GameManager, error) {
 	gm.SetLocation(-1, marketplace)
 
 	go gm.CheckForEvent(10 * time.Minute)
+	go gm.CheckForShopAvailablity()
 
 	return gm, nil
 }

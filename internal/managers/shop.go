@@ -1,21 +1,25 @@
 package managers
 
 import (
-	"cafego/internal/utils"
 	"math/rand"
 	"slices"
 	"time"
+
+	"github.com/charmbracelet/log"
 )
 
 func (gm *GameManager) CheckForShopAvailablity() {
-	isShopUnavailable := true
-
-	if isShopUnavailable && len(gm.unavailableIngredients) == 0 {
-		ingredients, err := utils.GetItems("ingredients")
-		if err != nil {
-			return
-		}
+	for true {
+		currentTime := time.Now().UTC()
+		start, end := GetShopUnavailabilityRange()
+		duration := end.Sub(currentTime) //duration is in nanosec!
 		var choices []int
+
+		ingredients := map[int]bool{}
+
+		for i := 1301; i <= 1343; i++ {
+			ingredients[i] = true
+		}
 
 		alwaysAvailable := []int{
 			1314, 1307, 1308, 1318,
@@ -23,16 +27,27 @@ func (gm *GameManager) CheckForShopAvailablity() {
 			1337, 1341, 1340,
 		}
 
+		for _, id := range alwaysAvailable {
+			ingredients[id] = false
+		}
+
 		for i := 0; i < rand.Intn(4)+1; i++ {
 			for {
-				ingredient := ingredients[rand.Intn(len(ingredients))]
-				if !slices.Contains(alwaysAvailable, ingredient.ID) {
-					choices = append(choices, ingredient.ID)
+				randomID := rand.Intn(1343-1301+1) + 1301
+				if ingredients[randomID] {
+					choices = append(choices, randomID)
 					break
 				}
 			}
+
+			gm.unavailableIngredients = choices
 		}
-		gm.unavailableIngredients = choices
+
+		log.Infof("Shop will be unavailable from %s to %s", start, end)
+		log.Infof("Unabailable ingredients will be: %d", gm.GetUnavailableIngredients())
+
+		time.Sleep(duration) // duration is in nanosec!
+		// sleep until end, so its resets the ingredients.
 	}
 }
 
@@ -45,14 +60,15 @@ func (gm *GameManager) GetUnavailableIngredients() []int {
 }
 
 func (gm *GameManager) IsIngredientUnavailable(ingredientID int) bool {
-	if slices.Contains(gm.unavailableIngredients, ingredientID) {
+	if gm.IsShopUnavailable() && slices.Contains(gm.unavailableIngredients, ingredientID) {
 		return true
 	}
 
 	return false
 }
 
-func IsShopUnavailable(currentTime time.Time) bool {
+func (gm *GameManager) IsShopUnavailable() bool {
+	currentTime := time.Now().UTC()
 	start, end := GetShopUnavailabilityRange()
 	return currentTime.After(start) && currentTime.Before(end)
 }
@@ -64,13 +80,14 @@ func GetShopUnavailabilityRange() (time.Time, time.Time) {
 	r := rand.New(rand.NewSource(seed))
 
 	randomDayOffset := r.Intn(14)
-	randomHourDuration := time.Duration(rand.Intn(4) + 1)
+	max := 12 // h
+	min := 8  // h
+	randomHourDuration := time.Duration(rand.Intn(max-min) + min)
 	randomDate := now.AddDate(0, 0, randomDayOffset)
 
 	startHour := r.Intn(22)
 	start := time.Date(randomDate.Year(), randomDate.Month(), randomDate.Day(), startHour, 0, 0, 0, time.UTC)
 	end := start.Add(randomHourDuration * time.Hour)
 
-	// fmt.Printf("Shop will be unavailable from %v to %v\n", start, end)
 	return start, end
 }
