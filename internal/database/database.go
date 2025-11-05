@@ -99,3 +99,35 @@ func (db *CafeDB) CreateAccount(name, email, password string, a avatar.Avatar) (
 
 	return player, nil
 }
+
+func (db *CafeDB) GetLeaderBoard() ([]map[string]any, error) {
+	type Entry struct {
+		ID       int
+		Username string
+		XP       int
+		Luxury   int
+	}
+
+	var rows []Entry
+	err := db.conn.
+		Table("player AS p").
+		Select("p.id AS id, p.username AS username, p.xp AS xp, c.luxury AS luxury").
+		Joins("LEFT JOIN cafe AS c ON c.player_id = p.id").
+		Scan(&rows).Error
+	if err != nil {
+		return nil, err
+	}
+
+	leaderboard := make([]map[string]any, len(rows))
+	for i, item := range rows {
+		leaderboard[i] = map[string]any{
+			"rank":     i + 1,
+			"id":       item.ID,
+			"username": item.Username,
+			"xp":       item.XP,
+			"luxury":   item.Luxury,
+		}
+	}
+
+	return leaderboard, nil
+}

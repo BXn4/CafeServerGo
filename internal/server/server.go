@@ -5,6 +5,7 @@ import (
 	"cafego/internal/commands"
 	"cafego/internal/database"
 	"cafego/internal/managers"
+	"cafego/internal/models/leaderboard"
 	"cafego/internal/utils"
 	"fmt"
 	"net"
@@ -66,6 +67,9 @@ func (s *CafeServer) Run() {
 	log.Infof("Server connected to database.")
 
 	s.gm.SetCafeDB(db)
+
+	// Caching / updates it in every 5 mins.
+	leaderboard.CheckLeaderBoard(db)
 
 	// Start the TCP server
 	address := fmt.Sprintf("%s:%s", s.config.Host, s.config.Port)
