@@ -3,6 +3,7 @@ package commands
 import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
+	"cafego/internal/models/shop"
 	"cafego/internal/types/requests"
 	"fmt"
 	"strconv"
@@ -26,7 +27,7 @@ func BuyIngredientFromShopCarrier(req *requests.Request, c *client.Client, gm *m
 		return fmt.Errorf("Can't parse amount to int: %v", err)
 	}
 
-	if gm.IsIngredientUnavailable(ingredientID) { // return true when the shop is un.
+	if shop.IsIngredientUnavailable(ingredientID) { // return true when the shop is un.
 		if c.Location.Cafe().GetFridgeFreeSpace() < ingredientAmount {
 			c.SendExtensionResponse("scp", "-1", "40")
 			return nil

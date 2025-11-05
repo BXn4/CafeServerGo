@@ -3,6 +3,7 @@ package commands
 import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
+	"cafego/internal/models/event"
 	"cafego/internal/models/simple"
 	"cafego/internal/types/requests"
 	"cafego/internal/utils"
@@ -42,7 +43,7 @@ func BuyObject(req *requests.Request, c *client.Client, gm *managers.GameManager
 	}
 
 	// 2 0 0
-	if (c.Location.Cafe().GetFurnitureInventory()[objID] == 0) && (gm.GetEvent() < objectInfo.Events) {
+	if (c.Location.Cafe().GetFurnitureInventory()[objID] == 0) && (event.GetEvent() < objectInfo.Events) {
 		c.SendExtensionResponse("ebu", "-1", "1", strconv.Itoa(objX), strconv.Itoa(objY), strconv.Itoa(objID), strconv.Itoa(objRotation))
 		return nil
 	}

@@ -4,6 +4,8 @@ import (
 	"cafego/internal/client"
 	"cafego/internal/database"
 	"cafego/internal/models/cafe"
+	"cafego/internal/models/event"
+	"cafego/internal/models/shop"
 	"sync"
 	"time"
 )
@@ -16,10 +18,6 @@ type GameManager struct {
 
 	clientMutex sync.Mutex
 	clients     []*client.Client
-
-	gameEvent              int
-	gameEventDaysLeft      int
-	unavailableIngredients []int
 }
 
 func NewGameManager() (*GameManager, error) {
@@ -42,8 +40,8 @@ func NewGameManager() (*GameManager, error) {
 	// Add marketplace to cafe list
 	gm.SetLocation(-1, marketplace)
 
-	go gm.CheckForEvent(10 * time.Minute)
-	go gm.CheckForShopAvailablity()
+	go event.CheckForEvent(10 * time.Minute)
+	go shop.CheckForShopAvailablity(10 * time.Minute)
 
 	return gm, nil
 }

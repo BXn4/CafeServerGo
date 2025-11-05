@@ -3,6 +3,7 @@ package commands
 import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
+	"cafego/internal/models/event"
 	"cafego/internal/types/requests"
 	"cafego/internal/utils"
 	"fmt"
@@ -61,7 +62,7 @@ func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameMana
 			return fmt.Errorf("Invalid ingredient ID: %w", err)
 		}
 
-		if gm.GetEvent() < dishInfo.Events {
+		if event.GetEvent() < dishInfo.Events {
 			return fmt.Errorf("Invalid dish ID:, because theres no holiday %w", err)
 
 		}

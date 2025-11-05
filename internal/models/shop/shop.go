@@ -1,4 +1,4 @@
-package managers
+package shop
 
 import (
 	"math/rand"
@@ -8,11 +8,33 @@ import (
 	"github.com/charmbracelet/log"
 )
 
-func (gm *GameManager) CheckForShopAvailablity() {
-	for true {
-		currentTime := time.Now().UTC()
-		start, end := GetShopUnavailabilityRange()
-		duration := end.Sub(currentTime) //duration is in nanosec!
+var unavailableIngredients []int
+var unavailable = false
+
+func CheckForShopAvailablity(d time.Duration) {
+	ticker := time.NewTicker(d)
+	defer ticker.Stop()
+
+	Check()
+
+	for range ticker.C {
+		Check()
+	}
+}
+
+func Check() {
+	currentTime := time.Now().UTC()
+	start, end := GetShopUnavailabilityRange()
+
+	if currentTime.Before(start) || currentTime.After(end) {
+		log.Infof("Shop is available now, no ingredients are unavailable.")
+
+		setUnavailable(false)
+		return
+	}
+
+	if !IsShopUnavailable() {
+
 		var choices []int
 
 		ingredients := map[int]bool{}
@@ -40,48 +62,53 @@ func (gm *GameManager) CheckForShopAvailablity() {
 				}
 			}
 
-			gm.unavailableIngredients = choices
+			setUnavailable(true)
+			setUnavailableIngredietns(choices)
 		}
 
-		log.Infof("Shop will be unavailable from %s to %s", start, end)
-		log.Infof("Unabailable ingredients will be: %d", gm.GetUnavailableIngredients())
-
-		time.Sleep(duration) // duration is in nanosec!
-		// sleep until end, so its resets the ingredients.
+		log.Infof("Shop is unavailable from %s to %s", start, end)
+		log.Infof("Unabailable ingredients: %d", GetUnavailableIngredients())
 	}
 }
 
-func (gm *GameManager) GetUnavailableIngredients() []int {
-	if len(gm.unavailableIngredients) != 0 {
-		return gm.unavailableIngredients
+func GetUnavailableIngredients() []int {
+	if len(unavailableIngredients) != 0 {
+		return unavailableIngredients
 	}
 
 	return nil
 }
 
-func (gm *GameManager) IsIngredientUnavailable(ingredientID int) bool {
-	if gm.IsShopUnavailable() && slices.Contains(gm.unavailableIngredients, ingredientID) {
+func setUnavailableIngredietns(value []int) {
+	unavailableIngredients = value
+}
+
+func setUnavailable(value bool) {
+	unavailable = value
+}
+
+func IsIngredientUnavailable(ingredientID int) bool {
+	if slices.Contains(unavailableIngredients, ingredientID) {
 		return true
 	}
 
 	return false
 }
 
-func (gm *GameManager) IsShopUnavailable() bool {
-	currentTime := time.Now().UTC()
-	start, end := GetShopUnavailabilityRange()
-	return currentTime.After(start) && currentTime.Before(end)
+func IsShopUnavailable() bool {
+	return unavailable
 }
 
 func GetShopUnavailabilityRange() (time.Time, time.Time) {
 	now := time.Now().UTC()
-
 	seed := int64(now.Year()*10000 + int(now.Month())*100 + now.Day())
 	r := rand.New(rand.NewSource(seed))
 
 	randomDayOffset := r.Intn(14)
+
 	max := 12 // h
 	min := 8  // h
+
 	randomHourDuration := time.Duration(rand.Intn(max-min) + min)
 	randomDate := now.AddDate(0, 0, randomDayOffset)
 

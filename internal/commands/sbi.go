@@ -3,6 +3,7 @@ package commands
 import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
+	"cafego/internal/models/shop"
 	"cafego/internal/types/requests"
 	"cafego/internal/utils"
 	"fmt"
@@ -37,9 +38,11 @@ func BuyIngredient(req *requests.Request, c *client.Client, gm *managers.GameMan
 		return nil
 	}
 
-	if gm.IsIngredientUnavailable(ingredientID) { // SCP command hanles when buying from currior
-		c.SendExtensionResponse("sbi", "-1", "4")
-		return nil
+	if shop.IsShopUnavailable() {
+		if shop.IsIngredientUnavailable(ingredientID) { // SCP command hanles when buying from currior
+			c.SendExtensionResponse("sbi", "-1", "4")
+			return nil
+		}
 	}
 
 	if ingredientInfo.Cash != 0 {

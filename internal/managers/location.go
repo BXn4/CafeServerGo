@@ -3,6 +3,7 @@ package managers
 import (
 	"cafego/internal/database"
 	"cafego/internal/models/cafe"
+	"cafego/internal/models/event"
 	"fmt"
 
 	"github.com/charmbracelet/log"
@@ -55,7 +56,7 @@ func (gm *GameManager) AddLocation(id int) *LoadedLocation {
 		return nil
 	}
 
-	if gm.GetEvent() == 3 {
+	if event.GetEvent() == 3 {
 		cafeObj.Background = cafe.WinterBackground
 	} else {
 		cafeObj.Background = cafe.DefaultBackground
