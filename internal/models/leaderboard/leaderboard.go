@@ -79,8 +79,24 @@ func CacheLeaderBoard(db *database.CafeDB) error {
 		return leaderboardXP[i].PlayerXP > leaderboardXP[j].PlayerXP
 	})
 
+	for i := range leaderboardXP {
+		leaderboardXP[i].PlayerRank = i + 1
+	}
+
+	sort.Slice(leaderboardXP, func(i, j int) bool {
+		return leaderboardXP[i].PlayerRank < leaderboardXP[j].PlayerRank
+	})
+
 	sort.Slice(leaderboardLuxury, func(i, j int) bool {
 		return leaderboardLuxury[i].PlayerCafeLuxury > leaderboardLuxury[j].PlayerCafeLuxury
+	})
+
+	for i := range leaderboardLuxury {
+		leaderboardLuxury[i].PlayerRank = i + 1
+	}
+
+	sort.Slice(leaderboardLuxury, func(i, j int) bool {
+		return leaderboardLuxury[i].PlayerRank < leaderboardLuxury[j].PlayerRank
 	})
 
 	log.Info("Leaderboard was updated!")
@@ -127,7 +143,7 @@ func GetLeaderBoard(search string, orderBy int) string {
 
 	for _, lb := range leaderboardList {
 		leaderboardStr := fmt.Sprintf("%d+%d+%d+%s",
-			lb.PlayerRank, lb.PlayerXP, lb.PlayerCafeLuxury, lb.PlayerName)
+			lb.PlayerID, lb.PlayerXP, lb.PlayerCafeLuxury, lb.PlayerName)
 		args = append(args, leaderboardStr)
 	}
 
