@@ -38,7 +38,7 @@ func InstantCook(req *requests.Request, c *client.Client, gm *managers.GameManag
 
 	if c.Player.IsTutorialCompleted {
 		c.Player.AddGold(-1)
-		c.Player.InstantCookings--
+		c.Player.InstantCookings++
 	}
 
 	currentTime := time.Now().UTC()
