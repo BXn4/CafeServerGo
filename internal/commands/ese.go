@@ -3,6 +3,7 @@ package commands
 import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
+	"cafego/internal/models/balancing"
 	"cafego/internal/types/requests"
 	"cafego/internal/utils"
 	"fmt"
@@ -66,7 +67,7 @@ func SellObject(req *requests.Request, c *client.Client, gm *managers.GameManage
 
 	}
 
-	c.Player.AddCash(sellAmount * int(math.Round(float64(objectInfo.Cash)*0.2+float64(objectInfo.Gold)*0.2)))
+	c.Player.AddCash(sellAmount * int(math.Round(float64(objectInfo.Cash)*(float64(balancing.BalancingConstants.SellFactorCash)/100)+float64(objectInfo.Gold)*(float64(balancing.BalancingConstants.SellFactorGold)/100))))
 
 	c.Player.UpdateAchivementSoldItems(sellAmount)
 
