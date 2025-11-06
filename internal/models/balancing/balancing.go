@@ -139,45 +139,7 @@ func LoadBalancing(hasConfig bool, envFile map[string]string) {
 	}
 }
 
-func (balancing *BalancingConfig) GetCleanCostCash() int      { return balancing.CleanCostCash }
-func (balancing *BalancingConfig) GetStaffPrice() int         { return balancing.StaffPrice }
-func (balancing *BalancingConfig) GetSellFactorCash() int     { return balancing.SellFactorCash }
-func (balancing *BalancingConfig) GetSellFactorGold() int     { return balancing.SellFactorGold }
-func (balancing *BalancingConfig) GetTimeFactor() int         { return balancing.TimeFactor }
-func (balancing *BalancingConfig) GetRatingGuestHappy() int   { return balancing.RatingGuestHappy }
-func (balancing *BalancingConfig) GetRatingGuestUnhappy() int { return balancing.RatingGuestUnhappy }
-func (balancing *BalancingConfig) GetCourierPrice() int       { return balancing.CourierPrice }
-func (balancing *BalancingConfig) GetMaxCourierSize() int     { return balancing.MaxCourierSize }
-func (balancing *BalancingConfig) GetInstantCookHourPerGold() int {
-	return balancing.InstantCookHourPerGold
-}
-
+// Getters not needed, just need timestamp
 func (balancing *BalancingConfig) GetServerTimestamp() string {
 	return strconv.FormatInt(time.Now().UTC().Unix(), 10)
-}
-
-func (balancing *BalancingConfig) GetJobsPerDay() int           { return balancing.JobsPerDay }
-func (balancing *BalancingConfig) GetJobRefillGold() int        { return balancing.JobRefillGold }
-func (balancing *BalancingConfig) GetCoopExpansionHours() int   { return balancing.CoopExpansionHours }
-func (balancing *BalancingConfig) GetCoopExpansionGold() int    { return balancing.CoopExpansionGold }
-func (balancing *BalancingConfig) GetCoopTimeToGold() float64   { return balancing.CoopTimeToGold }
-func (balancing *BalancingConfig) GetCoopTimeToSilver() float64 { return balancing.CoopTimeToSilver }
-func (balancing *BalancingConfig) GetCoopRewardFactorGold() int {
-	return balancing.CoopRewardFactorGold
-}
-func (balancing *BalancingConfig) GetCoopRewardFactorSilver() int {
-	return balancing.CoopRewardFactorSilver
-}
-func (balancing *BalancingConfig) GetRefreshFoodCost() int   { return balancing.RefreshFoodCost }
-func (balancing *BalancingConfig) GetMasteryDaysLv1() int    { return balancing.MasteryDaysLv1 }
-func (balancing *BalancingConfig) GetMasteryDaysLv2() int    { return balancing.MasteryDaysLv2 }
-func (balancing *BalancingConfig) GetMasteryDaysLv3() int    { return balancing.MasteryDaysLv3 }
-func (balancing *BalancingConfig) GetMasteryStoveCount() int { return balancing.MasteryStoveCount }
-func (balancing *BalancingConfig) GetMasteryBonusServing() float64 {
-	return balancing.MasteryBonusServing
-}
-func (balancing *BalancingConfig) GetMasteryBonusXP() float64   { return balancing.MasteryBonusXP }
-func (balancing *BalancingConfig) GetMasteryBonusTime() float64 { return balancing.MasteryBonusTime }
-func (balancing *BalancingConfig) GetEmailVerificationGold() int {
-	return balancing.EmailVerificationGold
 }

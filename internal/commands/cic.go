@@ -3,7 +3,9 @@ package commands
 import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
+	"cafego/internal/models/balancing"
 	"cafego/internal/types/requests"
+	"cafego/internal/utils"
 	"strconv"
 	"time"
 )
@@ -26,18 +28,33 @@ func InstantCook(req *requests.Request, c *client.Client, gm *managers.GameManag
 		return nil
 	}
 
-	if c.Player.GetGold() < 1 || c.Player.GetInstantCookings() > c.Player.GetMaxInstantCookings() {
-		c.SendExtensionResponse("cic", "-1", "4", strconv.Itoa(objX), strconv.Itoa(objY))
-		return nil
-	}
-
 	stove := c.Location.Cafe().GetObjectByPosXY(objX, objY)
 	if stove == nil {
 		return nil
 	}
+	dishID := stove.GetDishID()
+	if dishID == -1 {
+		return nil
+	}
+
+	dishInfo, err := utils.GetDish(dishID)
+	if err != nil {
+		return nil
+	}
+
+	dishDuration := dishInfo.Duration
+	dishCostGoldPerHours := balancing.BalancingConstants.InstantCookHourPerGold
+	if dishDuration > 60 {
+		dishCostGoldPerHours = dishDuration / 60
+	}
+
+	if c.Player.GetGold() < dishCostGoldPerHours || c.Player.GetInstantCookings() > c.Player.GetMaxInstantCookings() {
+		c.SendExtensionResponse("cic", "-1", "4", strconv.Itoa(objX), strconv.Itoa(objY))
+		return nil
+	}
 
 	if c.Player.IsTutorialCompleted {
-		c.Player.AddGold(-1)
+		c.Player.AddGold(-dishCostGoldPerHours)
 		c.Player.InstantCookings++
 	}
 

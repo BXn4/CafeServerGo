@@ -5,6 +5,7 @@ import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
 	"cafego/internal/models/avatar"
+	"cafego/internal/models/balancing"
 	"cafego/internal/models/waiter"
 	"cafego/internal/types/requests"
 	"cafego/internal/utils"
@@ -14,7 +15,7 @@ import (
 func HireWaiter(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	// Checl if we have enough money
-	if c.Player.GetGold() < 2 {
+	if c.Player.GetGold() < balancing.BalancingConstants.StaffPrice {
 		c.SendExtensionResponse("nhi", "0", "4", req.Args[2], req.Args[3])
 		return nil
 	}
@@ -28,7 +29,7 @@ func HireWaiter(req *requests.Request, c *client.Client, gm *managers.GameManage
 	}
 
 	// Pay price
-	c.Player.AddGold(-2)
+	c.Player.AddGold(-balancing.BalancingConstants.StaffPrice)
 
 	npcGender := utils.If(req.Args[3] == "1", avatar.Girl, avatar.Boy)
 	avatar := avatar.NewRandomAvatar()

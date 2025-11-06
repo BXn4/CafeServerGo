@@ -3,6 +3,7 @@ package commands
 import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
+	"cafego/internal/models/balancing"
 	"cafego/internal/types/requests"
 	"strconv"
 	"time"
@@ -25,7 +26,7 @@ func Recook(req *requests.Request, c *client.Client, gm *managers.GameManager) e
 		return err
 	}
 
-	if c.Player.GetGold() < 1 {
+	if c.Player.GetGold() < balancing.BalancingConstants.RefreshFoodCost {
 		c.SendExtensionResponse("crc", "-1", "4", strconv.Itoa(objX), strconv.Itoa(objY))
 		return nil
 	}
@@ -36,7 +37,7 @@ func Recook(req *requests.Request, c *client.Client, gm *managers.GameManager) e
 	}
 
 	if stove.GetIsRotten() { // if its really rotten
-		c.Player.AddGold(-1)
+		c.Player.AddGold(-balancing.BalancingConstants.RefreshFoodCost)
 
 		// The recook works different!!
 		// this.rottenCookTime = getTimer() + currentDish.baseDuration * 60000 / CafeConstants.timeFactor;

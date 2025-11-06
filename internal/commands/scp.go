@@ -3,6 +3,7 @@ package commands
 import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
+	"cafego/internal/models/balancing"
 	"cafego/internal/models/shop"
 	"cafego/internal/types/requests"
 	"fmt"
@@ -33,7 +34,7 @@ func BuyIngredientFromShopCarrier(req *requests.Request, c *client.Client, gm *m
 			return nil
 		}
 
-		if c.Player.GetGold() <= 0 {
+		if c.Player.GetGold() < balancing.BalancingConstants.CourierPrice || ingredientAmount > balancing.BalancingConstants.MaxCourierSize {
 			c.SendExtensionResponse("scp", "-1", "4")
 			return nil
 		}
@@ -45,7 +46,7 @@ func BuyIngredientFromShopCarrier(req *requests.Request, c *client.Client, gm *m
 
 	c.Location.Cafe().AddToFridge(ingredientID, ingredientAmount)
 	c.Player.UpdateAchivementCurierCount(ingredientAmount)
-	c.Player.AddGold(-1)
+	c.Player.AddGold(-balancing.BalancingConstants.CourierPrice)
 
 	c.DB.UpdateFridgeInventory(c.Location.Cafe().ID, c.Location.Cafe().GetFridgeInventory().String())
 	c.DB.UpdateGold(c.Player.ID, c.Player.GetGold())

@@ -2,6 +2,7 @@ package player
 
 import (
 	"cafego/internal/models/avatar"
+	"cafego/internal/models/balancing"
 	"cafego/internal/models/gift"
 	"cafego/internal/models/simple"
 	"cafego/internal/utils"
@@ -125,7 +126,7 @@ func (p *Player) GetDishMasteryServings(dishID int) int {
 	if masteryLevel < 1 {
 		return baseServings
 	} else {
-		return int(math.Round(float64(baseServings) * 1.05))
+		return int(math.Round(float64(baseServings) * balancing.BalancingConstants.MasteryBonusServing))
 	}
 }
 
@@ -142,7 +143,7 @@ func (p *Player) GetDishMasteryXP(dishID int) int {
 	if masteryLevel < 2 {
 		return baseXP
 	} else {
-		return int(math.Round(float64(baseXP) * 1.05))
+		return int(math.Round(float64(baseXP) * balancing.BalancingConstants.MasteryBonusXP))
 	}
 }
 
@@ -160,7 +161,7 @@ func (p *Player) GetDishMasteryDuration(dishID int) int {
 	if masteryLevel < 3 {
 		return baseDuration * 60
 	} else {
-		return int(math.Round(float64(baseDuration)*0.95) * 60)
+		return int(math.Round(float64(baseDuration)*balancing.BalancingConstants.MasteryBonusTime) * 60)
 	}
 }
 

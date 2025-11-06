@@ -3,6 +3,7 @@ package commands
 import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
+	"cafego/internal/models/balancing"
 	"cafego/internal/types/requests"
 	"cafego/internal/utils"
 	"strconv"
@@ -32,7 +33,7 @@ func Clean(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 	}
 
 	if obj.IsStove() {
-		if c.Player.GetCash() < 15 {
+		if c.Player.GetCash() < balancing.BalancingConstants.CleanCostCash {
 			c.SendExtensionResponse(
 				"ccn", "-1",
 				"4",
@@ -44,7 +45,7 @@ func Clean(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 			return nil
 		}
 
-		c.Player.AddCash(-15)
+		c.Player.AddCash(-balancing.BalancingConstants.CleanCostCash)
 
 		if obj.GetDishID() > 0 && obj.GetIsRotten() {
 			c.Player.UpdateAchivementOvercookedFoods() // if the player cleans rotten food
@@ -55,9 +56,8 @@ func Clean(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 	}
 
 	if obj.IsCounter() {
-		if obj.GetDishID() > 0 {
-			obj.SetDishID(-1)
-		}
+		obj.SetDishID(-1)
+		obj.SetDishAmount(0)
 	}
 
 	c.SendExtensionResponse(

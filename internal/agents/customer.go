@@ -2,6 +2,7 @@ package agents
 
 import (
 	"cafego/internal/interfaces"
+	"cafego/internal/models/balancing"
 	"cafego/internal/models/customer"
 	"cafego/internal/models/object"
 	"cafego/internal/models/simple"
@@ -54,7 +55,7 @@ func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
 			return chair != nil
 		},
 		10*time.Second, l) {
-		l.Cafe().AddRating(-2)
+		l.Cafe().AddRating(balancing.BalancingConstants.RatingGuestUnhappy)
 		Leave(l, c) // Leaves sad :(
 		return
 	}
@@ -91,7 +92,7 @@ func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
 			return c.GetAssignedWaiter() != -1
 		},
 		25*time.Second, l) {
-		l.Cafe().AddRating(-2)
+		l.Cafe().AddRating(balancing.BalancingConstants.RatingGuestUnhappy)
 		Leave(l, c) // Leaves sad :(
 		l.UnreserveObject(table)
 		l.UnreserveObject(chair)
@@ -104,7 +105,7 @@ func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
 	for c.GetDishID() == -1 {
 		// Check if waiter abadoned customer
 		if c.GetAssignedWaiter() == -1 {
-			l.Cafe().AddRating(-2)
+			l.Cafe().AddRating(balancing.BalancingConstants.RatingGuestUnhappy)
 			Leave(l, c) // Leaves sad :( // We should make it to wait, then leave. TODO!
 			l.UnreserveObject(table)
 			l.UnreserveObject(chair)
@@ -145,7 +146,7 @@ func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
 	player.AddCash(dishInfo.IncomePerServing)
 	// The dish only gave XP when delivered to the counter
 	// player.AddXP(dishInfo.XP)
-	l.Cafe().AddRating(1)
+	l.Cafe().AddRating(balancing.BalancingConstants.RatingGuestHappy)
 
 	// Set plate dirty
 	chair.SetDishStatus(3) // Dirty
