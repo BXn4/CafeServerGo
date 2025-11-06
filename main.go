@@ -2,6 +2,7 @@ package main
 
 import (
 	"cafego/internal/database"
+	"cafego/internal/managers"
 	"cafego/internal/server"
 	"cafego/internal/utils"
 	"os"
@@ -48,6 +49,8 @@ func main() {
 			Password: utils.If(hasConfig, envFile["DB_PASSWORD"], ""),
 		},
 	)
+
+	managers.LoadBalancing(hasConfig, envFile)
 
 	if err != nil {
 		log.Errorf("Failed to create the server object: %v", err)
