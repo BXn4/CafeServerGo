@@ -2,7 +2,7 @@ package main
 
 import (
 	"cafego/internal/database"
-	"cafego/internal/managers"
+	"cafego/internal/models/balancing"
 	"cafego/internal/server"
 	"cafego/internal/utils"
 	"os"
@@ -50,7 +50,7 @@ func main() {
 		},
 	)
 
-	managers.LoadBalancing(hasConfig, envFile)
+	balancing.LoadBalancing(hasConfig, envFile)
 
 	if err != nil {
 		log.Errorf("Failed to create the server object: %v", err)

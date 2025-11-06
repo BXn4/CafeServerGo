@@ -1,4 +1,4 @@
-package managers
+package balancing
 
 import (
 	"cafego/internal/utils"
