@@ -21,6 +21,7 @@ type BalancingConfig struct {
 	ServerTimestamp        time.Time
 	JobsPerDay             int
 	JobRefillGold          int
+	WorkTimeLeft           int
 	CoopExpansionHours     int
 	CoopExpansionGold      int
 	CoopTimeToGold         float64
@@ -55,6 +56,7 @@ func (balancing *BalancingConfig) AsResponse() string {
 		balancing.GetServerTimestamp(),
 		strconv.Itoa(balancing.JobsPerDay),
 		strconv.Itoa(balancing.JobRefillGold),
+		strconv.Itoa(balancing.WorkTimeLeft),
 		strconv.Itoa(balancing.CoopExpansionHours),
 		strconv.Itoa(balancing.CoopExpansionGold),
 		strconv.FormatFloat(balancing.CoopTimeToGold, 'f', -1, 64),
@@ -88,6 +90,7 @@ func LoadBalancing(hasConfig bool, envFile map[string]string) {
 	instantCookHourPerGold, _ := strconv.Atoi(utils.If(hasConfig, envFile["INSTANT_COOK_HOUR_PER_GOLD"], "1"))
 	jobsPerDay, _ := strconv.Atoi(utils.If(hasConfig, envFile["JOBS_PER_DAY"], "5"))
 	jobRefillGold, _ := strconv.Atoi(utils.If(hasConfig, envFile["JOB_REFILL_GOLD"], "1"))
+	workTimeLeft, _ := strconv.Atoi(utils.If(hasConfig, envFile["WORK_TIME_LEFT"], "0"))
 	coopExpansionHours, _ := strconv.Atoi(utils.If(hasConfig, envFile["COOP_EXPANSION_HOURS"], "20"))
 	coopExpansionGold, _ := strconv.Atoi(utils.If(hasConfig, envFile["COOP_EXPANSION_GOLD"], "1"))
 	coopTimeToGold, _ := strconv.ParseFloat(utils.If(hasConfig, envFile["COOP_TIME_TO_GOLD"], "0.5"), 64)
@@ -117,6 +120,7 @@ func LoadBalancing(hasConfig bool, envFile map[string]string) {
 		InstantCookHourPerGold: instantCookHourPerGold,
 		JobsPerDay:             jobsPerDay,
 		JobRefillGold:          jobRefillGold,
+		WorkTimeLeft:           workTimeLeft,
 		CoopExpansionHours:     coopExpansionHours,
 		CoopExpansionGold:      coopExpansionGold,
 		CoopTimeToGold:         coopTimeToGold,
