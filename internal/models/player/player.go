@@ -40,6 +40,7 @@ type Player struct {
 	AchievementLevel    simple.IntMap                                 `gorm:"-"`
 	WorkTimeLeft        int                                           `gorm:"-"`
 	CoopID              int                                           `gorm:"column:coop_id;type:int;default:null"`
+	StartedCoop         bool                                          `gorm:"column:started_coop;type:int;default:false"`
 	SeekingJob          bool                                          `gorm:"-"`
 	LastLogin           time.Time                                     `gorm:"column:last_login;type:datetime;default:null"`
 	DailyLogin          time.Time                                     `gorm:"column:daily_login;type:datetime;default:null"`
@@ -227,7 +228,7 @@ func (p *Player) SetInstantCookings(value int) {
 }
 
 func (p *Player) RemoveInstantCooking() {
-	p.InstantCookings--
+	p.InstantCookings++ // need to add, because its checks how much was used.
 }
 
 func (p *Player) GetMaxInstantCookings() int {
@@ -241,4 +242,24 @@ func (p *Player) SetMaxInstantCookings(value int) {
 func (p *Player) GetIsDailyLogin() bool {
 	timePassed := time.Now().UTC().Sub(p.DailyLogin)
 	return timePassed >= 24*time.Hour
+}
+
+func (p *Player) SetActiveCoopID(coopID int) {
+	p.CoopID = coopID
+}
+
+func (p *Player) GetActiveCoopID() int {
+	return p.CoopID
+}
+
+func (p *Player) IsInCoop() bool {
+	if p.GetActiveCoopID() == 0 {
+		return false
+	}
+
+	return true
+}
+
+func (p *Player) GetStartedCoop() bool {
+	return p.StartedCoop
 }

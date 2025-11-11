@@ -6,7 +6,9 @@ import (
 	"cafego/internal/types/requests"
 	"cafego/internal/utils"
 	"math"
+	"slices"
 	"strconv"
+	"strings"
 )
 
 func StoveDeliver(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
@@ -93,6 +95,33 @@ func StoveDeliver(req *requests.Request, c *client.Client, gm *managers.GameMana
 	c.Player.UpdateAchivementCookingCount()
 
 	c.DB.UpdateAchievement(c.Player.ID, c.Player.GetAchivements().String())
+
+	if c.Player.IsInCoop() {
+		coop, _ := c.DB.GetCoop(c.Player.GetActiveCoopID())
+
+		coopInfo, _ := utils.GetCoop(coop.ActiveCoop)
+
+		coopDishes := strings.Split(coopInfo.Dishes, "#")
+
+		var dishes []int
+
+		for _, dishRequirements := range coopDishes {
+			dishRequirement := strings.Split(dishRequirements, "+")
+			dishID, _ := strconv.Atoi(dishRequirement[0])
+			dishes = append(dishes, dishID)
+		}
+
+		if slices.Contains(dishes, dish.ID) {
+			coop.AddDish(dish.ID)
+
+			if coop.IsDone() {
+				coop.FinishLevel = coop.CalculateFinishLevel()
+				CoopFinish(&coop, gm)
+			}
+			c.DB.SaveCoop(&coop)
+		}
+
+	}
 
 	// response = ExtensionResponse('csd', '-1', '0', stove_x, stove_y, counter_x, counter_y, str(player.id))
 	c.SendExtensionResponse(

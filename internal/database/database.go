@@ -3,7 +3,7 @@ package database
 import (
 	"cafego/internal/models/avatar"
 	"cafego/internal/models/cafe"
-	"cafego/internal/models/coop"
+	"cafego/internal/models/coops"
 	"cafego/internal/models/player"
 	"cafego/internal/models/simple"
 	"fmt"
@@ -36,7 +36,7 @@ func ConnectToDB(config *DBConfig) (*CafeDB, error) {
 	}
 
 	// Check if database tables are valid
-	err = db.AutoMigrate(&player.Player{}, &cafe.Cafe{}, &coop.Coop{})
+	err = db.AutoMigrate(&player.Player{}, &cafe.Cafe{}, &coops.Coop{})
 	if err != nil {
 		return nil, err
 	}

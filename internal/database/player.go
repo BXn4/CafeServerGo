@@ -376,3 +376,13 @@ func (db *CafeDB) UpdateGifts(playerID int, gifts string) error {
 	}
 	return nil
 }
+
+func (db *CafeDB) UpdateStartedCoop(playerID int, started_coop bool) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("started_coop", started_coop).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}

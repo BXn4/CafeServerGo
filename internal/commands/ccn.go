@@ -57,7 +57,7 @@ func Clean(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 
 	if obj.IsCounter() {
 		obj.SetDishID(-1)
-		obj.SetDishAmount(0)
+		obj.SetDishAmount(-1)
 	}
 
 	c.SendExtensionResponse(

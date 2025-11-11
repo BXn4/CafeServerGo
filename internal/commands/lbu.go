@@ -31,6 +31,11 @@ func LoginRewards(req *requests.Request, c *client.Client, gm *managers.GameMana
 		c.Player.SetInstantCookings(0) // 0 because its counts used, and not how much still have
 
 		c.Player.PlayedWheel = false
+		if c.Player.GetActiveCoopID() == 0 {
+			c.Player.StartedCoop = false
+
+			c.DB.UpdateStartedCoop(c.Player.ID, c.Player.GetStartedCoop())
+		}
 
 		fancies, err := utils.GetItems("fancy")
 		if err != nil {

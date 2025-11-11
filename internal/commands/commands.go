@@ -158,6 +158,12 @@ func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameMan
 		err = BuyIngredientFromShopCarrier(req, c, gm)
 	case requests.C2S_HIGHSCORE_LIST:
 		err = SendHighscoreList(req, c, gm)
+	case requests.C2S_COOP_DETAIL:
+		err = CoopDetail(req, c, gm)
+	case requests.C2S_COOP_LEAVE:
+		err = CoopLeave(req, c, gm)
+	case requests.C2S_COOP_JOIN:
+		err = CoopJoin(req, c, gm)
 	default:
 		log.Infof("NOT IMPLEMENTED: %v", req.Args[0])
 	}

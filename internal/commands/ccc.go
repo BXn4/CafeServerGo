@@ -63,7 +63,7 @@ func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameMana
 		}
 
 		if event.GetEvent() < dishInfo.Events {
-			return fmt.Errorf("Invalid dish ID:, because theres no holiday %w", err)
+			return fmt.Errorf("Invalid dish ID:, because theres no holiday")
 
 		}
 
