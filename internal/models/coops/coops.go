@@ -154,3 +154,7 @@ func (coop *Coop) Leave(playerID int) {
 		}
 	}
 }
+
+func (coop *Coop) AddExtend() {
+	coop.ExtendCount++
+}

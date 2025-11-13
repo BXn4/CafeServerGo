@@ -164,6 +164,8 @@ func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameMan
 		err = CoopLeave(req, c, gm)
 	case requests.C2S_COOP_JOIN:
 		err = CoopJoin(req, c, gm)
+	case requests.C2S_COOP_EXTEND:
+		err = CoopExtend(req, c, gm)
 	default:
 		log.Infof("NOT IMPLEMENTED: %v", req.Args[0])
 	}
