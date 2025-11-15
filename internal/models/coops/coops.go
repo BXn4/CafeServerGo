@@ -158,3 +158,18 @@ func (coop *Coop) Leave(playerID int) {
 func (coop *Coop) AddExtend() {
 	coop.ExtendCount++
 }
+
+// Returns: GOLD, CASH, XP by the finishlevel
+func (coop *Coop) GetRewards(finishLevel int, playerLevel int) (int, int, int) {
+	coopInfo, _ := utils.GetCoop(coop.ActiveCoop)
+	switch finishLevel {
+	case 0: // gold
+		return coopInfo.Gold, coopInfo.Chips * balancing.BalancingConstants.CoopRewardFactorGold, coopInfo.XP * (playerLevel / 3) * balancing.BalancingConstants.CoopRewardFactorGold
+	case 1: // silver
+		return 0, coopInfo.Chips * balancing.BalancingConstants.CoopRewardFactorSilver, coopInfo.XP * (playerLevel / 3) * balancing.BalancingConstants.CoopRewardFactorSilver
+	case 2: // bronze
+		return 0, coopInfo.Chips, coopInfo.XP * (playerLevel / 3)
+	default: // not found, or not finished?
+		return 0, 0, 0
+	}
+}
