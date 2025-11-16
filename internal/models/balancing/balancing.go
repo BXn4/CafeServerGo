@@ -90,7 +90,7 @@ func LoadBalancing(hasConfig bool, envFile map[string]string) {
 	instantCookHourPerGold, _ := strconv.Atoi(utils.If(hasConfig, envFile["INSTANT_COOK_HOUR_PER_GOLD"], "1"))
 	jobsPerDay, _ := strconv.Atoi(utils.If(hasConfig, envFile["JOBS_PER_DAY"], "5"))
 	jobRefillGold, _ := strconv.Atoi(utils.If(hasConfig, envFile["JOB_REFILL_GOLD"], "1"))
-	workTimeLeft, _ := strconv.Atoi(utils.If(hasConfig, envFile["WORK_TIME_LEFT"], "0"))
+	workTimeLeft, _ := strconv.Atoi(utils.If(hasConfig, envFile["WORK_TIME_LEFT"], "240"))
 	coopExpansionHours, _ := strconv.Atoi(utils.If(hasConfig, envFile["COOP_EXPANSION_HOURS"], "20"))
 	coopExpansionGold, _ := strconv.Atoi(utils.If(hasConfig, envFile["COOP_EXPANSION_GOLD"], "1"))
 	coopTimeToGold, _ := strconv.ParseFloat(utils.If(hasConfig, envFile["COOP_TIME_TO_GOLD"], "0.5"), 64)
