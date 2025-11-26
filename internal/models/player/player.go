@@ -50,6 +50,7 @@ type Player struct {
 	IsTutorialCompleted bool                                          `gorm:"default:false"`
 	AccessLevel         int                                           `gorm:"column:access_level;default:0;type:int"`
 	MaxInstants         int                                           `gorm:"default:12"`
+	Job                 PlayerJob                                     `gorm:"-"`
 	OnAchievementEarned func(achievementID int, level int, p *Player) `gorm:"-"`
 }
 
@@ -65,12 +66,13 @@ func (p *Player) String() string {
 		strconv.Itoa(p.GetXP()),
 		strconv.Itoa(p.Position.X),
 		strconv.Itoa(p.Position.Y),
-		strconv.Itoa(p.WorkTimeLeft),
+		strconv.Itoa(p.GetWorkTimeLeft()),
 		strconv.Itoa(p.OpenJobs),
 		utils.If(p.SeekingJob, "1", "0"),
 		utils.If(p.AllowFriendRequests, "1", "0"),
 		p.Avatar.String(),
 	}
+	println(strings.Join(params, "+"))
 	return strings.Join(params, "+")
 }
 

@@ -54,7 +54,7 @@ func StoveDeliverInfo(req *requests.Request, c *client.Client, gm *managers.Game
 			py	%xt%csi%-1%0%1%5%3%6%
 			go	%xt%csi%-1%0%0%1%5%3%6%
 		*/
-		c.SendExtensionResponse(
+		c.Location.Broadcast(
 			"csi", "-1",
 			status,
 			req.Args[2],

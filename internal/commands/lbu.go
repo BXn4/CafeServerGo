@@ -37,6 +37,8 @@ func LoginRewards(req *requests.Request, c *client.Client, gm *managers.GameMana
 			c.DB.UpdateStartedCoop(c.Player.ID, c.Player.GetStartedCoop())
 		}
 
+		c.Player.OpenJobs = 5
+
 		fancies, err := utils.GetItems("fancy")
 		if err != nil {
 			return err
@@ -56,6 +58,7 @@ func LoginRewards(req *requests.Request, c *client.Client, gm *managers.GameMana
 		c.DB.UpdateDailyLogin(c.Player.ID, c.Player.DailyLogin)
 		c.DB.UpdatePlayedWheel(c.Player.ID, c.Player.PlayedWheel)
 		c.DB.UpdateInstantCookings(c.Player.ID, maxInstants)
+		c.DB.UpdateOpenJobs(c.Player.ID, c.Player.OpenJobs)
 		c.DB.UpdateFridgeInventory(cafe.ID, cafe.FridgeInventory.String())
 	}
 

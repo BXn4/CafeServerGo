@@ -118,6 +118,10 @@ func (lc *LoadedLocation) Join(playerID int, channel chan<- responses.Response) 
 		return
 	}
 
+	if c.(*client.Client).Player.SeekingJob {
+		c.(*client.Client).Player.SeekingJob = false
+	} // need to clear it
+
 	// Set position of player
 	c.(*client.Client).Player.Position = lc.cafe.GetPlayerStart()
 

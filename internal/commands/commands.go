@@ -168,6 +168,10 @@ func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameMan
 		err = CoopExtend(req, c, gm)
 	case requests.C2S_MARKETPLACE_SEEKINGJOB:
 		err = SeekingJob(req, c, gm)
+	case requests.C2S_MARKETPLACE_JOB:
+		err = MarketPlaceJob(req, c, gm)
+	case requests.C2S_JOB_USER_ACTION:
+		err = JobAction(req, c, gm)
 	default:
 		log.Infof("NOT IMPLEMENTED: %v", req.Args[0])
 	}

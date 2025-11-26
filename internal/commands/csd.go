@@ -124,7 +124,7 @@ func StoveDeliver(req *requests.Request, c *client.Client, gm *managers.GameMana
 	}
 
 	// response = ExtensionResponse('csd', '-1', '0', stove_x, stove_y, counter_x, counter_y, str(player.id))
-	c.SendExtensionResponse(
+	c.Location.Broadcast(
 		"csd", "-1", "0",
 		req.Args[2],
 		req.Args[3],

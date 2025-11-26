@@ -15,6 +15,7 @@ func SeekingJob(req *requests.Request, c *client.Client, gm *managers.GameManage
 
 	if seekingStatus != 1 {
 		c.Player.SeekingJob = false
+		c.Player.ClearOffers()
 	} else {
 		if c.Player.OpenJobs > 0 {
 			c.Player.SeekingJob = true

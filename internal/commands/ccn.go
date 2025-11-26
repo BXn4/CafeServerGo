@@ -34,7 +34,7 @@ func Clean(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 
 	if obj.IsStove() {
 		if c.Player.GetCash() < balancing.BalancingConstants.CleanCostCash {
-			c.SendExtensionResponse(
+			c.Location.Broadcast(
 				"ccn", "-1",
 				"4",
 				req.Args[2],
@@ -60,7 +60,7 @@ func Clean(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 		obj.SetDishAmount(-1)
 	}
 
-	c.SendExtensionResponse(
+	c.Location.Broadcast(
 		"ccn", "-1",
 		"0",
 		req.Args[2],
