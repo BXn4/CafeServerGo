@@ -12,8 +12,18 @@ import (
 	"github.com/charmbracelet/log"
 )
 
-// Spawns a custommer at the location
-func SpawnCustomer(l interfaces.CafeLocation) *customer.Customer {
+type EatingSpace struct {
+	Chair    *object.Object
+	Table    *object.Object
+	Distance int
+}
+
+// Add the customer to cafe customer list, returns a new customer
+func NewCustomer(l interfaces.CafeLocation) *customer.Customer {
+
+	if !*l.GetIsRunning() {
+		return nil
+	}
 
 	// Create new random customer
 	c := customer.NewRandomCustomer(
@@ -24,6 +34,16 @@ func SpawnCustomer(l interfaces.CafeLocation) *customer.Customer {
 	// Store customer data
 	l.Cafe().AddCustomer(c)
 
+	return c
+}
+
+// Spawns a custommer at the location
+func Spawn(l interfaces.CafeLocation, c *customer.Customer) {
+
+	if c == nil {
+		return
+	}
+
 	// Send customer action
 	l.Broadcast("nav", "-1", "0", c.SpawnString())
 	CustomerDoAction(l, c,
@@ -32,83 +52,78 @@ func SpawnCustomer(l interfaces.CafeLocation) *customer.Customer {
 		time.Second,
 	)
 
-	return c
+	WaitForChair(l, c)
 }
 
-// Does one iteration of the customer tasks
-func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
-
-	// Check if customer even exists
-	if c == nil {
-		return
-	}
-
-	// Declare varaibles
-	var table *object.Object
-	var chair *object.Object
-	var distanceToChair int
-
-	// Wait until a eating space frees up
+func WaitForChair(l interfaces.CafeLocation, c *customer.Customer) {
 	if WaitUntil(
 		func() bool {
-			table, chair, distanceToChair = GetAvailableEatingSpace(l)
-			return chair != nil
+			table, chair, distanceToChair := GetAvailableEatingSpace(l)
+			es := EatingSpace{Chair: chair, Table: table, Distance: distanceToChair}
+			if es.Chair != nil && es.Table != nil && es.Distance != -1 {
+				WalkToChair(l, c, es)
+				return true
+			}
+			return false
 		},
 		10*time.Second, l) {
-		l.Cafe().AddRating(balancing.BalancingConstants.RatingGuestUnhappy)
-		Leave(l, c) // Leaves sad :(
+		Leave(l, c, nil)
 		return
 	}
+}
 
-	if !l.IsRunning() {
-		return
-	}
-
-	// Walk to chair and wait until arrives
-	// println("Customer started to walking to the chair")
+func WalkToChair(l interfaces.CafeLocation, c *customer.Customer, es EatingSpace) {
+	println("Customer started to walking to the chair")
 	CustomerDoAction(l, c,
 		customer.CUSTOMER_WALK_TO_CHAIR,
-		chair.GetPos(),
-		time.Duration(distanceToChair-1)*550*time.Millisecond,
+		es.Chair.GetPos(),
+		time.Duration(es.Distance-1)*550*time.Millisecond,
 	)
 
-	// println("Customer arrived to the chair")
-	// println("Customer waiting 1sec before sit down")
+	println("Customer arrived to the chair")
+	SitDown(l, c, es)
+}
 
-	// Sit down
+func SitDown(l interfaces.CafeLocation, c *customer.Customer, es EatingSpace) {
+	println("Customer waiting 1sec before sit down")
+
 	CustomerDoAction(l, c,
 		customer.CUSTOMER_SIT_DOWN,
-		chair.GetPos(),
+		es.Chair.GetPos(),
 		1*time.Second,
 	)
 
-	// println("Customer sat down")
+	println("Customer sat down")
 
-	// println("Customer started to waiting for food")
+	WaitForFood(l, c, time.Duration(25), es)
+}
 
-	// Wait for assigned waiter
+func WaitForFood(l interfaces.CafeLocation, c *customer.Customer, duration time.Duration, es EatingSpace) {
+	println("Customer started to waiting for food")
+
 	if WaitUntil(
 		func() bool {
-			return c.GetAssignedWaiter() != -1
+			if c.GetAssignedWaiter() != -1 {
+				WaitForWaiterArrive(l, c, es)
+				return true
+			}
+			return false
 		},
-		25*time.Second, l) {
-		l.Cafe().AddRating(balancing.BalancingConstants.RatingGuestUnhappy)
-		Leave(l, c) // Leaves sad :(
-		l.UnreserveObject(table)
-		l.UnreserveObject(chair)
-
-		// println("Customer not got any food on time, customer left sad...")
+		duration*time.Second, l) {
+		println("Customer not got any food on time, customer left sad...")
+		Leave(l, c, &es) // Leaves sad :(
 		return
 	}
+}
 
-	// Wait until waiter set food to the customer
+func WaitForWaiterArrive(l interfaces.CafeLocation, c *customer.Customer, es EatingSpace) {
+	println("Customer started to waiting for waiter to arrive")
 	for c.GetDishID() == -1 {
 		// Check if waiter abadoned customer
 		if c.GetAssignedWaiter() == -1 {
-			l.Cafe().AddRating(balancing.BalancingConstants.RatingGuestUnhappy)
-			Leave(l, c) // Leaves sad :( // We should make it to wait, then leave. TODO!
-			l.UnreserveObject(table)
-			l.UnreserveObject(chair)
+			println("Waiter abadoned the customer!")
+			// 10, because I dont want to make it to wait again 25s
+			WaitForFood(l, c, time.Duration(10), es)
 			return
 		}
 		if !l.TryStepSleep(100 * time.Millisecond) {
@@ -116,81 +131,62 @@ func IterateCustomer(l interfaces.CafeLocation, c *customer.Customer) {
 		}
 	}
 
-	// println("Customer started to eating")
-
-	//  Eat food
-	CustomerDoAction(l, c, customer.CUSTOMER_EAT, c.GetPos(), 25*time.Second) // Customers eating for 25 sec. Footage: https://www.youtube.com/watch?v=pSX2kXIFxtE
-
-	// After 10 sec set food to half eaten
-	// I think we dont need to set the dish status. Just need to set when its finishes.
-	// The game updates the dish status in visual to empty, when the customer finishes
-	// chair.SetDishStatus(2) // Half eaten
-
-	// println("Customer finished eating, leaving....")
-
-	//  Add rewards to player
-	player, err := l.Owner()
-	if err != nil {
-		log.Errorf("Cant find owner of cafe: %v", l.Cafe().GetPlayerID())
-		return
-	}
-
-	// Get dish info
-	dishInfo, err := utils.GetDish(c.GetDishID())
-	if err != nil {
-		log.Errorf("Cant find dish! %v\n", err)
-		return
-	}
-
-	// Rewards
-	player.AddCash(dishInfo.IncomePerServing)
-	// The dish only gave XP when delivered to the counter
-	// player.AddXP(dishInfo.XP)
-	l.Cafe().AddRating(balancing.BalancingConstants.RatingGuestHappy)
-
-	// Set plate dirty
-	chair.SetDishStatus(3) // Dirty
-
-	player.UpdateAchivementServingsCount(1)
-
-	// c.DB.UpdateAchievement(player.ID, player.GetAchivements().String())
-
-	Leave(l, c)
+	Eat(l, c, time.Duration(25), es)
+	// Customers eating for 25 sec. Footage: https://www.youtube.com/watch?v=pSX2kXIFxtE
 }
 
-// Returns a chair and a table
-// which are empty and approachable
-func GetAvailableEatingSpace(l interfaces.CafeLocation) (*object.Object, *object.Object, int) {
-
-	spaces := l.Cafe().GetEatingSpaces()
-	for table, chairs := range spaces {
-
-		// If there are no connected chairs skip
-		if len(chairs) == 0 {
-			continue
-		}
-
-		// Try to reserve table
-		if !l.ReserveObject(table) {
-			continue
-		}
-
-		// Loop through all chairs and if approachable return them
-		for _, chair := range chairs {
-			start := NewCafePoint(l.Cafe().GetPlayerStart(), l.Cafe())
-			end := NewCafePoint(chair.GetPos(), l.Cafe())
-			_, distance, found := Path(start, end)
-			if found {
-				l.ReserveObject(chair)
-				return table, chair, distance
-			}
-		}
-
+func Eat(l interfaces.CafeLocation, c *customer.Customer, duration time.Duration, es EatingSpace) {
+	println("Customer started to eat")
+	switch duration {
+	case 25:
+		es.Chair.SetDishStatus(1)
+	case 15:
+		es.Chair.SetDishStatus(2)
+	case 5:
+		es.Chair.SetDishStatus(3)
 	}
-	return nil, nil, 0
+
+	CustomerDoAction(l, c, customer.CUSTOMER_EAT, c.GetPos(), duration*time.Second)
+
+	println("Customer ate the food!")
+
+	Leave(l, c, &es)
 }
 
-func Leave(l interfaces.CafeLocation, c *customer.Customer) {
+func Leave(l interfaces.CafeLocation, c *customer.Customer, es *EatingSpace) {
+	// Leave sad, not got any dish
+	if c.GetDishID() == -1 {
+		l.Cafe().AddRating(balancing.BalancingConstants.RatingGuestUnhappy)
+
+		// If the customer had a chair, but not got food
+		// So the waiter not need to clean it
+		if es != nil {
+			l.UnreserveObject(es.Chair)
+			l.UnreserveObject(es.Table)
+		}
+	} else {
+		// Customer got food!
+		player, err := l.Owner()
+		if err != nil {
+			log.Errorf("Cant find owner of cafe: %v", l.Cafe().GetPlayerID())
+			return
+		}
+
+		dishInfo, err := utils.GetDish(c.GetDishID())
+		if err != nil {
+			log.Errorf("Cant find dish! %v\n", err)
+			return
+		}
+
+		player.AddCash(dishInfo.IncomePerServing)
+		// The dish only gave XP when delivered to the counter
+		// player.AddXP(dishInfo.XP)
+		l.Cafe().AddRating(balancing.BalancingConstants.RatingGuestHappy)
+
+		es.Chair.SetDishStatus(3) // Dirty
+
+		player.UpdateAchivementServingsCount(1)
+	}
 
 	// Calculate time to exit
 	start := NewCafePoint(c.GetPos(), l.Cafe())
@@ -223,6 +219,36 @@ func WaitUntil(condition func() bool, timeout time.Duration, l interfaces.CafeLo
 		}
 	}
 	return false
+}
+
+func GetAvailableEatingSpace(l interfaces.CafeLocation) (*object.Object, *object.Object, int) {
+
+	spaces := l.Cafe().GetEatingSpaces()
+	for table, chairs := range spaces {
+
+		// If there are no connected chairs skip
+		if len(chairs) == 0 {
+			continue
+		}
+
+		// Try to reserve table
+		if !l.ReserveObject(table) {
+			continue
+		}
+
+		// Loop through all chairs and if approachable return them
+		for _, chair := range chairs {
+			start := NewCafePoint(l.Cafe().GetPlayerStart(), l.Cafe())
+			end := NewCafePoint(chair.GetPos(), l.Cafe())
+			_, distance, found := Path(start, end)
+			if found {
+				l.ReserveObject(chair)
+				return table, chair, distance
+			}
+		}
+
+	}
+	return nil, nil, 0
 }
 
 // 1. Sets action and pos,

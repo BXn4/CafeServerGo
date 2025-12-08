@@ -67,7 +67,7 @@ func StartAgentCycles(l interfaces.CafeLocation) {
 				continue
 			}
 
-			go IterateCustomer(l, SpawnCustomer(l))
+			go Spawn(l, NewCustomer(l))
 		}
 	}()
 }
