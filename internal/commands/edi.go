@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"cafego/internal/agents"
 	"cafego/internal/client"
 	"cafego/internal/managers"
 	"cafego/internal/types/requests"
@@ -25,8 +26,10 @@ func EditorMode(req *requests.Request, c *client.Client, gm *managers.GameManage
 		c.Location.SetRunning(true)
 		c.Location.ClearReservedObjects()
 		c.Player.Position = c.Location.Cafe().GetPlayerStart()
+
+		go agents.FillEmptyCafe(c.Location)
 	case 1:
-		// println(len(c.Location.Cafe().GetCustomers()))
+		c.Location.Cafe().SetCustomers(nil)
 		c.Location.SetRunning(false)
 	}
 

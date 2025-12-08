@@ -155,26 +155,6 @@ func (lc *LoadedLocation) Join(playerID int, channel chan<- responses.Response) 
 	lc.send(playerID, julArgs...)
 
 	if lc.cafe.GetRoomType() == cafe.CafeRoom {
-		// Send every customer in location
-		log.Debug("JOIN CUSTOMER DATA:")
-		for _, cs := range lc.cafe.GetCustomers() {
-			customerActionString := cs.ActionString()
-			log.Debug("- SENT CUSTOMER DATA")
-
-			if cs.GetAction() == customer.CUSTOMER_WALK_TO_CHAIR {
-				customerActionString = cs.ActionStringToSpawnBack(customer.CUSTOMER_SIT_DOWN)
-			}
-
-			if cs.GetAction() != customer.CUSTOMER_LEAVE {
-				lc.send(playerID, "nav", "-1", "0", cs.SpawnString())
-				lc.send(playerID, "nac", "-1", "0", customerActionString)
-			}
-		}
-
-		log.Debugf("CUSTOMER COUNT: %d ", len(lc.cafe.GetCustomers()))
-
-		log.Debugf("WP COND %d %d", playerID, lc.cafe.GetPlayerID())
-
 		// Start waiters when the owner joins if not yet stared
 		if playerID == lc.cafe.GetPlayerID() && !lc.cafe.AgentCycleBinded {
 			// Start waiters
@@ -186,6 +166,7 @@ func (lc *LoadedLocation) Join(playerID int, channel chan<- responses.Response) 
 			}
 
 			if p.IsTutorialCompleted && !lc.Cafe().AgentCycleBinded {
+				go agents.FillEmptyCafe(lc)
 				go agents.StartAgentCycles(lc)
 			}
 
@@ -214,6 +195,28 @@ func (lc *LoadedLocation) Join(playerID int, channel chan<- responses.Response) 
 				lc.send(playerID, "nac", "-1", strconv.Itoa(i), waiterActionString)
 			}
 		}
+
+		// Send every customer in location
+		log.Debug("JOIN CUSTOMER DATA:")
+
+		for _, cs := range lc.cafe.GetCustomers() {
+			customerActionString := cs.ActionString()
+			log.Debug("- SENT CUSTOMER DATA")
+
+			if cs.GetAction() == customer.CUSTOMER_WALK_TO_CHAIR {
+				customerActionString = cs.ActionStringToSpawnBack(customer.CUSTOMER_SIT_DOWN)
+			}
+
+			if cs.GetAction() != customer.CUSTOMER_LEAVE {
+				lc.send(playerID, "nav", "-1", "0", cs.SpawnString())
+				lc.send(playerID, "nac", "-1", "0", customerActionString)
+			}
+		}
+
+		log.Debugf("CUSTOMER COUNT: %d ", len(lc.cafe.GetCustomers()))
+
+		log.Debugf("WP COND %d %d", playerID, lc.cafe.GetPlayerID())
+
 	}
 
 	lc.running = true

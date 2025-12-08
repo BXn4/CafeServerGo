@@ -7,6 +7,8 @@ import (
 	"cafego/internal/models/object"
 	"cafego/internal/models/simple"
 	"cafego/internal/utils"
+	"math"
+	"math/rand"
 	"time"
 
 	"github.com/charmbracelet/log"
@@ -16,6 +18,95 @@ type EatingSpace struct {
 	Chair    *object.Object
 	Table    *object.Object
 	Distance int
+}
+
+func FillEmptyCafe(l interfaces.CafeLocation) {
+	// Number of customers based on:
+	// The chairs and the rating
+
+	// Spawn random eating customers, and random waiting customers
+	// If theres no food on the counters -> waiting
+	// If theres food on the counters -> 1/2 eat or wait
+
+	// The eating not works, need to set the chairs before the objects was sent
+	numberOfChairs := 0
+	rating := float64(l.Cafe().GetRating())
+	expansion := float64(l.Cafe().ExpansionID)
+	ratingFactor := math.Min(rating/1000.0, 10.0)
+	expansionFactor := math.Min(expansion/8.0, 1.0)
+
+	spaces := l.Cafe().GetEatingSpaces()
+	for _, chairs := range spaces {
+
+		// If there are no connected chairs skip
+		if len(chairs) == 0 {
+			continue
+		}
+
+		// Loop through all chairs and if approachable count them
+		for _, chair := range chairs {
+			start := NewCafePoint(l.Cafe().GetPlayerStart(), l.Cafe())
+			end := NewCafePoint(chair.GetPos(), l.Cafe())
+			_, _, found := Path(start, end)
+			if found {
+				numberOfChairs++
+			}
+		}
+	}
+
+	customersToSpawn := int(float64(numberOfChairs) * ratingFactor * expansionFactor)
+
+	if numberOfChairs > 0 && customersToSpawn == 0 {
+		// spawn 1 OR 2 50 % force
+		customersToSpawn = int(math.Min(float64(numberOfChairs), float64(rand.Intn(3))))
+	}
+
+	println("Customers to spawn: %d", customersToSpawn)
+
+	for _ = range customersToSpawn {
+		// customerCanEat := false
+		c := NewCustomer(l)
+
+		/* counter, _ := GetRandomCounter(l.Cafe())
+
+		// if its not going to be empty
+		if counter.GetDishAmount() > 0 {
+			customerCanEat = true
+		}
+
+		customerIsEating := rand.Intn(2) == 1 */
+
+		table, chair, distanceToChair := GetAvailableEatingSpace(l)
+		es := EatingSpace{Chair: chair, Table: table, Distance: distanceToChair}
+
+		/*if customerIsEating && customerCanEat {
+			c.SetDishID(counter.GetDishID())
+			es.Chair.SetDishID(counter.GetDishID())
+			counter.AddDishAmount(-1)
+		}*/
+
+		l.Broadcast("nav", "-1", "0", c.SpawnString())
+
+		/*if customerIsEating && customerCanEat {
+			eatingSec := rand.Intn(25-5) + 5
+
+			c.SetAction(customer.CUSTOMER_EAT)
+			c.SetPos(es.Chair.GetPos())
+
+			l.Broadcast("nac", "-1", "0", c.ActionString())
+
+			go Eat(l, c, time.Duration(eatingSec), es)
+
+		} else { */
+		waitingSec := rand.Intn(25-7) + 7
+		c.SetAction(customer.CUSTOMER_SIT_DOWN)
+		c.SetPos(es.Chair.GetPos())
+
+		l.Broadcast("nac", "-1", "0", c.ActionString())
+
+		go WaitForFood(l, c, time.Duration(waitingSec), es)
+		// }
+	}
 }
 
 // Add the customer to cafe customer list, returns a new customer
@@ -137,12 +228,12 @@ func WaitForWaiterArrive(l interfaces.CafeLocation, c *customer.Customer, es Eat
 
 func Eat(l interfaces.CafeLocation, c *customer.Customer, duration time.Duration, es EatingSpace) {
 	println("Customer started to eat")
-	switch duration {
-	case 25:
+	switch {
+	case duration >= 15:
 		es.Chair.SetDishStatus(1)
-	case 15:
+	case duration >= 5:
 		es.Chair.SetDishStatus(2)
-	case 5:
+	case duration <= 5:
 		es.Chair.SetDishStatus(3)
 	}
 
