@@ -4,11 +4,46 @@ import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
 	"cafego/internal/types/requests"
-	"cafego/internal/types/responses"
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/charmbracelet/log"
 )
+
+type Command struct {
+	Config    CommandConfig
+	Validator func(req *requests.Request, c *client.Client, gm *managers.GameManager, cm CommandConfig) (string, ErrorCodes)
+	Handler   func(req *requests.Request, c *client.Client, gm *managers.GameManager) error
+}
+
+type CommandConfig struct {
+	Identifier string
+	Name       string
+	MinArgs    int
+	MaxArgs    int
+	IsBool     bool
+}
+
+var Commands = map[requests.RequestKind]Command{}
+
+func RegisterCommand(
+	kind requests.RequestKind,
+	commandConfig CommandConfig,
+	commandValidator func(*requests.Request, *client.Client, *managers.GameManager, CommandConfig) (string, ErrorCodes),
+	commandHandler func(*requests.Request, *client.Client, *managers.GameManager) error,
+) {
+	Commands[kind] = Command{
+		Config:    commandConfig,
+		Validator: commandValidator,
+		Handler:   commandHandler,
+	}
+}
+
+func ErrorHandler(req *requests.Request, c *client.Client, cm *CommandConfig, reason string, errc ErrorCodes) error {
+	c.SendExtensionResponse(cm.Identifier, "-1", strconv.Itoa(int(errc)), strings.Join(req.Args[2:], "%"))
+	return fmt.Errorf("Command %s failed with error code: %d.\n---> Reason: %s", cm.Name, errc, reason)
+}
 
 func HandleClient(c *client.Client, gm *managers.GameManager) {
 	defer c.Disconnect()
@@ -27,7 +62,7 @@ func HandleClient(c *client.Client, gm *managers.GameManager) {
 		// Handle requests
 		err := HandleRequest(req, c, gm)
 		if err != nil {
-			log.Warnf("%v request: %s", req.Args[0], err.Error())
+			log.Warnf(err.Error())
 			continue
 		}
 	}
@@ -35,150 +70,26 @@ func HandleClient(c *client.Client, gm *managers.GameManager) {
 }
 
 func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
+	command, implemented := Commands[req.Kind]
 
-	var err error
-
-	switch req.Kind {
-	/* SYSTEM */
-	case requests.POLICY_FILE:
-		c.SendSystemResponse(responses.POLICY_FILE)
-	case requests.VERSION_CHECK:
-		c.SendSystemResponse(responses.VERSION_CHECK)
-	case requests.AUTO_JOIN:
-		c.SendSystemResponse(responses.AUTO_JOIN)
-	case requests.ROUND_TRIP:
-		c.SendSystemResponse(responses.ROUND_TRIP)
-	case requests.DISCONNECT:
-		c.SendSystemResponse(responses.LOGOUT)
-
-	/* COMMANDS */
-	case requests.C2S_PING:
-		SendPing(req, c, gm)
-	case requests.LOGIN:
-		RoomList(req, c, gm)
-	case requests.C2S_VERSION_CHECK:
-		err = VersionCheck(req, c, gm)
-	case requests.C2S_JOIN_CAFE:
-		err = JoinCafe(req, c, gm)
-	case requests.C2S_LOGIN:
-		err = Login(req, c, gm)
-	case requests.C2S_CAFE_WALK:
-		err = CafeWalk(req, c, gm)
-	case requests.C2S_SHOP_AVAILIBILITY:
-		err = ShopAvailibility(req, c, gm)
-	case requests.C2S_SHOP_DELETE_ITEM:
-		err = SellIngredient(req, c, gm)
-	case requests.C2S_SHOP_BUY_ITEM:
-		err = BuyIngredient(req, c, gm)
-	case requests.C2S_CAFE_CHAT:
-		err = SendChatMessage(req, c, gm)
-	case requests.C2S_MARKETPLACE_JOIN:
-		err = JoinMarketplace(req, c, gm)
-	case requests.C2S_CAFE_COOK:
-		err = StartCooking(req, c, gm)
-	case requests.C2S_CAFE_STOVE_DELIVER_INFO:
-		err = StoveDeliverInfo(req, c, gm)
-	case requests.C2S_CAFE_STOVE_DELIVER:
-		err = StoveDeliver(req, c, gm)
-	case requests.C2S_CAFE_CLEAN:
-		err = Clean(req, c, gm)
-	case requests.C2S_EDITOR_MODE:
-		err = EditorMode(req, c, gm)
-	case requests.C2S_EDITOR_BUY_OBJECT:
-		// TODO: Need to check level.
-		err = BuyObject(req, c, gm)
-	case requests.C2S_EDITOR_STORE_OBJECT:
-		err = StoreObject(req, c, gm)
-	case requests.C2S_EDITOR_ROTATE_OBJECT:
-		err = RotateObject(req, c, gm)
-	case requests.C2S_EDITOR_MOVE_OBJECT:
-		err = MoveObject(req, c, gm)
-	case requests.C2S_EDITOR_SELL_OBJECT:
-		err = SellObject(req, c, gm)
-	case requests.C2S_CAFE_INSTANTCOOK:
-		err = InstantCook(req, c, gm)
-	case requests.C2S_MINI_MUFFIN:
-		// TODO: Need to check level.
-		err = PlayMuffinGame(req, c, gm)
-	case requests.C2S_NPC_HIRE:
-		err = HireWaiter(req, c, gm)
-	case requests.C2S_NPC_FIRE:
-		err = FireWaiter(req, c, gm)
-	case requests.C2S_CAFE_ACHIEVEMENT_LIST:
-		err = SendAchivements(req, c, gm)
-	case requests.C2S_NPC_CUSTOMIZE:
-		err = WaiterCustomize(req, c, gm)
-	case requests.C2S_BUDDY_INGAME:
-		err = SendFriendRequest(req, c, gm)
-	case requests.C2S_EDITOR_BUY_FLOOR:
-		err = BuyFloor(req, c, gm)
-	case requests.C2S_WHEELOFFORTUNE:
-		err = WheelOfFortune(req, c, gm)
-	case requests.C2S_GIFT_PLAYERGIFTS:
-		err = SendPlayerGifts(req, c, gm)
-	case requests.C2S_GIFT_REMOVE:
-		err = RemoveGift(req, c, gm)
-	case requests.C2S_GIFT_USE:
-		err = UseGift(req, c, gm)
-	case requests.C2S_CREATE_AVATAR:
-		err = CreateAvatar(req, c, gm)
-	case requests.C2S_REGISTER:
-		err = Register(req, c, gm)
-	case requests.C2S_GIFT_SENDABLEGIFTS:
-		err = DailyGifts(req, c, gm)
-	case requests.C2S_GIFT_ALLREADYSEND_PLAYERS:
-		err = GiftAllReadySendPlayers(req, c, gm)
-	case requests.C2S_ALLOW_BUDDY_REQUESTS:
-		err = AllowFriendRequests(req, c, gm)
-	case requests.C2S_KICK_USER:
-		err = KickPlayer(req, c, gm)
-	case requests.C2S_ALLOW_MAIL_REQUESTS:
-		err = AllowEmails(req, c, gm)
-	case requests.C2S_CHANGE_PASSWORD:
-		err = ChangePassword(req, c, gm)
-	case requests.C2S_MARKETPLACE_JOBREFILL:
-		err = MarketplaceJobRefill(req, c, gm)
-	case requests.C2S_COOP_START:
-		err = CoopStart(req, c, gm)
-	case requests.C2S_COOP_ACTIVELIST:
-		err = CoopActiveList(req, c, gm)
-	case requests.C2S_FASTFOOD_COOK:
-		err = FastFoodCook(req, c, gm)
-	case requests.C2S_FASTFOOD_NPC:
-		err = FastFoodCook(req, c, gm)
-	case requests.C2S_CHANGE_AVATAR:
-		err = ChangeAvatar(req, c, gm)
-	case requests.C2S_CAFE_RECOOK:
-		err = Recook(req, c, gm)
-	case requests.C2S_CAFE_TUTORIAL_FINISH:
-		err = TutorialComplete(c, gm)
-	case requests.C2S_SPECIAL_EVENT:
-		err = SendSpecialEvent(c, gm)
-	case requests.C2S_SHOP_CARRIER_PIGEON:
-		err = BuyIngredientFromShopCarrier(req, c, gm)
-	case requests.C2S_HIGHSCORE_LIST:
-		err = SendHighscoreList(req, c, gm)
-	case requests.C2S_COOP_DETAIL:
-		err = CoopDetail(req, c, gm)
-	case requests.C2S_COOP_LEAVE:
-		err = CoopLeave(req, c, gm)
-	case requests.C2S_COOP_JOIN:
-		err = CoopJoin(req, c, gm)
-	case requests.C2S_COOP_EXTEND:
-		err = CoopExtend(req, c, gm)
-	case requests.C2S_MARKETPLACE_SEEKINGJOB:
-		err = SeekingJob(req, c, gm)
-	case requests.C2S_MARKETPLACE_JOB:
-		err = MarketPlaceJob(req, c, gm)
-	case requests.C2S_JOB_USER_ACTION:
-		err = JobAction(req, c, gm)
-	default:
-		log.Infof("NOT IMPLEMENTED: %v", req.Args[0])
+	if !implemented {
+		cm := CommandConfig{
+			Name:       req.Args[0],
+			Identifier: req.Args[0],
+		}
+		return ErrorHandler(req, c, &cm, "The command is not implemented", NOT_IMPLEMENTED)
 	}
 
-	if err != nil {
-		return fmt.Errorf("Error during command handling: %s", err)
+	// command error = int
+	// all error codes what the cafe having in int
+	if command.Validator != nil {
+		reason, commandError := command.Validator(req, c, gm, command.Config)
+
+		// If theres an ANY error, then dont run the handler.
+		if commandError != NO_ERROR {
+			return ErrorHandler(req, c, &command.Config, reason, commandError)
+		}
 	}
 
-	return nil
+	return command.Handler(req, c, gm)
 }

@@ -7,6 +7,7 @@ import (
 	"cafego/internal/managers"
 	"cafego/internal/models/leaderboard"
 	"cafego/internal/utils"
+	"cafego/internal/versions"
 	"fmt"
 	"net"
 	"os"
@@ -79,7 +80,7 @@ func (s *CafeServer) Run() {
 	}
 	defer listener.Close()
 
-	log.Infof("Server started and listening on %s", address)
+	log.Infof("Server started with game version %v, and listening on %s", versions.GetGameVersion(), address)
 
 	// Handle connections
 	go func() {

@@ -5,48 +5,33 @@ import (
 	"cafego/internal/managers"
 	"cafego/internal/models/balancing"
 	"cafego/internal/types/requests"
+	"cafego/internal/types/responses"
 	"cafego/internal/utils"
+	"fmt"
 	"strconv"
 )
 
+func init() {
+	RegisterCommand(requests.C2S_CAFE_CLEAN,
+		CommandConfig{
+			Name:       "Clean",
+			Identifier: responses.S2C_CAFE_CLEAN,
+			MinArgs:    4,
+			MaxArgs:    4,
+		},
+		CleanValidator,
+		Clean,
+	)
+}
+
 func Clean(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
-	// Dont allow players to modify the packet and sending us CCH while in editor.
-	if !c.Location.IsRunning() {
-		return nil
-	}
-
-	objX, err := strconv.Atoi(req.Args[2])
-	if err != nil {
-		return err
-	}
-
-	objY, err := strconv.Atoi(req.Args[3])
-	if err != nil {
-		return err
-	}
-
+	objX, _ := strconv.Atoi(req.Args[2])
+	objY, _ := strconv.Atoi(req.Args[3])
 	obj := c.Location.Cafe().GetObjectByPosXY(objX, objY)
 
-	if obj == nil {
-		return err
-	}
-
 	if obj.IsStove() {
-		if c.Player.GetCash() < balancing.BalancingConstants.CleanCostCash {
-			c.Location.Broadcast(
-				"ccn", "-1",
-				"4",
-				req.Args[2],
-				req.Args[3],
-				utils.If(obj.IsStove(), "1", "0"),
-			)
-
-			return nil
-		}
-
 		c.Player.AddCash(-balancing.BalancingConstants.CleanCostCash)
-
 		if obj.GetDishID() > 0 && obj.GetIsRotten() {
 			c.Player.UpdateAchivementOvercookedFoods() // if the player cleans rotten food
 
@@ -74,30 +59,46 @@ func Clean(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 	return nil
 }
 
-/*
-async def handle_ccn(server: 'CafeServer', client: 'StreamWriter', *params: str):
-    address = client.get_extra_info('peername')
-    player = server.clients[address]
+func CleanValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm CommandConfig) (string, ErrorCodes) {
+	if len(req.Args) < cm.MinArgs {
+		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), MIN_ARGS
+	}
 
-    obj_x = params[1]
-    obj_y = params[2]
+	if cm.MinArgs > 0 {
+		if len(req.Args) > cm.MaxArgs {
+			return fmt.Sprintf("Too much args. NEEDED/GOT: %d/%d", cm.MaxArgs, len(req.Args)), MAX_ARGS
+		}
+	}
 
-    obj = player.cafe.get_object(int(obj_x), int(obj_y))
+	// Dont allow players to modify the packet and sending us CCN while in editor.
+	if !c.Location.IsRunning() {
+		return "The location is not running", LOCATION_NOT_RUNNING
+	}
 
-    if obj.type == ObjectType.STOVE:
-        if player.cash < 15:
-            status = '4'
-        else:
-            status = '0'
-            player.cash -= 15
-            obj.dish_id = -1
-            server.db.update_player(player.id, cash=player.cash)
-            server.db.update_cafe(player.id, objects=player.cafe.get_objects_as_json())
-    else:
-        status = '0'
-        obj.dish_id = -1
-        server.db.update_cafe(player.id, objects=player.cafe.get_objects_as_json())
+	if c.Location.Cafe().GetPlayerID() != c.Player.ID {
+		return "Not the owner!", NOT_DECLARED
+	}
 
-    response = ExtensionResponse('ccn', '-1', status, obj_x, obj_y, str(int(obj.type == ObjectType.STOVE)))
-    await server.send_response(client, response)
-*/
+	posX, err := strconv.Atoi(req.Args[2])
+	if err != nil {
+		return "Cant convert string to int!", CONVERT_ERROR
+	}
+
+	posY, err := strconv.Atoi(req.Args[3])
+	if err != nil {
+		return "Cant convert string to int!", CONVERT_ERROR
+	}
+
+	obj := c.Location.Cafe().GetObjectByPosXY(posX, posY)
+	if obj == nil {
+		return fmt.Sprintf("No object found at: %d:%d", posX, posY), NOT_DECLARED
+	}
+
+	if obj.IsStove() {
+		if c.Player.GetCash() < balancing.BalancingConstants.CleanCostCash {
+			return "Player not have enough cash to clean the stove", NOT_ENOUGHT_MONEY
+		}
+	}
+
+	return "Command ran without any errors.", NO_ERROR
+}

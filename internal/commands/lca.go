@@ -6,11 +6,25 @@ import (
 	"cafego/internal/models/avatar"
 	"cafego/internal/models/player"
 	"cafego/internal/types/requests"
+	"cafego/internal/types/responses"
 	"fmt"
 	"math/rand"
 
 	"github.com/charmbracelet/log"
 )
+
+func init() {
+	RegisterCommand(requests.C2S_CREATE_AVATAR,
+		CommandConfig{
+			Name:       "CreateAvatar",
+			Identifier: responses.S2C_CREATE_AVATAR,
+			MinArgs:    7,
+			MaxArgs:    7,
+		},
+		CreateAvatarValidator,
+		CreateAvatar,
+	)
+}
 
 func CreateAvatar(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
@@ -22,20 +36,36 @@ func CreateAvatar(req *requests.Request, c *client.Client, gm *managers.GameMana
 	avatar := avatar.NewAvatarFromString(req.Args[2])
 	avatar.Name = guestName
 
-	if avatar == nil {
-		c.SendExtensionResponse("lca", "-1", "-1", "-1", "-1")
-		return fmt.Errorf("Cant parse avatar from string!")
-	}
-
-	if !avatar.IsValid() {
-		c.SendExtensionResponse("lca", "-1", "-1", "-1", "-1")
-		return fmt.Errorf("Invalid avatar structure!")
-	}
-
 	c.Player = &player.Player{
 		Avatar: *avatar,
 	}
 
 	c.SendExtensionResponse("lca", "-1", "0", guestName, "1")
 	return nil
+}
+
+func CreateAvatarValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm CommandConfig) (string, ErrorCodes) {
+	if len(req.Args) < cm.MinArgs {
+		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), MIN_ARGS
+	}
+
+	if cm.MinArgs > 0 {
+		if len(req.Args) > cm.MaxArgs {
+			return fmt.Sprintf("Too much args. NEEDED/GOT: %d/%d", cm.MaxArgs, len(req.Args)), MAX_ARGS
+		}
+	}
+
+	guestName := fmt.Sprintf("Guest_%v", rand.Intn(89999999)+10000000)
+	avatar := avatar.NewAvatarFromString(req.Args[2])
+	avatar.Name = guestName
+
+	if avatar == nil {
+		return "Cant parse avatar from the string, avatar is invalid!", NOT_DECLARED
+	}
+
+	if !avatar.IsValid() {
+		return "Cant parse avatar from the string, avatar is invalid!", NOT_DECLARED
+	}
+
+	return "Command ran without any errors.", NO_ERROR
 }

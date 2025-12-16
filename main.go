@@ -5,7 +5,9 @@ import (
 	"cafego/internal/models/balancing"
 	"cafego/internal/server"
 	"cafego/internal/utils"
+	"cafego/internal/versions"
 	"os"
+	"strconv"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/log"
@@ -49,6 +51,14 @@ func main() {
 			Password: utils.If(hasConfig, envFile["DB_PASSWORD"], ""),
 		},
 	)
+
+	versionStr := utils.If(hasConfig, envFile["GAME_VERSION"], "1603")
+	version, err := strconv.Atoi(versionStr)
+	if err != nil {
+		log.Fatalf("Invalid GAME_VERSION: %v", versionStr)
+	}
+
+	versions.SetGameVersion(version)
 
 	balancing.LoadBalancing(hasConfig, envFile)
 

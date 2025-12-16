@@ -3,6 +3,7 @@ package managers
 import (
 	"cafego/internal/database"
 	"cafego/internal/models/cafe"
+	"cafego/internal/models/customer"
 	"cafego/internal/models/event"
 	"fmt"
 
@@ -29,8 +30,27 @@ func (gm *GameManager) RemoveLocation(id int) {
 	for i, lc := range gm.locations {
 		if lc.cafe.GetID() == id {
 			// This removes the location by id by not changing the others memory addresses
-			gm.db.SaveCafe(lc.Cafe())
-			log.Debugf("Saved %v cafe to db", lc.cafe.GetID())
+			owner := lc.Cafe().GetOwnerName()
+			player, err := gm.db.GetPlayerByName(owner)
+			if err == nil {
+				if player.GetXP() > 0 {
+					gm.db.SaveCafe(lc.Cafe())
+					log.Debugf("Saved %v cafe to db", lc.cafe.GetID())
+				}
+			}
+
+			if lc.Cafe().AgentCycleBinded {
+				lc.Cafe().AgentCycleBinded = false
+				for _, c := range lc.Cafe().GetCustomers() {
+					delete(lc.Cafe().Customers, c.GetID())
+				}
+
+				for _, w := range lc.Cafe().Waiters {
+					w.StopWorking()
+				}
+
+				lc.Cafe().Waiters = lc.Cafe().Waiters[:0]
+			}
 			delete(gm.locations, i)
 			return
 		}
@@ -57,14 +77,16 @@ func (gm *GameManager) AddLocation(id int) *LoadedLocation {
 	}
 
 	if event.GetEvent() == 3 {
-		cafeObj.Background = cafe.WinterBackground
+		cafeObj.Background = cafe.WinterCafeBackground
 	} else {
-		cafeObj.Background = cafe.DefaultBackground
+		cafeObj.Background = cafe.DefaultCafeBackground
 	}
 
 	//
 	loc := NewLoadedLocation(cafeObj, gm)
 	gm.locations[id] = loc
+
+	loc.Cafe().Customers = make(map[int]*customer.Customer)
 
 	println("LOADED CAFE: ", id)
 

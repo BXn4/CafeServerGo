@@ -5,9 +5,23 @@ import (
 	"cafego/internal/managers"
 	"cafego/internal/models/player"
 	"cafego/internal/types/requests"
+	"cafego/internal/types/responses"
 	"fmt"
 	"strconv"
 )
+
+func init() {
+	RegisterCommand(requests.C2S_LOGIN,
+		CommandConfig{
+			Name:       "Login",
+			Identifier: responses.S2C_LOGIN,
+			MinArgs:    2,
+			MaxArgs:    2,
+		},
+		nil,
+		Login,
+	)
+}
 
 // lgn - Login
 func Login(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
@@ -92,8 +106,12 @@ func Login(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 			gm.SendEarnAchievement(id, level, p.Username)
 		}
 
-		c.Player.IsTutorialCompleted = true // Default false, because after register, the customers should not start.
-		// And we cant trigger the tutorial event in the game, so its just works after register. If the player disconnects after the tutorial, we cant trigger it.
+		if c.Player.XP == 0 && !c.Player.IsTutorialCompleted {
+			// reset it to allow player to complete the tutorial
+			c.SendExtensionResponse("lgn", "-1", strconv.Itoa(LOGIN_SET_FIRST_LOGIN))
+		} else {
+			c.Player.IsTutorialCompleted = true // Default false, because after register, the customers should not start.
+		}
 	}
 
 	return nil

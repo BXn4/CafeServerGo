@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+// min level 4
+
 func SendFriendsAvatar(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	friends := c.Player.Friends

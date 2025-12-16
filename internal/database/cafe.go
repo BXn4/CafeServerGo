@@ -37,7 +37,7 @@ func (db *CafeDB) SaveCafe(c *cafe.Cafe) error {
 				"objects":       c.Objects.StringForDB(),
 				"fridge_inv":    c.FridgeInventory.String(),
 				"furniture_inv": c.FurnitureInventory.String(),
-				"waiters":       c.Waiters.String(),
+				"waiters":       c.Waiters,
 			}).Error
 
 		if err != nil {

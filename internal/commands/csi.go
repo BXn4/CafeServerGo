@@ -5,64 +5,128 @@ import (
 	"cafego/internal/managers"
 	"cafego/internal/models/object"
 	"cafego/internal/types/requests"
-	"cafego/internal/utils"
+	"cafego/internal/types/responses"
+	"fmt"
 	"strconv"
 )
 
+func init() {
+	RegisterCommand(requests.C2S_CAFE_STOVE_DELIVER_INFO,
+		CommandConfig{
+			Name:       "StoveDeliverInfo",
+			Identifier: responses.S2C_CAFE_STOVE_DELIVER_INFO,
+			MinArgs:    4,
+			MaxArgs:    4,
+		},
+		StoveDeliverInfoValidator,
+		StoveDeliverInfo,
+	)
+}
+
 func StoveDeliverInfo(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
-
-	// Dont allow players to modify the packet and sending us CSD while in editor.
-	if !c.Location.IsRunning() {
-		return nil
-	}
-
-	stoveX, err := strconv.Atoi(req.Args[2])
-	if err != nil {
-		return err
-	}
-
-	stoveY, err := strconv.Atoi(req.Args[3])
-	if err != nil {
-		return err
-	}
+	stoveX, _ := strconv.Atoi(req.Args[2])
+	stoveY, _ := strconv.Atoi(req.Args[3])
 
 	stove := c.Location.Cafe().GetObjectByPosXY(stoveX, stoveY)
 
-	if !stove.GetIsRotten() {
-
-		// Choose counter that is empty or has the same food type
-		var counter *object.Object
-		for _, object := range c.Location.Cafe().GetObjects() {
-			if !object.IsCounter() {
-				continue
-			}
-
-			if stove.GetDishID() == object.GetDishID() {
-				counter = object
-				break
-			} else if object.GetDishID() == -1 {
-				counter = object
-			}
+	// Choose counter that is empty or has the same food type
+	var counter *object.Object
+	for _, object := range c.Location.Cafe().GetObjects() {
+		if !object.IsCounter() {
+			continue
 		}
 
-		// Set args
-		counterX := utils.If(counter != nil, counter.GetPos().X, -1)
-		counterY := utils.If(counter != nil, counter.GetPos().Y, -1)
-		status := utils.If(counter != nil, "0", "37")
-
-		/*
-			py	%xt%csi%-1%0%1%5%3%6%
-			go	%xt%csi%-1%0%0%1%5%3%6%
-		*/
-		c.Location.Broadcast(
-			"csi", "-1",
-			status,
-			req.Args[2],
-			req.Args[3],
-			strconv.Itoa(counterX),
-			strconv.Itoa(counterY),
-		)
+		if stove.GetDishID() == object.GetDishID() {
+			counter = object
+			break
+		} else if object.GetDishID() == -1 {
+			counter = object
+		}
 	}
 
+	// Set args
+	counterX := counter.GetPos().X
+	counterY := counter.GetPos().Y
+
+	/*
+		py	%xt%csi%-1%0%1%5%3%6%
+		go	%xt%csi%-1%0%0%1%5%3%6%
+	*/
+
+	c.Location.Broadcast(
+		"csi", "-1",
+		"0",
+		req.Args[2],
+		req.Args[3],
+		strconv.Itoa(counterX),
+		strconv.Itoa(counterY),
+	)
+
 	return nil
+}
+
+func StoveDeliverInfoValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm CommandConfig) (string, ErrorCodes) {
+	if len(req.Args) < cm.MinArgs {
+		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), MIN_ARGS
+	}
+
+	if cm.MinArgs > 0 {
+		if len(req.Args) > cm.MaxArgs {
+			return fmt.Sprintf("Too much args. NEEDED/GOT: %d/%d", cm.MaxArgs, len(req.Args)), MAX_ARGS
+		}
+	}
+
+	// Dont allow players to modify the packet and sending us CSI while in editor.
+	if !c.Location.IsRunning() {
+		return "The location is not running", LOCATION_NOT_RUNNING
+	}
+
+	if c.Location.Cafe().GetPlayerID() != c.Player.ID {
+		return "Not the owner!", NOT_DECLARED
+	}
+
+	posX, err := strconv.Atoi(req.Args[2])
+	if err != nil {
+		return "Cant convert string to int!", CONVERT_ERROR
+	}
+
+	posY, err := strconv.Atoi(req.Args[3])
+	if err != nil {
+		return "Cant convert string to int!", CONVERT_ERROR
+	}
+
+	stove := c.Location.Cafe().GetObjectByPosXY(posX, posY)
+
+	if stove == nil {
+		return fmt.Sprintf("No stove found at: %d:%d", posX, posY), NOT_DECLARED
+	}
+
+	dishID := stove.GetDishID()
+	if dishID == -1 {
+		return "Cant use stove deliver info, because the stove not have any valid dish ID", NOT_DECLARED
+	}
+
+	if stove.GetIsRotten() {
+		return "Cant use stove deliver info, because the dish is rotten", NOT_DECLARED
+	}
+
+	var counter *object.Object
+	for _, object := range c.Location.Cafe().GetObjects() {
+		if !object.IsCounter() {
+			continue
+		}
+
+		if stove.GetDishID() == object.GetDishID() {
+			counter = object
+			break
+		} else if object.GetDishID() == -1 {
+			counter = object
+		}
+	}
+
+	if counter == nil {
+		return "No valid counters found", NOT_DECLARED
+	}
+
+	return "Command ran without any errors.", NO_ERROR
 }

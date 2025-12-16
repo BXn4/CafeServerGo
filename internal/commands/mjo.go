@@ -6,15 +6,31 @@ import (
 	"cafego/internal/types/requests"
 )
 
+// min level 4
+
+/* func init() {
+	RegisterCommand(requests.C2S_MARKETPLACE_JOB,
+		CommandConfig{
+			Name:       "MarketplaceJob",
+			Identifier: responses.S2C_MARKETPLACE_JOB,
+			MinArgs:    6,
+			MaxArgs:    6,
+		},
+		AllowFriendRequestsValidator,
+		AllowFriendRequests,
+	)
+}
+
 const (
 	OFFER_JOB                  = 0
 	ACCEPT_JOB                 = 1
 	DECLINE_JOB                = 2
 	PLAYER_LEFT                = 11
 	PLAYER_WORKED_ENOUGH_TODAY = 61
-)
+) */
 
-func MarketPlaceJob(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
+// the func is "done" but the job is not yet.
+func MarketplaceJob(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 	/*
 		status, err := strconv.Atoi(req.Args[2])
 		fromPlayerID, err := strconv.Atoi(req.Args[3])

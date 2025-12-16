@@ -63,6 +63,7 @@ func (db *CafeDB) SavePlayer(p *player.Player) error {
 		"xp":                    p.GetXP(),
 		"instant_cookings":      p.InstantCookings,
 		"open_jobs":             p.OpenJobs,
+		"refilled_jobs":         p.RefilledJobs,
 		"coop_id":               p.CoopID,
 		"played_wheel":          p.PlayedWheel,
 		"allow_friend_requests": p.AllowFriendRequests,
@@ -211,6 +212,16 @@ func (db *CafeDB) UpdateOpenJobs(playerID int, openJobs int) error {
 	err := db.conn.Model(&player.Player{}).
 		Where("id = ?", playerID).
 		Update("open_jobs", openJobs).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateRefilledJobs(playerID int, refilledJobs int) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("refilled_jobs", refilledJobs).Error
 	if err != nil {
 		return fmt.Errorf("Cant update player: %v", err)
 	}

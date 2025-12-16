@@ -22,6 +22,7 @@ type Player struct {
 	Gold                int                                           `gorm:"column:gold;type:int;default:11"`
 	XP                  int                                           `gorm:"column:xp;type:int;default:0"`
 	InstantCookings     int                                           `gorm:"column:instant_cookings;type:int;default:0"`
+	RefilledJobs        int                                           `gorm:"column:refilled_jobs;type:int;default:0"`
 	OpenJobs            int                                           `gorm:"column:open_jobs;type:int;default:0"`
 	PlayedWheel         bool                                          `gorm:"column:played_wheel;type:bool;default:false"`
 	AllowFriendRequests bool                                          `gorm:"column:allow_friend_requests;stype:bool;default:true"`
@@ -72,7 +73,6 @@ func (p *Player) String() string {
 		utils.If(p.AllowFriendRequests, "1", "0"),
 		p.Avatar.String(),
 	}
-	println(strings.Join(params, "+"))
 	return strings.Join(params, "+")
 }
 

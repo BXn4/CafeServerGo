@@ -65,18 +65,21 @@ func (c *Client) Start() {
 
 func (c *Client) Disconnect() error {
 	if c.Player != nil {
-		id := c.Player.ID
+		// id := c.Player.ID
 
-		c.Player.LastLogin = time.Now().UTC()
-		c.DB.UpdateLastLogin(c.Player.ID, c.Player.LastLogin)
-
-		c.DB.SavePlayer(c.Player)
-		c.DB.SaveCafe(c.Location.Cafe())
-
-		c.Player = nil
-
-		c.ClientManager.DisconnectClient(id)
+		if c.Player.IsTutorialCompleted {
+			c.Player.LastLogin = time.Now().UTC()
+			c.DB.UpdateLastLogin(c.Player.ID, c.Player.LastLogin)
+			c.DB.SavePlayer(c.Player)
+			if c.Location != nil {
+				if c.Location.Cafe() != nil {
+					c.DB.SaveCafe(c.Location.Cafe())
+				}
+			}
+		}
 	}
+
+	c.ClientManager.DisconnectClient(c.ClientID)
 	c.Conn.Close()
 	log.Infof("Client disconnected: %s", c.GetIP())
 
@@ -147,25 +150,27 @@ func (c *Client) autoSave() {
 			}
 
 			// Save player data
-			err := c.DB.SavePlayer(c.Player)
-			if err != nil {
-				log.Errorf("Failed to auto-save player data: %v", err)
-			} else {
-				log.Debugf("Auto-saved player %v data", c.Player.ID)
-			}
+			if c.Player.IsTutorialCompleted {
+				err := c.DB.SavePlayer(c.Player)
+				if err != nil {
+					log.Errorf("Failed to auto-save player data: %v", err)
+				} else {
+					log.Debugf("Auto-saved player %v data", c.Player.ID)
+				}
 
-			// Save cafe
-			cafe, err := c.DB.GetCafeByPlayerID(c.Player.ID)
-			if err != nil {
-				log.Errorf("Failed to get cafe for auto-save: %v", err)
-				continue
-			}
+				// Save cafe
+				cafe, err := c.DB.GetCafeByPlayerID(c.Player.ID)
+				if err != nil {
+					log.Errorf("Failed to get cafe for auto-save: %v", err)
+					continue
+				}
 
-			err = c.DB.SaveCafe(cafe)
-			if err != nil {
-				log.Error("Failed to auto-save cafe data: %v", err)
-			} else {
-				log.Debug("Auto-saved cafe %v data", cafe.ID)
+				err = c.DB.SaveCafe(cafe)
+				if err != nil {
+					log.Error("Failed to auto-save cafe data: %v", err)
+				} else {
+					log.Debug("Auto-saved cafe %v data", cafe.ID)
+				}
 			}
 		}
 	}

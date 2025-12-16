@@ -13,12 +13,12 @@ import (
 	"sync"
 )
 
-type CafeBackground string
+type RoomBackground string
 
 const (
-	DefaultBackground     CafeBackground = "1501"
-	MarketplaceBackground CafeBackground = "1502"
-	WinterBackground      CafeBackground = "1503"
+	DefaultCafeBackground RoomBackground = "1501"
+	MarketplaceBackground RoomBackground = "1502"
+	WinterCafeBackground  RoomBackground = "1503"
 )
 
 type RoomType int
@@ -29,26 +29,26 @@ const (
 )
 
 type Cafe struct {
-	ID                 int                  `gorm:"primaryKey;autoIncrement"`
-	PlayerID           int                  `gorm:"not null;type:int"`
-	OwnerName          string               `gorm:"not null;type:text"`
-	Rating             int                  `gorm:"default:50"`
-	Luxury             int                  `gorm:"default:0"`
-	Size               int                  `gorm:"default:8"`
-	Background         CafeBackground       `gorm:"type:text"`
-	ExpansionID        int                  `gorm:"type:int;default:0"`
-	Tiles              simple.IntMatrix     `gorm:"type:longtext"`
-	Objects            object.ObjectList    `gorm:"type:longtext"`
-	availableTables    object.ObjectList    `gorm:"-"`
-	fridgeCapacity     int                  `gorm:"-"`
-	FridgeInventory    simple.IntMap        `gorm:"column:fridge_inv;type:text"`
-	FurnitureInventory simple.IntMap        `gorm:"column:furniture_inv;type:text"`
-	Waiters            waiter.WaiterList    `gorm:"type:longtext;"`
-	customers          []*customer.Customer `gorm:"-"`
-	AgentCycleBinded   bool                 `gorm:"-"`
-	playerStart        *simple.Position     `gorm:"-"`
-	roomType           RoomType             `gorm:"default:0"`
-	mutex              sync.RWMutex         `gorm:"-"`
+	ID                 int                        `gorm:"primaryKey;autoIncrement"`
+	PlayerID           int                        `gorm:"not null;type:int"`
+	OwnerName          string                     `gorm:"not null;type:text"`
+	Rating             int                        `gorm:"default:50"`
+	Luxury             int                        `gorm:"default:0"`
+	Size               int                        `gorm:"default:8"`
+	Background         RoomBackground             `gorm:"type:text"`
+	ExpansionID        int                        `gorm:"type:int;default:0"`
+	Tiles              simple.IntMatrix           `gorm:"type:longtext"`
+	Objects            object.ObjectList          `gorm:"type:longtext"`
+	availableTables    object.ObjectList          `gorm:"-"`
+	fridgeCapacity     int                        `gorm:"-"`
+	FridgeInventory    simple.IntMap              `gorm:"column:fridge_inv;type:text"`
+	FurnitureInventory simple.IntMap              `gorm:"column:furniture_inv;type:text"`
+	Waiters            waiter.WaiterList          `gorm:"type:longtext;"`
+	Customers          map[int]*customer.Customer `gorm:"-"`
+	AgentCycleBinded   bool                       `gorm:"-"`
+	playerStart        *simple.Position           `gorm:"-"`
+	roomType           RoomType                   `gorm:"default:0"`
+	mutex              sync.RWMutex               `gorm:"-"`
 }
 
 func (cafe *Cafe) TableName() string {
@@ -62,7 +62,7 @@ func NewCafe(id int, playerID int, ownerName string, luxury int, size int) *Cafe
 		OwnerName:  ownerName,
 		Luxury:     luxury,
 		Size:       size,
-		Background: DefaultBackground,
+		Background: DefaultCafeBackground,
 	}
 }
 
@@ -140,6 +140,17 @@ func (cafe *Cafe) GetObjectByPosXY(x, y int) *object.Object {
 	pos := simple.NewPosition(x, y)
 	for _, obj := range cafe.Objects {
 		if obj.GetPos() == pos {
+			return obj
+		}
+	}
+	return nil
+}
+
+func (cafe *Cafe) GetDoor() *object.Object {
+	cafe.mutex.RLock()
+	defer cafe.mutex.RUnlock()
+	for _, obj := range cafe.Objects {
+		if obj.IsDoor() {
 			return obj
 		}
 	}
@@ -392,7 +403,7 @@ func (c *Cafe) GetExpansionID() int {
 	return c.ExpansionID
 }
 
-func (c *Cafe) GetBackground() CafeBackground {
+func (c *Cafe) GetBackground() RoomBackground {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 	return c.Background
@@ -428,17 +439,17 @@ func (c *Cafe) GetWaiters() []*waiter.Waiter {
 	return c.Waiters
 }
 
-func (c *Cafe) GetCustomers() []*customer.Customer {
+func (c *Cafe) GetCustomers() map[int]*customer.Customer {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
-	return c.customers
+	return c.Customers
 }
 
 func (c *Cafe) GetCustomer(id int) *customer.Customer {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
-	for _, cs := range c.customers {
+	for _, cs := range c.Customers {
 		if cs.GetID() == id {
 			return cs
 		}
@@ -506,7 +517,8 @@ func (c *Cafe) SetLuxury(luxury int) {
 func (c *Cafe) AddLuxury(luxury int) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
-	c.Luxury = luxury
+
+	c.Luxury += luxury
 }
 
 func (c *Cafe) SetSize(size int) {
@@ -515,7 +527,7 @@ func (c *Cafe) SetSize(size int) {
 	c.Size = size
 }
 
-func (c *Cafe) SetBackground(background CafeBackground) {
+func (c *Cafe) SetBackground(background RoomBackground) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	c.Background = background
@@ -557,16 +569,17 @@ func (c *Cafe) SetWaiters(waiters []*waiter.Waiter) {
 	c.Waiters = waiters
 }
 
-func (c *Cafe) SetCustomers(customers []*customer.Customer) {
+func (c *Cafe) SetCustomers(customers map[int]*customer.Customer) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
-	c.customers = customers
+	c.Customers = customers
 }
 
-func (c *Cafe) AddCustomer(customer *customer.Customer) {
+func (c *Cafe) AddCustomer(cu *customer.Customer) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
-	c.customers = append(c.customers, customer)
+
+	c.Customers[cu.GetID()] = cu
 }
 
 func (c *Cafe) AddWaiter(waiter *waiter.Waiter) {
@@ -598,26 +611,16 @@ func (c *Cafe) SetTile(x, y, value int) {
 	c.Tiles[y][x] = value
 }
 
-// Removes a customer from the list by id
+// Removes a customer from the map by id
 func (c *Cafe) RemoveCustomer(id int) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
-	// Search index
-	index := -1
-	for i, customer := range c.customers {
-		if customer.GetID() == id {
-			index = i
-		}
-	}
-
-	// If not found return
-	if index == -1 {
+	if c.Customers == nil {
 		return
 	}
 
-	// Remove from slice
-	c.customers = append(c.customers[:index], c.customers[index+1:]...)
+	delete(c.Customers, id)
 }
 
 func (c *Cafe) SetRoomType(roomType RoomType) {

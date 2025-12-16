@@ -6,6 +6,19 @@ import (
 	"cafego/internal/types/requests"
 )
 
+/*func init() {
+	RegisterCommand(requests.C2S_JOB_USER_ACTION,
+		CommandConfig{
+			Name:       "JobAction",
+			Identifier: responses.S2C_JOB_USER_ACTION,
+			MinArgs:    0,
+			MaxArgs:    0,
+		},
+		JobActionValidator,
+		JobAction,
+	)
+} */
+
 var (
 	JobCleanStart   = 0
 	JobCleaned      = 1

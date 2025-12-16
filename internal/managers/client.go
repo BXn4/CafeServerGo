@@ -4,6 +4,9 @@ import (
 	"cafego/internal/client"
 	"cafego/internal/interfaces"
 	"fmt"
+	"time"
+
+	"github.com/charmbracelet/log"
 )
 
 // AddClient adds a new client to the list
@@ -13,7 +16,12 @@ func (gm *GameManager) AddClient(item interfaces.ManagedItem) {
 
 	c := item.(*client.Client)
 
-	gm.clients = append(gm.clients, c)
+	clientID := gm.NextClientID()
+	c.SetClientID(clientID)
+
+	gm.clients[clientID] = c
+
+	log.Info("Assigned a ID to client: ", clientID)
 }
 
 // RemoveClient removes a client by id
@@ -21,29 +29,41 @@ func (gm *GameManager) DisconnectClient(id int) {
 	gm.clientMutex.Lock()
 	defer gm.clientMutex.Unlock()
 
-	newClients := make([]*client.Client, 0, len(gm.clients))
-	for i, c := range gm.clients {
-		if c.Player == nil && i != id {
-			continue
-		} else {
-			c.SetClientID(i)
-			newClients = append(newClients, c)
-		}
+	c, ok := gm.clients[id]
+	if !ok {
+		log.Info("[Disconnect] Client ID not found:", id)
+		return
+	}
 
-		for len(c.RequestQueue) > 0 {
-			c.RequestQueue <- nil
+	log.Info("[Disconnect] Disconnecting client id:", id)
+
+	for len(c.RequestQueue) > 0 {
+		select {
+		case c.RequestQueue <- nil:
+		default:
+		}
+	}
+	time.Sleep(time.Millisecond * 100) // Wait until procceses stop
+
+	for len(c.RequestQueue) > 0 {
+		c.RequestQueue <- nil
+	}
+	time.Sleep(time.Millisecond * 100) // Wait until procceses stop
+
+	delete(gm.clients, id)
+
+	if c.Player != nil {
+		if c.Player.IsTutorialCompleted {
+			gm.db.SavePlayer(c.Player)
 		}
 
 		if c.Location != nil {
-			c.Location.Leave(id)
+			c.Location.Leave(c.Player.ID)
 		}
+		c.Player = nil
 	}
 
-	gm.clients = newClients
-
-	/* for client := range gm.clients {
-	println(client)
-	} */
+	log.Info("[Disconnect] Client removed, remaining clients:", len(gm.clients))
 }
 
 // GetClient retrieves a client by its ID
@@ -64,16 +84,11 @@ func (gm *GameManager) GetClient(id int) (interfaces.ManagedItem, error) {
 }
 
 func (gm *GameManager) NextClientID() int {
-	gm.clientMutex.Lock()
-	defer gm.clientMutex.Unlock()
-
-	maxID := 0
-	for _, c := range gm.clients {
-		if c != nil && c.ClientID > maxID {
-			maxID = c.ClientID
+	for i := 1; ; i++ {
+		if _, exists := gm.clients[i]; !exists {
+			return i
 		}
 	}
-	return maxID + 1
 }
 
 // Checks if client is online

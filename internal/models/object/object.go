@@ -93,6 +93,12 @@ func (c *Object) IsWall() bool {
 	return 101 <= c.kind && c.kind <= 135
 }
 
+func (c *Object) IsWallObject() bool {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	return 901 <= c.kind && c.kind <= 934
+}
+
 func (c *Object) IsDoor() bool {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()

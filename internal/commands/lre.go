@@ -4,6 +4,8 @@ import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
 	"cafego/internal/types/requests"
+	"cafego/internal/types/responses"
+	"fmt"
 	"net/mail"
 	"strings"
 	"time"
@@ -11,104 +13,28 @@ import (
 	"github.com/charmbracelet/log"
 )
 
-const (
-	USERNAME_WRONG   = "1"
-	USERNAME_SHORT   = "2"
-	USERNAME_LONG    = "3"
-	EMAIL_WRONG      = "4"
-	PASSWORD_WRONG   = "5"
-	ACCEPT_TERMS     = "98"
-	PASSWORD_SHORT   = "96"
-	PASSWORD_INVALID = "10"
-	EMAIL_LONG       = "94"
-	EMAIL_INVALID    = "14"
-	ACCOUNT_EXIST    = "13"
-	BAD_WORD         = "93"
-)
+func init() {
+	RegisterCommand(requests.C2S_REGISTER,
+		CommandConfig{
+			Name:       "Register",
+			Identifier: responses.S2C_REGISTER,
+			MinArgs:    19,
+			MaxArgs:    19,
+		},
+		RegisterValidator,
+		Register,
+	)
+}
 
 // TODO: add more chars
 var invalidChars = "+%&*/()[]{}\"'\\´`^°§€²³.,;:?µ$"
 
 func Register(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
-
 	username := req.Args[2]
 	email := req.Args[3]
 	password := req.Args[4]
-	acceptedTerms := req.Args[5]
-
-	// Check if username contains unique characters
-	if username == "." || strings.ContainsAny(username, invalidChars) {
-		c.SendExtensionResponse("lre", "-1", USERNAME_WRONG)
-		return nil
-	}
-
-	// Check if username is short
-	if len(username) < 4 {
-		c.SendExtensionResponse("lre", "-1", USERNAME_SHORT)
-		return nil
-	}
-	// Check if username is long
-	if len(username) > 24 {
-		c.SendExtensionResponse("lre", "-1", USERNAME_LONG)
-		return nil
-	}
-
-	// Check if email is valid
-	if email == "." || strings.ContainsAny(strings.Split(email, "@")[0], invalidChars) {
-		c.SendExtensionResponse("lre", "-1", EMAIL_WRONG)
-		return nil
-	}
-
-	// PASSWORD_WRONG
-	if password == "." {
-		c.SendExtensionResponse("lre", "-1", PASSWORD_WRONG)
-		return nil
-	}
-
-	// ACCEPT_TERMS
-	if acceptedTerms == "0" {
-		c.SendExtensionResponse("lre", "-1", ACCEPT_TERMS)
-		return nil
-	}
-
-	// PASSWORD_SHORT
-	if len(password) < 4 {
-		c.SendExtensionResponse("lre", "-1", PASSWORD_SHORT)
-		return nil
-	}
-
-	// PASSWORD_INVALID
-	if strings.ContainsAny(password, invalidChars) {
-		c.SendExtensionResponse("lre", "-1", PASSWORD_INVALID)
-		return nil
-	}
-
-	// EMAIL_LONG
-	if len(email) > 320 {
-		c.SendExtensionResponse("lre", "-1", EMAIL_LONG)
-		return nil
-	}
-	// EMAIL_INVALID
-	_, err := mail.ParseAddress(email)
-	if err != nil {
-		c.SendExtensionResponse("lre", "-1", EMAIL_INVALID)
-		return nil
-	}
-
-	// ACCOUNT_EXIST
-	_, err = c.DB.GetPlayerByName(username)
-	if err == nil {
-		c.SendExtensionResponse("lre", "-1", ACCOUNT_EXIST)
-		return nil
-	}
 
 	log.Debug("Everything is fine! Player register should start")
-
-	// TODO: Check if username contains a bad word
-	/* if false {
-	c.SendExtensionResponse("lre", "-1", BAD_WORD)
-	return nil
-	} */
 
 	avatar := c.Player.Avatar
 
@@ -165,4 +91,83 @@ func Register(req *requests.Request, c *client.Client, gm *managers.GameManager)
 	c.DB.SetRegistered(player.ID)
 	c.DB.UpdateDailyLogin(player.ID, player.DailyLogin)
 	return nil
+}
+
+func RegisterValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm CommandConfig) (string, ErrorCodes) {
+	if len(req.Args) < cm.MinArgs {
+		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), MIN_ARGS
+	}
+
+	if cm.MinArgs > 0 {
+		if len(req.Args) > cm.MaxArgs {
+			return fmt.Sprintf("Too much args. NEEDED/GOT: %d/%d", cm.MaxArgs, len(req.Args)), MAX_ARGS
+		}
+	}
+
+	username := req.Args[2]
+	email := req.Args[3]
+	password := req.Args[4]
+	acceptedTerms := req.Args[5]
+
+	// TODO
+	log.Warn("SOME REGISTER COMMANDS NOT USED IN THE GAME, BUT EXIST IN THE LANGUAGE FILE! USERNAME SHORT ETC. TODO!")
+
+	// Check if username contains unique characters
+	if username == "." || strings.ContainsAny(username, invalidChars) {
+		return "Can't register the player, because the username is wrong / contains not allowed chars!", USERNAME_WRONG
+	}
+
+	// Check if username is short
+	if len(username) < 4 {
+		return "Can't register the player, because the username is short!", USERNAME_SHORT
+	}
+	// Check if username is long
+	if len(username) > 24 {
+		return "Can't register the player, because the username is long!", USERNAME_LONG
+	}
+
+	// TODO: Check if username contains a bad word
+	/* if false {
+	c.SendExtensionResponse("lre", "-1", BAD_WORD)
+	return nil
+	} */
+
+	// Check if email is valid
+	if email == "." || strings.ContainsAny(strings.Split(email, "@")[0], invalidChars) {
+		return "Can't register the player, because the email format is invalid!", EMAIL_INVALID
+	}
+
+	// ACCEPT_TERMS
+	if acceptedTerms == "0" {
+		return "Can't register the player, because the player not accepted the terms!", ACCEPT_TERMS
+	}
+
+	// PASSWORD_SHORT
+	if len(password) < 4 {
+		return "Can't register the player, because the password is short!", PASSWORD_SHORT
+	}
+
+	// PASSWORD_INVALID
+	if strings.ContainsAny(password, invalidChars) {
+		return "Can't register the player, because the password is containts invalid chars!", PASSWORD_INVALID
+	}
+
+	// EMAIL_LONG
+	if len(email) > 320 {
+		return "Can't register the player, because the email is long!", EMAIL_LONG
+
+	}
+	// EMAIL_INVALID
+	_, err := mail.ParseAddress(email)
+	if err != nil {
+		return "Can't register the player, because the email is invalid", EMAIL_INVALID
+	}
+
+	// ACCOUNT_EXIST
+	_, err = c.DB.GetPlayerByName(username)
+	if err == nil {
+		return "Can't register the player, because the username, or email exist!", ACCOUNT_EXIST
+	}
+
+	return "Command ran without any errors.", NO_ERROR
 }

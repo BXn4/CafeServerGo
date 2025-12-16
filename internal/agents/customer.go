@@ -137,11 +137,14 @@ func Spawn(l interfaces.CafeLocation, c *customer.Customer) {
 
 	// Send customer action
 	l.Broadcast("nav", "-1", "0", c.SpawnString())
-	CustomerDoAction(l, c,
+	if CustomerDoAction(l, c,
 		customer.CUSTOMER_INSERT,
 		l.Cafe().GetPlayerStart(),
 		time.Second,
-	)
+	) {
+		log.Debug("Customer task cancelled!")
+		return
+	}
 
 	WaitForChair(l, c)
 }
@@ -165,11 +168,14 @@ func WaitForChair(l interfaces.CafeLocation, c *customer.Customer) {
 
 func WalkToChair(l interfaces.CafeLocation, c *customer.Customer, es EatingSpace) {
 	println("Customer started to walking to the chair")
-	CustomerDoAction(l, c,
+	if CustomerDoAction(l, c,
 		customer.CUSTOMER_WALK_TO_CHAIR,
 		es.Chair.GetPos(),
 		time.Duration(es.Distance-1)*550*time.Millisecond,
-	)
+	) {
+		log.Debug("Customer task cancelled!")
+		return
+	}
 
 	println("Customer arrived to the chair")
 	SitDown(l, c, es)
@@ -178,14 +184,16 @@ func WalkToChair(l interfaces.CafeLocation, c *customer.Customer, es EatingSpace
 func SitDown(l interfaces.CafeLocation, c *customer.Customer, es EatingSpace) {
 	println("Customer waiting 1sec before sit down")
 
-	CustomerDoAction(l, c,
+	if CustomerDoAction(l, c,
 		customer.CUSTOMER_SIT_DOWN,
 		es.Chair.GetPos(),
 		1*time.Second,
-	)
+	) {
+		log.Debug("Customer task cancelled!")
+		return
+	}
 
 	println("Customer sat down")
-
 	WaitForFood(l, c, time.Duration(25), es)
 }
 
@@ -237,10 +245,12 @@ func Eat(l interfaces.CafeLocation, c *customer.Customer, duration time.Duration
 		es.Chair.SetDishStatus(3)
 	}
 
-	CustomerDoAction(l, c, customer.CUSTOMER_EAT, c.GetPos(), duration*time.Second)
+	if CustomerDoAction(l, c, customer.CUSTOMER_EAT, c.GetPos(), duration*time.Second) {
+		log.Debug("Customer task cancelled!")
+		return
+	}
 
 	println("Customer ate the food!")
-
 	Leave(l, c, &es)
 }
 
@@ -285,11 +295,15 @@ func Leave(l interfaces.CafeLocation, c *customer.Customer, es *EatingSpace) {
 	_, distance, _ := Path(start, end)
 
 	// Move out of cafe
-	CustomerDoAction(l, c, customer.CUSTOMER_LEAVE, l.Cafe().GetPlayerStart(), time.Duration(distance)*time.Second)
+	if CustomerDoAction(l, c, customer.CUSTOMER_LEAVE, l.Cafe().GetPlayerStart(), time.Duration(distance)*time.Second) {
+		// Wait 5 sec to make sure client deleted customer
+		// And instant cancel the sleeping it when the Café is not running
+		log.Debug("Customer task cancelled!")
+		return
+	}
 
-	// Wait 5 sec to make sure client deleted customer
-	// And instant cancel the sleeping it when the Café is not running
 	if !l.TryStepSleep(5 * time.Second) {
+		log.Debug("Customer task cancelled!")
 		return
 	}
 
@@ -346,7 +360,8 @@ func GetAvailableEatingSpace(l interfaces.CafeLocation) (*object.Object, *object
 // 2. Sends action response,
 // 3. Waits for delay,
 // 4. Stops if cafe is running,
-func CustomerDoAction(l interfaces.CafeLocation, c *customer.Customer, action customer.CustomerAction, pos simple.Position, delay time.Duration) {
+// 5. Return bool false if its cancelled, true when mpt
+func CustomerDoAction(l interfaces.CafeLocation, c *customer.Customer, action customer.CustomerAction, pos simple.Position, delay time.Duration) bool {
 
 	// Set properties
 	/* c.SetAction(action)
@@ -365,12 +380,13 @@ func CustomerDoAction(l interfaces.CafeLocation, c *customer.Customer, action cu
 
 		// Wait until customer walks in door
 		if !l.TryStepSleep(delay) {
-			return
+			println("RETURN TRUE")
+			return true
 		}
 	case customer.CUSTOMER_SIT_DOWN:
 		// Wait 1 sec before sit down (to avoid fast sit down at very close chair, because the distance is less than 1)
 		if !l.TryStepSleep(delay) {
-			return
+			return true
 		}
 
 		// Set properties
@@ -385,8 +401,9 @@ func CustomerDoAction(l interfaces.CafeLocation, c *customer.Customer, action cu
 
 		l.Broadcast("nac", "-1", "0", c.ActionString())
 		if !l.TryStepSleep(delay) {
-			return
+			return true
 		}
 	}
 
+	return false
 }

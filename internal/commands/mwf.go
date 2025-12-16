@@ -4,49 +4,57 @@ import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
 	"cafego/internal/types/requests"
+	"cafego/internal/types/responses"
 	"cafego/internal/utils"
 	"fmt"
 	"math/rand"
 	"strconv"
 	"strings"
+	"time"
 )
 
+func init() {
+	RegisterCommand(requests.C2S_WHEELOFFORTUNE,
+		CommandConfig{
+			Name:       "WheelOfFortuneMinigame",
+			Identifier: responses.S2C_WHEELOFFORTUNE,
+			MinArgs:    0,
+			MaxArgs:    0,
+		},
+		WheelOfFortuneValidator,
+		WheelOfFortune,
+	)
+}
+
+// min level 9
+
 func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
-
-	// If you have too much gifts return
-	if len(c.Player.Gifts) >= 99 {
-		c.SendExtensionResponse("mwf", "-1", "92")
-		return nil
+	if c.Player.PlayedWheel {
+		c.Player.AddGold(-1)
+	} else {
+		c.Player.PlayedWheel = true
 	}
-
-	// If you already played the wheel
-	if c.Player.PlayedWheel && c.Player.GetGold() == 0 {
-		c.SendExtensionResponse("mwf", "-1", "4")
-	}
-
-	c.Player.PlayedWheel = true
 
 	c.Player.UpdateAchivementWheelOfFortune()
 
 	c.DB.UpdateAchievement(c.Player.ID, c.Player.GetAchivements().String())
 	c.DB.UpdatePlayedWheel(c.Player.ID, c.Player.PlayedWheel)
 
-	reward := rand.Intn(16)
+	random := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	rewards := []int{0, 9, 13, 3, 11, 15, 14, 8, 10, 12}
+	reward := rewards[random.Intn(len(rewards))]
 	rewardStr := strconv.Itoa(reward)
 
 	switch reward {
 	case 0:
 		c.Player.AddGold(10)
 		c.SendExtensionResponse("mwf", "-1", "0", rewardStr, "1902+10")
-	case 1:
-		fallthrough
 	case 9:
 		amount := 300 + rand.Intn((401-300)/5)*5
 		c.Player.AddCash(amount)
 		amountStr := strconv.Itoa(amount)
 		c.SendExtensionResponse("mwf", "-1", "0", rewardStr, "1901+"+amountStr)
-	case 2:
-		fallthrough
 	case 13:
 		c.Player.Gifts.AddGift(1450, 1, -1)
 		c.SendExtensionResponse("mwf", "-1", "0", rewardStr, "1450+1")
@@ -67,8 +75,6 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 		mycafe.AddFurnitures(dec.ID, 1)
 
 		c.SendExtensionResponse("mwf", "-1", "0", rewardStr, idStr+"+1")
-	case 4:
-		fallthrough
 	case 11:
 		val := rand.Intn(int(99 - len(c.Player.Gifts)))
 		fancyCount := utils.If(val > 3, 3, val)
@@ -92,10 +98,6 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 			fanciesStr = append(fanciesStr, fancyStr)
 		}
 		c.SendExtensionResponse("mwf", "-1", "0", rewardStr, strings.Join(fanciesStr, "#"))
-	case 5:
-		fallthrough
-	case 7:
-		fallthrough
 	case 15:
 		val := rand.Intn(int(99 - len(c.Player.Gifts)))
 		dishCount := utils.If(val > 3, 3, val)
@@ -119,8 +121,6 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 			dishesStr = append(dishesStr, dishStr)
 		}
 		c.SendExtensionResponse("mwf", "-1", "0", rewardStr, strings.Join(dishesStr, "#"))
-	case 6:
-		fallthrough
 	case 14:
 		amount := (rand.Intn(150-60+1) + 60) * c.Player.GetLevel()
 		c.Player.AddXP(amount)
@@ -184,4 +184,31 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 	c.DB.UpdateFurnitureInventory(c.Location.Cafe().ID, c.Location.Cafe().FurnitureInventory.String())
 
 	return nil
+}
+
+func WheelOfFortuneValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm CommandConfig) (string, ErrorCodes) {
+	if len(req.Args) < cm.MinArgs {
+		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), MIN_ARGS
+	}
+
+	if cm.MinArgs > 0 {
+		if len(req.Args) > cm.MaxArgs {
+			return fmt.Sprintf("Too much args. NEEDED/GOT: %d/%d", cm.MaxArgs, len(req.Args)), MAX_ARGS
+		}
+	}
+
+	if c.Player.GetLevel() < 9 {
+		return "Player not yet unlocked the feature", NOT_DECLARED
+	}
+
+	if c.Player.PlayedWheel && c.Player.GetGold() <= 0 {
+		return "Player not have enough money", NOT_ENOUGHT_MONEY
+	}
+
+	// If you have too much gifts return
+	if len(c.Player.Gifts) >= 99 {
+		return "Player not have free gift space", ERROR_WHEEL_MINIGAME_NO_GIFT_SPACE_LEFT
+	}
+
+	return "Command ran without any errors.", NO_ERROR
 }

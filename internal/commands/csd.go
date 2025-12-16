@@ -4,39 +4,34 @@ import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
 	"cafego/internal/types/requests"
+	"cafego/internal/types/responses"
 	"cafego/internal/utils"
+	"fmt"
 	"math"
 	"slices"
 	"strconv"
 	"strings"
 )
 
+func init() {
+	RegisterCommand(requests.C2S_CAFE_STOVE_DELIVER,
+		CommandConfig{
+			Name:       "StoveDeliver",
+			Identifier: responses.S2C_CAFE_STOVE_DELIVER,
+			MinArgs:    6,
+			MaxArgs:    6,
+		},
+		StoveDeliverValidator,
+		StoveDeliver,
+	)
+}
+
 func StoveDeliver(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
-	// Dont allow players to modify the packet and sending us CSD while in editor.
-	if !c.Location.IsRunning() {
-		return nil
-	}
-
-	stoveX, err := strconv.Atoi(req.Args[2])
-	if err != nil {
-		return err
-	}
-
-	stoveY, err := strconv.Atoi(req.Args[3])
-	if err != nil {
-		return err
-	}
-
-	counterX, err := strconv.Atoi(req.Args[4])
-	if err != nil {
-		return err
-	}
-
-	counterY, err := strconv.Atoi(req.Args[5])
-	if err != nil {
-		return err
-	}
+	stoveX, _ := strconv.Atoi(req.Args[2])
+	stoveY, _ := strconv.Atoi(req.Args[3])
+	counterX, _ := strconv.Atoi(req.Args[4])
+	counterY, _ := strconv.Atoi(req.Args[5])
 
 	stove := c.Location.Cafe().GetObjectByPosXY(stoveX, stoveY)
 	counter := c.Location.Cafe().GetObjectByPosXY(counterX, counterY)
@@ -94,8 +89,6 @@ func StoveDeliver(req *requests.Request, c *client.Client, gm *managers.GameMana
 
 	c.Player.UpdateAchivementCookingCount()
 
-	c.DB.UpdateAchievement(c.Player.ID, c.Player.GetAchivements().String())
-
 	if c.Player.IsInCoop() {
 		coop, _ := c.DB.GetCoop(c.Player.GetActiveCoopID())
 
@@ -133,8 +126,74 @@ func StoveDeliver(req *requests.Request, c *client.Client, gm *managers.GameMana
 		strconv.Itoa(c.Player.ID),
 	)
 
-	c.DB.UpdateXP(c.Player.ID, c.Player.GetXP())
-	c.DB.UpdateObjects(c.Location.Cafe().ID, c.Location.Cafe().Objects.StringForDB())
+	if c.Player.IsTutorialCompleted {
+		c.DB.UpdateXP(c.Player.ID, c.Player.GetXP())
+		c.DB.UpdateAchievement(c.Player.ID, c.Player.GetAchivements().String())
+		c.DB.UpdateObjects(c.Location.Cafe().ID, c.Location.Cafe().Objects.StringForDB())
+	}
 
 	return nil
+}
+
+func StoveDeliverValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm CommandConfig) (string, ErrorCodes) {
+	if len(req.Args) < cm.MinArgs {
+		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), MIN_ARGS
+	}
+
+	if cm.MinArgs > 0 {
+		if len(req.Args) > cm.MaxArgs {
+			return fmt.Sprintf("Too much args. NEEDED/GOT: %d/%d", cm.MaxArgs, len(req.Args)), MAX_ARGS
+		}
+	}
+
+	// Dont allow players to modify the packet and sending us CSD while in editor.
+	if !c.Location.IsRunning() {
+		return "The location is not running", LOCATION_NOT_RUNNING
+	}
+
+	if c.Location.Cafe().GetPlayerID() != c.Player.ID {
+		return "Not the owner!", NOT_DECLARED
+	}
+
+	posX, err := strconv.Atoi(req.Args[2])
+	if err != nil {
+		return "Cant convert string to int!", CONVERT_ERROR
+	}
+
+	posY, err := strconv.Atoi(req.Args[3])
+	if err != nil {
+		return "Cant convert string to int!", CONVERT_ERROR
+	}
+
+	counterX, err := strconv.Atoi(req.Args[4])
+	if err != nil {
+		return "Cant convert string to int!", CONVERT_ERROR
+	}
+
+	counterY, err := strconv.Atoi(req.Args[5])
+	if err != nil {
+		return "Cant convert string to int!", CONVERT_ERROR
+	}
+
+	stove := c.Location.Cafe().GetObjectByPosXY(posX, posY)
+
+	if stove == nil {
+		return fmt.Sprintf("No stove found at: %d:%d", posX, posY), NOT_DECLARED
+	}
+
+	counter := c.Location.Cafe().GetObjectByPosXY(counterX, counterY)
+	if counter == nil {
+		return fmt.Sprintf("No counter found at: %d:%d", posX, posY), NOT_DECLARED
+	}
+
+	dishID := stove.GetDishID()
+	if dishID == -1 {
+		return "Cant use stove deliver info, because the stove not have any valid dish ID", NOT_DECLARED
+	}
+
+	if stove.GetIsRotten() {
+		return "Cant use stove deliver info, because the dish is rotten", NOT_DECLARED
+	}
+
+	return "Command ran without any errors.", NO_ERROR
 }

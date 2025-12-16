@@ -5,51 +5,42 @@ import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
 	"cafego/internal/types/requests"
+	"cafego/internal/types/responses"
 	"cafego/internal/utils"
 	"fmt"
 )
 
+// min level = 6
+
+func init() {
+	RegisterCommand(requests.C2S_FASTFOOD_NPC,
+		CommandConfig{
+			Name:       "FastFoodUse",
+			Identifier: responses.S2C_FASTFOOD_NPC,
+			MinArgs:    5,
+			MaxArgs:    5,
+		},
+		FastFoodUseValidator,
+		FastFoodUse,
+	)
+}
+
 // ffn
-func FastFoodCustomer(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
+func FastFoodUse(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	items, err := utils.MultiAtoi(req.Args[2:]...)
 	if err != nil {
 		return fmt.Errorf("Cant convert args to integers")
 	}
 
-	customerID, x, y := items[0], items[1], items[2]
+	_, x, y := items[0], items[1], items[2]
 	obj := c.Location.Cafe().GetObjectByPosXY(x, y)
-	// If object not found
-	if obj == nil {
-		c.SendExtensionResponse("ffn", "-1", "999")
-		return nil
-	}
-
-	cs := c.Location.Cafe().GetCustomer(customerID)
-	if cs == nil {
-		return fmt.Errorf("Cant find customer with id: %v", customerID)
-	}
-
-	// Check if object is reachable
-	start := agents.NewCafePoint(cs.GetPos(), c.Location.Cafe())
-	end := agents.NewCafePoint(obj.GetPos(), c.Location.Cafe())
-	_, _, reachable := agents.Path(start, end)
-
-	if !reachable {
-		c.SendExtensionResponse("ffn", "-1", "36")
-		return nil
-	}
+	// cs := c.Location.Cafe().GetCustomer(customerID)
 
 	drink, err := utils.GetItem(obj.GetDishID())
-	if err != nil {
-		return fmt.Errorf("Cant find dish with id: %v", obj.GetDishID())
-	}
 
-	// Decrease dish amount if cant send error
-	if obj.AddDishAmount(-1) {
-		c.SendExtensionResponse("ffn", "-1", "103")
-		return nil
-	}
+	// Decrease dish amount
+	obj.AddDishAmount(-1)
 
 	// Add rewards
 	c.Player.AddXP(drink.XP)
@@ -65,4 +56,59 @@ func FastFoodCustomer(req *requests.Request, c *client.Client, gm *managers.Game
 
 	c.SendExtensionResponse("vck", "-1", "0", req.Args[2], req.Args[3], req.Args[4])
 	return nil
+}
+
+func FastFoodUseValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm CommandConfig) (string, ErrorCodes) {
+	if len(req.Args) < cm.MinArgs {
+		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), MIN_ARGS
+	}
+
+	if cm.MinArgs > 0 {
+		if len(req.Args) > cm.MaxArgs {
+			return fmt.Sprintf("Too much args. NEEDED/GOT: %d/%d", cm.MaxArgs, len(req.Args)), MAX_ARGS
+		}
+	}
+
+	if !c.Location.IsRunning() {
+		return "The location is not running", NOT_DECLARED
+	}
+
+	if c.Location.Cafe().GetPlayerID() != c.Player.ID {
+		return "Not the owner!", NOT_DECLARED
+	}
+
+	items, err := utils.MultiAtoi(req.Args[2:]...)
+	if err != nil {
+		return "Cant convert string to int!", CONVERT_ERROR
+	}
+	customerID, x, y := items[0], items[1], items[2]
+
+	obj := c.Location.Cafe().GetObjectByPosXY(x, y)
+	if obj == nil {
+		return "Invalid position!", ERROR_FASTFOOD_OBJECT_NOT_FOUND
+	}
+
+	cs := c.Location.Cafe().GetCustomer(customerID)
+	if cs == nil {
+		return "Customer not found!", NOT_DECLARED
+	}
+
+	start := agents.NewCafePoint(cs.GetPos(), c.Location.Cafe())
+	end := agents.NewCafePoint(obj.GetPos(), c.Location.Cafe())
+	_, _, reachable := agents.Path(start, end)
+
+	if !reachable {
+		return "Not reachable!", ERROR_FASTFOOD_OUT_OF_REACH
+	}
+
+	_, err = utils.GetItem(obj.GetDishID())
+	if err != nil {
+		return "Cant get fastfood drink info!", NOT_DECLARED
+	}
+
+	if obj.GetDishAmount() <= 0 {
+		return "Fastfood empty!", ERROR_FASTFOOD_EMPTY
+	}
+
+	return "Command ran without any errors.", NO_ERROR
 }

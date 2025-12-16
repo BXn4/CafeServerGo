@@ -4,11 +4,27 @@ import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
 	"cafego/internal/types/requests"
+	"cafego/internal/types/responses"
 	"fmt"
 	"slices"
 )
 
-func GiftAllReadySendPlayers(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
+// min level: 7
+
+func init() {
+	RegisterCommand(requests.C2S_GIFT_SENDABLEGIFTS,
+		CommandConfig{
+			Name:       "SendableGifts",
+			Identifier: responses.S2C_GIFT_SENDABLEGIFTS,
+			MinArgs:    0,
+			MaxArgs:    0,
+		},
+		SendableGiftsValidator,
+		SendableGifts,
+	)
+}
+
+func SendableGifts(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	// Get friends
 	friends := c.Player.Friends
@@ -39,4 +55,22 @@ func GiftAllReadySendPlayers(req *requests.Request, c *client.Client, gm *manage
 		fmt.Sprintf("%v+%v+%v", c.Player.ID, c.Player.GetXP(), c.Player.Avatar.String()),
 	)
 	return nil
+}
+
+func SendableGiftsValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm CommandConfig) (string, ErrorCodes) {
+	if len(req.Args) < cm.MinArgs {
+		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), MIN_ARGS
+	}
+
+	if cm.MinArgs > 0 {
+		if len(req.Args) > cm.MaxArgs {
+			return fmt.Sprintf("Too much args. NEEDED/GOT: %d/%d", cm.MaxArgs, len(req.Args)), MAX_ARGS
+		}
+	}
+
+	if true {
+		return "NOT YET FINISHED!", NOT_DECLARED
+	}
+
+	return "Command ran without any errors.", NO_ERROR
 }

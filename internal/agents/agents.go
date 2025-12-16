@@ -25,49 +25,30 @@ func StartAgentCycles(l interfaces.CafeLocation) {
 	l.Cafe().AgentCycleBinded = true
 
 	go func() {
-		for {
+		ticker := time.NewTicker(1 * time.Second)
+		defer ticker.Stop()
+
+		nextSpawn := time.Now().UTC().Add(GetSpawnInterval(l))
+
+		for range ticker.C {
 
 			if !l.Cafe().AgentCycleBinded {
-				log.Debugf("Stopping agent cycle, because its not binded")
-				break
+				println("Stopping agent cycle: not binded")
+				return
 			}
 
 			if !*l.GetIsRunning() {
-				time.Sleep(500 * time.Millisecond)
+				println("Agent cycle paused")
 				continue
 			}
 
-			maxSpawn := 30.0
-			minSpawn := 2.0
-			rating := float64(l.Cafe().GetRating())
-			expansion := float64(l.Cafe().ExpansionID)
-			ratingFactor := math.Min(rating/1000.0, 10.0)
-			expansionFactor := math.Min(expansion/8.0, 1.0)
-			progress := ratingFactor*0.6 + expansionFactor*0.4
-			spawnBase := maxSpawn - progress*(maxSpawn-minSpawn)
-			variation := 0.8 + rand.Float64()*0.4
-			spawnInterval := time.Duration((spawnBase * variation) * float64(time.Second))
+			if time.Now().UTC().After(nextSpawn) {
+				nextSpawn = time.Now().UTC().Add(GetSpawnInterval(l))
 
-			log.Debugf("NPC spawn interval: %s", spawnInterval)
-
-			elapsed := time.Duration(0)
-			step := 100 * time.Millisecond
-
-			for elapsed < spawnInterval {
-				if !*l.GetIsRunning() {
-					log.Debugf("Paused agent cycle for Café: %d", l.Cafe().ID)
-					break
-				}
-
-				time.Sleep(step)
-				elapsed += step
+				go Spawn(l, NewCustomer(l))
 			}
 
-			if !*l.GetIsRunning() {
-				continue
-			}
-
-			go Spawn(l, NewCustomer(l))
+			// println("TICK!")
 		}
 	}()
 }
@@ -114,4 +95,19 @@ func GetRandomCounter(c *cafe.Cafe) (*object.Object, int) {
 	}
 
 	return nil, -1
+}
+
+func GetSpawnInterval(l interfaces.CafeLocation) time.Duration {
+	maxSpawn := 30.0
+	minSpawn := 2.0
+	rating := float64(l.Cafe().GetRating())
+	expansion := float64(l.Cafe().ExpansionID)
+	ratingFactor := math.Min(rating/1000.0, 10.0)
+	expansionFactor := math.Min(expansion/8.0, 1.0)
+	progress := ratingFactor*0.6 + expansionFactor*0.4
+	spawnBase := maxSpawn - progress*(maxSpawn-minSpawn)
+	variation := 0.8 + rand.Float64()*0.4
+	nextSpawn := time.Duration(spawnBase*variation) * time.Second
+	log.Debugf("NPC spawn interval: %s", nextSpawn.String())
+	return nextSpawn
 }

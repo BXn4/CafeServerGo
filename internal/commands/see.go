@@ -4,11 +4,26 @@ import (
 	"cafego/internal/client"
 	"cafego/internal/managers"
 	"cafego/internal/models/event"
+	"cafego/internal/types/requests"
+	"cafego/internal/types/responses"
 	"fmt"
 )
 
+func init() {
+	RegisterCommand(requests.C2S_SPECIAL_EVENT,
+		CommandConfig{
+			Name:       "SpecialEvent",
+			Identifier: responses.S2C_SPECIAL_EVENT,
+			MinArgs:    0,
+			MaxArgs:    0,
+		},
+		nil,
+		SendSpecialEvent,
+	)
+}
+
 // see - S2C_SPECIAL_EVENT
-func SendSpecialEvent(c *client.Client, gm *managers.GameManager) error {
+func SendSpecialEvent(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 	if event.GetEvent() == 0 || c.Player == nil {
 		return nil
 	}

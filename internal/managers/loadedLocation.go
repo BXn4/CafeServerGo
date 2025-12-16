@@ -180,8 +180,7 @@ func (lc *LoadedLocation) Join(playerID int, channel chan<- responses.Response) 
 			}
 		} else if lc.cafe.AgentCycleBinded {
 			// Respawn waiters
-			for i, w := range lc.cafe.Waiters {
-
+			for _, w := range lc.cafe.Waiters {
 				waiterActionString := w.ActionString()
 				if w.GetCurrentCounter() != nil {
 					// NOTE: Always spawn the waiter to a counter. In the main loop, the waiter will be updated.
@@ -191,8 +190,8 @@ func (lc *LoadedLocation) Join(playerID int, channel chan<- responses.Response) 
 					// Fallback.
 					waiterActionString = w.ActionStringToSpawnBack(waiter.INSERT, lc.cafe.GetPlayerStart())
 				}
-				lc.send(playerID, "nav", "-1", strconv.Itoa(i), w.SpawnString())
-				lc.send(playerID, "nac", "-1", strconv.Itoa(i), waiterActionString)
+				lc.send(playerID, "nav", "-1", "0", w.SpawnString())
+				lc.send(playerID, "nac", "-1", "0", waiterActionString)
 			}
 		}
 
