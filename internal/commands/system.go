@@ -5,6 +5,9 @@ import (
 	"cafego/internal/managers"
 	"cafego/internal/types/requests"
 	"cafego/internal/types/responses"
+	"fmt"
+
+	"github.com/charmbracelet/log"
 )
 
 func init() {
@@ -85,6 +88,17 @@ func RoundTripResponse(req *requests.Request, c *client.Client, gm *managers.Gam
 }
 
 func DisconnectResponse(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
+	log.Infof("Logout request from client %d, username: %v", c.ClientID, c.Player.Username)
+
+	// Send logout response first to ensure client gets the message
 	c.SendSystemResponse(responses.LOGOUT)
-	return nil
+	c.Writer.Flush() // Ensure the message is sent immediately
+
+	// Immediately disconnect and cleanup player state
+	log.Infof("Calling DisconnectClient for client %d", c.ClientID)
+	gm.DisconnectClient(c.ClientID)
+	log.Infof("DisconnectClient completed for client %d", c.ClientID)
+
+	// Return an error to trigger return from HandleClient, closing connection
+	return fmt.Errorf("client logged out")
 }

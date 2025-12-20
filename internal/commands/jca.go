@@ -29,7 +29,10 @@ func JoinCafe(req *requests.Request, c *client.Client, gm *managers.GameManager)
 	id, _ := strconv.Atoi(req.Args[3])
 
 	// Adds cafe to manager (loads it if not loaded)
-	location := gm.AddLocation(id)
+	location, err := gm.AddLocation(id)
+	if err != nil {
+		return fmt.Errorf("Failed to load location %d: %v", id, err)
+	}
 
 	// Leave cafe if already in one
 	if c.Location != nil {

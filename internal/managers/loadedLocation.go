@@ -38,10 +38,11 @@ func NewLoadedLocation(cafe *cafe.Cafe, gm *GameManager) *LoadedLocation {
 
 }
 
-// TODO: Change this its shit design and throws nil pointer exception
-// when more clients want to use it
-// INSTEAD we should create a threadsafe interface for cafe
 func (lc *LoadedLocation) Cafe() *cafe.Cafe {
+	if lc.cafe == nil {
+		log.Errorf("Attempted to access nil cafe in location")
+		return nil
+	}
 	return lc.cafe
 }
 
@@ -238,8 +239,7 @@ func (lc *LoadedLocation) Leave(id int) {
 
 	// If there are no players at the location
 	// and the location is not marketplace
-	// and the owner is not online
-	if len(lc.occupants) == 0 && lc.cafe.GetID() > 0 && !lc.gm.UnsafeIsOnline(lc.cafe.GetID()) {
+	if lc.cafe != nil && len(lc.occupants) == 0 && lc.cafe.GetID() > 0 && !lc.gm.UnsafeIsOnline(lc.cafe.GetID()) {
 		log.Debugf("Unloading cafe %v...", lc.cafe.GetID())
 		lc.gm.RemoveLocation(lc.cafe.ID)
 	}

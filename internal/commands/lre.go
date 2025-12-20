@@ -45,7 +45,10 @@ func Register(req *requests.Request, c *client.Client, gm *managers.GameManager)
 		return err
 	}
 	c.Player = player
-	location := gm.AddLocation(c.Player.ID)
+	location, err := gm.AddLocation(c.Player.ID)
+	if err != nil {
+		return fmt.Errorf("Failed to load location for player %d: %v", c.Player.ID, err)
+	}
 	c.Location = location
 
 	c.SendExtensionResponse("lre", "-1", "0")

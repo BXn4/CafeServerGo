@@ -46,14 +46,15 @@ func ErrorHandler(req *requests.Request, c *client.Client, cm *CommandConfig, re
 }
 
 func HandleClient(c *client.Client, gm *managers.GameManager) {
-	defer c.Disconnect()
 	for req := range c.RequestQueue {
 		if req == nil {
 			return
 		}
 
 		if req.NeedsLogin() && c.Player == nil &&
-			req.Kind != requests.C2S_LOGIN && req.Kind != requests.C2S_SPECIAL_EVENT {
+			req.Kind != requests.C2S_LOGIN &&
+			req.Kind != requests.C2S_SPECIAL_EVENT &&
+			req.Kind <= requests.VERSION_CHECK {
 			// While the player is not logged in, disconnects the client if the request is not for login.
 			// The client sends SEE command after login. Maybe we can patch this in the game client to only send it, when the login was successful.
 			return

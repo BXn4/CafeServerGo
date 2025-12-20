@@ -27,7 +27,10 @@ func init() {
 func JoinMarketplace(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
 
 	// Gets cafe location
-	location := gm.AddLocation(-1)
+	location, err := gm.AddLocation(-1)
+	if err != nil {
+		return fmt.Errorf("Failed to load marketplace: %v", err)
+	}
 
 	// Send cafe joined
 	c.SendExtensionResponse("mjm", "-1", "0")

@@ -9,7 +9,6 @@ import (
 
 // ifr - SendFridgeInventory
 func SendFridgeInventory(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
-
 	fridge := c.Location.Cafe().GetFridgeInventory()
 	fridgeCap := c.Location.Cafe().GetFridgeMaxCapacity()
 

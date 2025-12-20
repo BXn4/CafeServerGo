@@ -33,13 +33,17 @@ func EditorMode(req *requests.Request, c *client.Client, gm *managers.GameManage
 	case 0:
 		c.Location.SetRunning(true)
 		c.Location.ClearReservedObjects()
-		c.Player.Position = c.Location.Cafe().GetPlayerStart()
+		cafe := c.Location.Cafe()
+		if cafe == nil {
+			return fmt.Errorf("Location cafe is nil for client %d", c.ClientID)
+		}
+		c.Player.Position = cafe.GetPlayerStart()
 
-		c.Location.Cafe().Customers = make(map[int]*customer.Customer)
+		cafe.Customers = make(map[int]*customer.Customer)
 
 		go agents.FillEmptyCafe(c.Location)
 
-		for i, w := range c.Location.Cafe().Waiters {
+		for i, w := range cafe.Waiters {
 			w.SetIsWorking(false)
 			// Spawn waiters
 			go func() {

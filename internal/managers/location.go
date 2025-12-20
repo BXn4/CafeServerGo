@@ -57,7 +57,7 @@ func (gm *GameManager) RemoveLocation(id int) {
 	}
 }
 
-func (gm *GameManager) AddLocation(id int) *LoadedLocation {
+func (gm *GameManager) AddLocation(id int) (*LoadedLocation, error) {
 	gm.locationMutex.Lock()
 	defer gm.locationMutex.Unlock()
 
@@ -65,7 +65,7 @@ func (gm *GameManager) AddLocation(id int) *LoadedLocation {
 	item, err := gm.getLocationByID(id)
 	if err == nil {
 		// If there is a location already loaded return it
-		return item
+		return item, nil
 	}
 
 	// If there is no loaded cafe load one
@@ -73,7 +73,7 @@ func (gm *GameManager) AddLocation(id int) *LoadedLocation {
 	cafeObj, err = gm.db.GetCafeByPlayerID(id)
 	if err != nil {
 		log.Errorf("Player with id %v has no cafe in database: %v", id, err)
-		return nil
+		return nil, fmt.Errorf("Player %d has no cafe: %v", id, err)
 	}
 
 	if event.GetEvent() == 3 {
@@ -90,7 +90,7 @@ func (gm *GameManager) AddLocation(id int) *LoadedLocation {
 
 	println("LOADED CAFE: ", id)
 
-	return loc
+	return loc, nil
 }
 
 // |========================================|

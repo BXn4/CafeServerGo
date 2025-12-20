@@ -36,7 +36,10 @@ func KickPlayer(req *requests.Request, c *client.Client, gm *managers.GameManage
 	kickedClient.Location.Leave(id)
 
 	// Get owned location of the kicked out user
-	location := gm.AddLocation(id)
+	location, err := gm.AddLocation(id)
+	if err != nil {
+		return fmt.Errorf("Failed to load location for kicked user %d: %v", id, err)
+	}
 
 	// Join kicked out user to its owned cafe
 	location.Join(kickedClient.Player.ID, kickedClient.ResponseQueue)

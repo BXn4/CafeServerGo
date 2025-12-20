@@ -8,6 +8,9 @@ import (
 	"cafego/internal/types/responses"
 	"fmt"
 	"strconv"
+	"time"
+
+	"github.com/charmbracelet/log"
 )
 
 func init() {
@@ -33,12 +36,25 @@ func Login(req *requests.Request, c *client.Client, gm *managers.GameManager) er
 
 	// Check if already logged in disconnect the client
 	if err == nil {
-		if searched, _ := gm.GetClientByName(name); searched != nil {
+		log.Infof("Checking if user %s is already logged in", name)
+		searched, searchErr := gm.GetClientByName(name)
+		if searched != nil && searchErr == nil {
+			log.Infof("User %s found as already logged in on client %d, kicking existing session", name, searched.ClientID)
 			statusCode = 15
-			// Check if the same ip because than its most likely a bug
-			/* if c.GetIP() == searched.GetIP() {
-			err = searched.Disconnect() // Kick client out
-			} */
+
+			// Check if same IP and kick the existing user
+			if c.GetIP() == searched.GetIP() {
+				kickErr := searched.Disconnect()
+				if kickErr != nil {
+					log.Errorf("Failed to kick existing session for user %s: %v", name, kickErr)
+				} else {
+					log.Infof("Successfully kicked existing session for user %s", name)
+				}
+				// Small delay to ensure cleanup completes
+				time.Sleep(100 * time.Millisecond)
+			}
+		} else {
+			log.Infof("User %s is not currently logged in (searchErr: %v)", name, searchErr)
 		}
 	}
 
