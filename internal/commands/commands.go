@@ -14,15 +14,24 @@ import (
 type Command struct {
 	Config    CommandConfig
 	Validator func(req *requests.Request, c *client.Client, gm *managers.GameManager, cm CommandConfig) (string, ErrorCodes)
-	Handler   func(req *requests.Request, c *client.Client, gm *managers.GameManager) error
+	Handler   func(req *requests.Request, c *client.Client, gm *managers.GameManager, cm CommandConfig) error
+	DBSaver   func(c *client.Client) error
 }
 
 type CommandConfig struct {
-	Identifier string
-	Name       string
-	MinArgs    int
-	MaxArgs    int
-	IsBool     bool
+	Name        string // Command name to us to easier to known which command is that (CafeWalk)
+	Identifier  string // 3 letter identifier to the command (CWA)
+	Description string // Whats the command will do.
+	Args        string // What args needed to be send back.
+
+	MinArgs int  // if the args less than X (needed) len, then dont allow command to run. Probaly will missing some values.
+	MaxArgs int  // if the args more than X (needed) len, then dont allow command to run.
+	IsBool  bool // 1 or 0
+
+	PermissionLevel int // For the Staff / Admin / Moderator commands
+	FeatureLevel    int // min level to use the command/feature. if its not declared, then its allow it.
+
+	Category string // Categories. Like: Editor, Cafe, Player etc.
 }
 
 var Commands = map[requests.RequestKind]Command{}
@@ -31,12 +40,14 @@ func RegisterCommand(
 	kind requests.RequestKind,
 	commandConfig CommandConfig,
 	commandValidator func(*requests.Request, *client.Client, *managers.GameManager, CommandConfig) (string, ErrorCodes),
-	commandHandler func(*requests.Request, *client.Client, *managers.GameManager) error,
+	commandHandler func(*requests.Request, *client.Client, *managers.GameManager, CommandConfig) error,
+	commandDBSaver func(*client.Client) error,
 ) {
 	Commands[kind] = Command{
 		Config:    commandConfig,
 		Validator: commandValidator,
 		Handler:   commandHandler,
+		DBSaver:   commandDBSaver,
 	}
 }
 
@@ -63,7 +74,7 @@ func HandleClient(c *client.Client, gm *managers.GameManager) {
 		// Handle requests
 		err := HandleRequest(req, c, gm)
 		if err != nil {
-			log.Warnf(err.Error())
+			log.Errorf("Error during request handling: %v", err.Error())
 			continue
 		}
 	}
@@ -81,6 +92,8 @@ func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameMan
 		return ErrorHandler(req, c, &cm, "The command is not implemented", NOT_IMPLEMENTED)
 	}
 
+	// log.Debugf("Handling command: %s", command.Config.Name)
+
 	// command error = int
 	// all error codes what the cafe having in int
 	if command.Validator != nil {
@@ -92,5 +105,17 @@ func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameMan
 		}
 	}
 
-	return command.Handler(req, c, gm)
+	err := command.Handler(req, c, gm, command.Config)
+	if err != nil {
+		return fmt.Errorf("Error during command handling: %w", err)
+	}
+
+	if command.DBSaver != nil {
+		err = command.DBSaver(c)
+		if err != nil {
+			return fmt.Errorf("Error during command DB saving: %w", err)
+		}
+	}
+
+	return nil
 }

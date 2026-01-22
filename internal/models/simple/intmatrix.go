@@ -27,12 +27,20 @@ func (m IntMatrix) Size() int {
 
 // Scan converts a database value (string) to IntMatrix
 func (m *IntMatrix) Scan(value interface{}) error {
-	bytes, ok := value.([]byte)
-	if !ok {
+	var str string
+
+	switch v := value.(type) {
+	case []byte:
+		str = string(v)
+	case string:
+		str = v
+	case nil:
+		*m = make(IntMatrix, 0)
+		return nil
+	default:
 		return fmt.Errorf("failed to convert database value to bytes")
 	}
 
-	str := string(bytes)
 	if str == "" {
 		*m = make([][]int, 0)
 		return nil

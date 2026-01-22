@@ -10,18 +10,20 @@ type ObjectList []*Object
 
 // Scan implements the sql.Scanner interface
 func (ol *ObjectList) Scan(value interface{}) error {
+	var str string
 
-	bytes, ok := value.([]byte)
-	if !ok {
-		return fmt.Errorf("\nFailed to convert database value to bytes: %v", value)
-	}
-
-	str := string(bytes)
-	if str == "" {
+	switch v := value.(type) {
+	case []byte:
+		str = string(v)
+	case string:
+		str = v
+	case nil:
 		println("Theres no objects found :(")
 		objectList := ObjectList{}
 		*ol = objectList
 		return nil
+	default:
+		return fmt.Errorf("failed to convert database value to bytes")
 	}
 
 	objectList := ParseObjectList(str)

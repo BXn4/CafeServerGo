@@ -6,6 +6,9 @@ import (
 )
 
 func (p *Player) GetXP() int {
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+
 	return p.XP
 }
 
@@ -21,13 +24,16 @@ func (p *Player) AddXP(amount int) {
 			p.AddGold(utils.GetLevelGoldReward(nextLevel))
 		}
 
-		p.SetMaxInstantCookings(utils.GetLevelInstantCookingsLimit(nextLevel))
+		p.SetMaxInstants(utils.GetLevelInstantCookingsLimit(nextLevel))
 	}
 
 	p.XP += amount
 }
 
 func (p *Player) SetXP(amount int) {
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+
 	p.XP = amount
 }
 

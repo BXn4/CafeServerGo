@@ -59,7 +59,8 @@ func (db *CafeDB) GetCoop(id int) (coops.Coop, error) {
 		if err != nil {
 			playersList = append(playersList, "")
 		} else {
-			playersList = append(playersList, strconv.Itoa(player.ID)+"+"+strconv.Itoa(player.XP)+"+"+player.Avatar.String())
+			avatar := player.GetAvatar()
+			playersList = append(playersList, strconv.Itoa(player.GetID())+"+"+strconv.Itoa(player.GetXP())+"+"+avatar.String())
 		}
 	}
 

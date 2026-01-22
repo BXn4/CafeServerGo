@@ -29,12 +29,12 @@ func NewMarketplace(id int) (*Cafe, error) {
 
 	return &Cafe{
 		ID:         id,
-		PlayerID:   id,
+		OwnerID:    id,
 		OwnerName:  "Marketplace",
-		Background: MarketplaceBackground,
+		background: MarketplaceBackground,
 		Rating:     0,
 		Luxury:     -1,
-		Size:       12,
+		size:       12,
 		Objects:    *objs,
 		Tiles:      *f,
 		roomType:   MarketRoom,

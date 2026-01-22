@@ -3,8 +3,6 @@ package managers
 import (
 	"cafego/internal/database"
 	"cafego/internal/models/cafe"
-	"cafego/internal/models/customer"
-	"cafego/internal/models/event"
 	"fmt"
 
 	"github.com/charmbracelet/log"
@@ -33,30 +31,23 @@ func (gm *GameManager) RemoveLocation(id int) {
 			owner := lc.Cafe().GetOwnerName()
 			player, err := gm.db.GetPlayerByName(owner)
 			if err == nil {
-				if player.GetXP() > 0 {
+				if player.GetIsTutorialCompleted() {
 					gm.db.SaveCafe(lc.Cafe())
 					log.Debugf("Saved %v cafe to db", lc.cafe.GetID())
 				}
 			}
+		}
 
-			if lc.Cafe().AgentCycleBinded {
-				lc.Cafe().AgentCycleBinded = false
-				for _, c := range lc.Cafe().GetCustomers() {
-					delete(lc.Cafe().Customers, c.GetID())
-				}
-
-				for _, w := range lc.Cafe().Waiters {
-					w.StopWorking()
-				}
-
-				lc.Cafe().Waiters = lc.Cafe().Waiters[:0]
-			}
+		if lc.running {
+			lc.Cafe().ClearAllCustomers()
+			lc.Cafe().CleaAllWaiters()
 			delete(gm.locations, i)
 			return
 		}
 	}
 }
 
+// Return the cafe if its already exists, or create a new cafe, set the values.
 func (gm *GameManager) AddLocation(id int) (*LoadedLocation, error) {
 	gm.locationMutex.Lock()
 	defer gm.locationMutex.Unlock()
@@ -76,17 +67,10 @@ func (gm *GameManager) AddLocation(id int) (*LoadedLocation, error) {
 		return nil, fmt.Errorf("Player %d has no cafe: %v", id, err)
 	}
 
-	if event.GetEvent() == 3 {
-		cafeObj.Background = cafe.WinterCafeBackground
-	} else {
-		cafeObj.Background = cafe.DefaultCafeBackground
-	}
+	cafeObj.Initalize()
 
-	//
 	loc := NewLoadedLocation(cafeObj, gm)
 	gm.locations[id] = loc
-
-	loc.Cafe().Customers = make(map[int]*customer.Customer)
 
 	println("LOADED CAFE: ", id)
 

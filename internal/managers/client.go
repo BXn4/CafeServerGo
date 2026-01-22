@@ -53,12 +53,12 @@ func (gm *GameManager) DisconnectClient(id int) {
 	delete(gm.clients, id)
 
 	if c.Player != nil {
-		if c.Player.IsTutorialCompleted {
+		if c.Player.GetIsTutorialCompleted() {
 			gm.db.SavePlayer(c.Player)
 		}
 
 		if c.Location != nil {
-			c.Location.Leave(c.Player.ID)
+			c.Location.Leave(c.Player.GetID())
 		}
 		c.Player = nil
 	}
@@ -75,7 +75,7 @@ func (gm *GameManager) GetClient(id int) (interfaces.ManagedItem, error) {
 		if c.Player == nil {
 			continue
 		}
-		if c.Player.ID == id {
+		if c.Player.GetID() == id {
 			return c, nil
 		}
 	}
@@ -100,7 +100,7 @@ func (gm *GameManager) IsOnline(id int) bool {
 		if c.Player == nil {
 			continue
 		}
-		if c.Player.ID == id {
+		if c.Player.GetID() == id {
 			return true
 		}
 	}
@@ -115,7 +115,7 @@ func (gm *GameManager) isOnline(id int) bool {
 		if c.Player == nil {
 			continue
 		}
-		if c.Player.ID == id {
+		if c.Player.GetID() == id {
 			return true
 		}
 	}
@@ -131,7 +131,7 @@ func (gm *GameManager) UnsafeIsOnline(id int) bool {
 		if c.Player == nil {
 			continue
 		}
-		if c.Player.ID == id {
+		if c.Player.GetID() == id {
 			return true
 		}
 	}
@@ -146,7 +146,7 @@ func (gm *GameManager) GetClientByName(name string) (*client.Client, error) {
 		if c.Player == nil {
 			continue
 		}
-		if c.Player.Username == name {
+		if c.Player.GetUsername() == name {
 			return c, nil
 		}
 	}

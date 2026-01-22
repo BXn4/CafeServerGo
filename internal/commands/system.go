@@ -20,6 +20,7 @@ func init() {
 		},
 		nil,
 		PolicyFileResponse,
+		nil,
 	)
 
 	RegisterCommand(requests.VERSION_CHECK,
@@ -31,6 +32,7 @@ func init() {
 		},
 		nil,
 		VersionCheckResponse,
+		nil,
 	)
 
 	RegisterCommand(requests.AUTO_JOIN,
@@ -42,6 +44,7 @@ func init() {
 		},
 		nil,
 		AutoJoinResponse,
+		nil,
 	)
 
 	RegisterCommand(requests.ROUND_TRIP,
@@ -53,6 +56,7 @@ func init() {
 		},
 		nil,
 		RoundTripResponse,
+		nil,
 	)
 
 	RegisterCommand(requests.DISCONNECT,
@@ -64,31 +68,32 @@ func init() {
 		},
 		nil,
 		DisconnectResponse,
+		nil,
 	)
 }
 
-func PolicyFileResponse(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
+func PolicyFileResponse(req *requests.Request, c *client.Client, gm *managers.GameManager, cm CommandConfig) error {
 	c.SendSystemResponse(responses.POLICY_FILE)
 	return nil
 }
 
-func VersionCheckResponse(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
+func VersionCheckResponse(req *requests.Request, c *client.Client, gm *managers.GameManager, cm CommandConfig) error {
 	c.SendSystemResponse(responses.VERSION_CHECK)
 	return nil
 }
 
-func AutoJoinResponse(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
+func AutoJoinResponse(req *requests.Request, c *client.Client, gm *managers.GameManager, cm CommandConfig) error {
 	c.SendSystemResponse(responses.AUTO_JOIN)
 	return nil
 }
 
-func RoundTripResponse(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
+func RoundTripResponse(req *requests.Request, c *client.Client, gm *managers.GameManager, cm CommandConfig) error {
 	c.SendSystemResponse(responses.ROUND_TRIP)
 	return nil
 }
 
-func DisconnectResponse(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
-	log.Infof("Logout request from client %d, username: %v", c.ClientID, c.Player.Username)
+func DisconnectResponse(req *requests.Request, c *client.Client, gm *managers.GameManager, cm CommandConfig) error {
+	log.Infof("Logout request from client %d, username: %v", c.ClientID, c.Player.GetUsername())
 
 	// Send logout response first to ensure client gets the message
 	c.SendSystemResponse(responses.LOGOUT)

@@ -6,14 +6,12 @@ import (
 	"fmt"
 
 	"gorm.io/gorm"
-
-	_ "github.com/go-sql-driver/mysql"
 )
 
 func (db *CafeDB) GetCafeByPlayerID(playerID int) (*cafe.Cafe, error) {
 
 	var c cafe.Cafe
-	if err := db.conn.Where("player_id = ?", playerID).First(&c).Error; err != nil {
+	if err := db.conn.Where("owner_id = ?", playerID).First(&c).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("Cafe for player ID %d not found", playerID)
 		}
@@ -26,18 +24,17 @@ func (db *CafeDB) GetCafeByPlayerID(playerID int) (*cafe.Cafe, error) {
 }
 
 func (db *CafeDB) SaveCafe(c *cafe.Cafe) error {
-	if c.ID > 0 {
+	if c.GetID() > 0 {
 		err := db.conn.Model(&cafe.Cafe{}).
-			Where("id = ?", c.ID).
+			Where("id = ?", c.GetID()).
 			Updates(map[string]any{
 				"rating":        c.GetRating(),
-				"luxury":        c.GetLuxury(),
 				"expansion_id":  c.GetExpansionID(),
-				"tiles":         c.Tiles.String(),
-				"objects":       c.Objects.StringForDB(),
-				"fridge_inv":    c.FridgeInventory.String(),
-				"furniture_inv": c.FurnitureInventory.String(),
-				"waiters":       c.Waiters,
+				"tiles":         c.GetTiles().String(),
+				"objects":       c.GetObjects().StringForDB(),
+				"fridge_inv":    c.GetFridgeInventory().String(),
+				"furniture_inv": c.GetFurnitureInventory().String(),
+				"waiters":       c.GetWaiters(),
 			}).Error
 
 		if err != nil {

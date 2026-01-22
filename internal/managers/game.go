@@ -53,8 +53,8 @@ func (gm *GameManager) SaveAll() error {
 
 	for _, client := range gm.clients {
 		if client.Player != nil {
-			if !client.Player.IsTutorialCompleted {
-				nonCompletedTutorialPlayers = append(nonCompletedTutorialPlayers, client.Player.Username)
+			if !client.Player.GetIsTutorialCompleted() {
+				nonCompletedTutorialPlayers = append(nonCompletedTutorialPlayers, client.Player.GetUsername())
 				continue
 			}
 			err := gm.db.SavePlayer(client.Player)
@@ -67,7 +67,7 @@ func (gm *GameManager) SaveAll() error {
 	for _, location := range gm.locations {
 		if location != nil {
 			if location.cafe.GetRoomType() == cafe.CafeRoom {
-				if !slices.Contains(nonCompletedTutorialPlayers, location.Cafe().OwnerName) {
+				if !slices.Contains(nonCompletedTutorialPlayers, location.Cafe().GetOwnerName()) {
 					err := gm.db.SaveCafe(location.cafe)
 					if err != nil {
 						return err

@@ -12,14 +12,21 @@ type IntMap map[int]int
 
 // Scan converts a DB value into IntMap
 func (m *IntMap) Scan(value interface{}) error {
-	bytes, ok := value.([]byte)
-	if !ok {
-		return fmt.Errorf("failed to convert database value to bytes")
+	var str string
+
+	switch v := value.(type) {
+	case []byte:
+		str = string(v)
+	case string:
+		str = v
+	case nil:
+		*m = make(IntMap)
+		return nil
+	default:
+		return fmt.Errorf("failed to convert database value to bytes: unsupported type %T", value)
 	}
 
-	str := string(bytes)
 	*m = *ParseIntMap(str)
-
 	return nil
 }
 

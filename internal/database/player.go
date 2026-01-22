@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
 	"gorm.io/gorm"
 )
 
@@ -22,7 +21,9 @@ func (db *CafeDB) GetPlayerByName(name string) (*player.Player, error) {
 		return nil, fmt.Errorf("SQL ERR: %v", err)
 	}
 
-	p.Avatar.Name = p.Username
+	avatar := p.GetAvatar()
+
+	avatar.Name = p.GetUsername()
 
 	return &p, nil
 
@@ -38,53 +39,57 @@ func (db *CafeDB) GetPlayer(id int) (*player.Player, error) {
 		}
 		return nil, fmt.Errorf("SQL ERR: %v", err)
 	}
-	p.Avatar.Name = p.Username
+	avatar := p.GetAvatar()
+
+	avatar.Name = p.GetUsername()
 	return &p, nil
 }
 
 func (db *CafeDB) SavePlayer(p *player.Player) error {
 
-	p.LastLogin = time.Now().UTC()
+	p.SetLastLogin(time.Now().UTC())
 
 	// Build friends
 	friendsStr := []string{}
-	for _, f := range p.Friends {
+	for _, f := range p.GetFriends() {
 		friendsStr = append(friendsStr, strconv.Itoa(f))
 	}
 
 	friendsWithGiftsStr := []string{}
-	for _, f := range p.FriendsWithGifts {
+	for _, f := range p.GetFriendsWithGifts() {
 		friendsWithGiftsStr = append(friendsWithGiftsStr, strconv.Itoa(f))
 	}
+
+	avatar := p.GetAvatar()
+	gifts := p.GetGifts()
 
 	updateData := map[string]any{
 		"cash":                  int(p.GetCash()),
 		"gold":                  p.GetGold(),
 		"xp":                    p.GetXP(),
-		"instant_cookings":      p.InstantCookings,
-		"open_jobs":             p.OpenJobs,
-		"refilled_jobs":         p.RefilledJobs,
-		"coop_id":               p.CoopID,
-		"played_wheel":          p.PlayedWheel,
-		"allow_friend_requests": p.AllowFriendRequests,
+		"instant_cookings_used": p.GetInstantCookingsUsed(),
+		"open_jobs":             p.GetOpenJobs(),
+		"refilled_jobs":         p.GetRefilledJobs(),
+		"coop_id":               p.GetCoopID(),
+		"played_wheel":          p.GetPlayedWheel(),
+		"allow_friend_requests": p.GetAllowFriendRequests(),
 		"friends":               strings.Join(friendsStr, "#"),
 		"friends_with_gifts":    strings.Join(friendsWithGiftsStr, "#"),
-		"sendable_gifts":        p.SendableGifts,
-		"allow_emails":          p.AllowEmails,
-		"email_verified":        p.EmailVerified,
-		"username":              p.Username,
-		"is_banned":             p.IsBanned,
-		"avatar":                p.Avatar.Apperance(),
-		"avatar_changed":        p.AvatarChanged,
-		"mastery":               p.Mastery.String(),
-		"achievement":           p.GetAchivements().String(),
-		"last_login":            p.LastLogin,
-		"daily_login":           p.DailyLogin,
-		"gifts":                 p.Gifts.String(),
-		"is_registered":         p.IsRegistered,
+		"sendable_gifts":        p.GetSendableGifts(),
+		"allow_emails":          p.GetAllowEmails(),
+		"email_verified":        p.GetEmailVerified(),
+		"username":              p.GetUsername(),
+		"is_banned":             p.GetIsBanned(),
+		"avatar":                avatar.Apperance(),
+		"avatar_changed":        p.GetAvatarChanged(),
+		"mastery":               p.GetMastery(),
+		"achievements":          p.GetAchivements().String(),
+		"last_login":            p.GetLastLogin(),
+		"daily_login":           p.GetDailyLogin(),
+		"gifts":                 gifts,
 	}
 
-	err := db.conn.Model(&player.Player{}).Where("id = ?", p.ID).Updates(updateData).Error
+	err := db.conn.Model(&player.Player{}).Where("id = ?", p.GetID()).Updates(updateData).Error
 	if err != nil {
 		return fmt.Errorf("Cant save player: %v", err)
 	}
@@ -99,7 +104,7 @@ func (db *CafeDB) DeleteFriend(playerID, friendID int) error {
 	}
 
 	index := -1
-	for i, f := range p.Friends {
+	for i, f := range p.GetFriends() {
 		if f == friendID {
 			index = i
 			break
@@ -109,7 +114,7 @@ func (db *CafeDB) DeleteFriend(playerID, friendID int) error {
 		return nil // Friend not found, no action needed
 	}
 
-	p.Friends = append(p.Friends[:index], p.Friends[index+1:]...)
+	p.SetFriends(append(p.GetFriends()[:index], p.GetFriends()[index+1:]...))
 
 	err = db.conn.Save(&p).Error
 	if err != nil {
@@ -189,6 +194,7 @@ func (db *CafeDB) UpdatePassord(playerID int, password string) error {
 }
 
 func (db *CafeDB) UpdateXP(playerID int, xp int) error {
+	println(xp)
 	err := db.conn.Model(&player.Player{}).
 		Where("id = ?", playerID).
 		Update("xp", xp).Error
@@ -331,7 +337,7 @@ func (db *CafeDB) UpdateMastery(playerID int, mastery string) error {
 func (db *CafeDB) UpdateAchievement(playerID int, achievement string) error {
 	err := db.conn.Model(&player.Player{}).
 		Where("id = ?", playerID).
-		Update("achievement", achievement).Error
+		Update("achievements", achievement).Error
 	if err != nil {
 		return fmt.Errorf("Cant update player: %v", err)
 	}

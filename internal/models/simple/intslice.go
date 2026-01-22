@@ -12,13 +12,19 @@ type IntSlice []int
 
 // Scan converts database value to []int
 func (s *IntSlice) Scan(value interface{}) error {
+	var str string
 
-	bytes, ok := value.([]byte)
-	if !ok {
+	switch v := value.(type) {
+	case []byte:
+		str = string(v)
+	case string:
+		str = v
+	case nil:
+		*s = make(IntSlice, 0)
+		return nil
+	default:
 		return fmt.Errorf("failed to convert database value to bytes")
 	}
-
-	str := string(bytes)
 
 	*s = *ParseIntSlice(str)
 	return nil

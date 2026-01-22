@@ -22,8 +22,6 @@ func StartAgentCycles(l interfaces.CafeLocation) {
 	// Empty reserved objects
 	l.ClearReservedObjects()
 
-	l.Cafe().AgentCycleBinded = true
-
 	go func() {
 		ticker := time.NewTicker(1 * time.Second)
 		defer ticker.Stop()
@@ -31,12 +29,6 @@ func StartAgentCycles(l interfaces.CafeLocation) {
 		nextSpawn := time.Now().UTC().Add(GetSpawnInterval(l))
 
 		for range ticker.C {
-
-			if !l.Cafe().AgentCycleBinded {
-				println("Stopping agent cycle: not binded")
-				return
-			}
-
 			if !*l.GetIsRunning() {
 				println("Agent cycle paused")
 				continue
@@ -101,7 +93,7 @@ func GetSpawnInterval(l interfaces.CafeLocation) time.Duration {
 	maxSpawn := 30.0
 	minSpawn := 2.0
 	rating := float64(l.Cafe().GetRating())
-	expansion := float64(l.Cafe().ExpansionID)
+	expansion := float64(l.Cafe().GetExpansionID())
 	ratingFactor := math.Min(rating/1000.0, 10.0)
 	expansionFactor := math.Min(expansion/8.0, 1.0)
 	progress := ratingFactor*0.6 + expansionFactor*0.4

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 
-	_ "github.com/go-sql-driver/mysql"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -21,11 +20,11 @@ func (db *CafeDB) Authenticate(name string, pass string) (*player.Player, int, e
 		return nil, 14, fmt.Errorf("DB Error: %v", err)
 	}
 
-	if !VerifyPassword(p.Password, pass) {
+	if !VerifyPassword(p.GetPassword(), pass) {
 		return nil, 14, errors.New("Access Denied!")
 	}
 
-	if p.IsBanned {
+	if p.GetIsBanned() {
 		return nil, 19, errors.New("You are banned!")
 	}
 
@@ -44,7 +43,7 @@ func (db *CafeDB) ChangePassword(id int, oldPass, newPass string) (int, error) {
 		return 1, fmt.Errorf("DB Error: %v", err)
 	}
 
-	if !VerifyPassword(player.Password, oldPass) {
+	if !VerifyPassword(player.GetPassword(), oldPass) {
 		return 10, errors.New("Access Denied!")
 	}
 

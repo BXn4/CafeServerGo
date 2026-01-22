@@ -86,6 +86,7 @@ func mimicPlayer(wg *sync.WaitGroup) error {
 		println("Failed to create connection:", err.Error())
 		return nil
 	}
+
 	defer conn.Close()
 
 	reader := bufio.NewReader(conn)

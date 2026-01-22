@@ -20,15 +20,15 @@ type PlayerJob struct {
 }
 
 func (p *Player) StartJob(cafe *cafe.Cafe) {
-	p.Job.Started = true
-	p.Job.StartedAt = time.Now().UTC()
-	p.WorkTimeLeft = balancing.BalancingConstants.WorkTimeLeft
+	p.job.Started = true
+	p.job.StartedAt = time.Now().UTC()
+	p.workTimeLeft = balancing.BalancingConstants.WorkTimeLeft
 
 	p.SetJobLocation(cafe)
 
 	workTimeEnd := time.Now().UTC().Add(time.Duration(balancing.BalancingConstants.WorkTimeLeft) * time.Second)
 
-	p.Job.FinishesAt = workTimeEnd
+	p.job.FinishesAt = workTimeEnd
 
 	go func() {
 		<-time.After(time.Until(workTimeEnd))
@@ -37,22 +37,22 @@ func (p *Player) StartJob(cafe *cafe.Cafe) {
 }
 
 func (p *Player) SetJobLocation(cafe *cafe.Cafe) {
-	p.Job.Location = cafe
+	p.job.Location = cafe
 }
 
 func (p *Player) GetJobStarted() bool {
-	return p.Job.Started
+	return p.job.Started
 }
 
 func (p *Player) GetJobStartedAt() time.Time {
-	return p.Job.StartedAt
+	return p.job.StartedAt
 }
 
 func (p *Player) GetWorkTimeLeft() int {
-	if p.GetJobStarted() {
-		return max(0, (balancing.BalancingConstants.WorkTimeLeft - int(time.Since(p.GetJobStartedAt()).Seconds())))
-	}
-	return 0
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+
+	return p.workTimeLeft
 }
 
 func (p *Player) FinishJob() {
@@ -60,22 +60,22 @@ func (p *Player) FinishJob() {
 }
 
 func (p *Player) DoAction() {
-	p.Job.ActionsDone++
+	p.job.ActionsDone++
 }
 
 func (p *Player) AddJobOffer(playerID int) {
-	p.Job.Offers = append(p.Job.Offers, playerID)
+	p.job.Offers = append(p.job.Offers, playerID)
 }
 
 func (p *Player) RemoveJobOffer(playerID int) {
-	for i, id := range p.Job.Offers {
+	for i, id := range p.job.Offers {
 		if id == playerID {
-			p.Job.Offers = append(p.Job.Offers[:i], p.Job.Offers[i+1:]...)
+			p.job.Offers = append(p.job.Offers[:i], p.job.Offers[i+1:]...)
 			return
 		}
 	}
 }
 
 func (p *Player) ClearOffers() {
-	p.Job.Offers = nil
+	p.job.Offers = nil
 }

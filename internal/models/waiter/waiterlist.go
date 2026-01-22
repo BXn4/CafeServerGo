@@ -10,16 +10,19 @@ type WaiterList []*Waiter
 
 // Scan converts a database value (string) to IntMatrix
 func (wl *WaiterList) Scan(value interface{}) error {
-	bytes, ok := value.([]byte)
-	if !ok {
-		return fmt.Errorf("failed to convert database value to bytes")
-	}
+	var str string
 
-	str := string(bytes)
-	if str == "" {
+	switch v := value.(type) {
+	case []byte:
+		str = string(v)
+	case string:
+		str = v
+	case nil:
 		waiterList := &WaiterList{}
 		*wl = *waiterList
 		return nil
+	default:
+		return fmt.Errorf("failed to convert database value to bytes")
 	}
 
 	waiterList := ParseWaiterList(str)

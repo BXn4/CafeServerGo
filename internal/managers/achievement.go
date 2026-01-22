@@ -44,12 +44,12 @@ func (gm *GameManager) SendEarnAchievement(achievementWOD int, level int, userna
 
 		c.Location.Cafe().AddToFridge(fancy.ID, amount)
 
-		c.DB.UpdateFridgeInventory(c.Location.Cafe().ID, c.Location.Cafe().FridgeInventory.String())
+		c.DB.UpdateFridgeInventory(c.Location.Cafe().GetID(), c.Location.Cafe().GetFridgeInventory().String())
 	}
 
-	c.DB.UpdateXP(c.Player.ID, c.Player.GetXP())
-	c.DB.UpdateCash(c.Player.ID, c.Player.GetCash())
-	c.DB.UpdateGold(c.Player.ID, c.Player.GetGold())
+	c.DB.UpdateXP(c.Player.GetID(), c.Player.GetXP())
+	c.DB.UpdateCash(c.Player.GetID(), c.Player.GetCash())
+	c.DB.UpdateGold(c.Player.GetID(), c.Player.GetGold())
 
 	c.SendExtensionResponse("cae", "-1", "0", args)
 }

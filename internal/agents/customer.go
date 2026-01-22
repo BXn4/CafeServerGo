@@ -31,7 +31,7 @@ func FillEmptyCafe(l interfaces.CafeLocation) {
 	// The eating not works, need to set the chairs before the objects was sent
 	numberOfChairs := 0
 	rating := float64(l.Cafe().GetRating())
-	expansion := float64(l.Cafe().ExpansionID)
+	expansion := float64(l.Cafe().GetExpansionID())
 	ratingFactor := math.Min(rating/1000.0, 10.0)
 	expansionFactor := math.Min(expansion/8.0, 1.0)
 
@@ -269,7 +269,7 @@ func Leave(l interfaces.CafeLocation, c *customer.Customer, es *EatingSpace) {
 		// Customer got food!
 		player, err := l.Owner()
 		if err != nil {
-			log.Errorf("Cant find owner of cafe: %v", l.Cafe().GetPlayerID())
+			log.Errorf("Cant find owner of cafe: %v", l.Cafe().GetOwnerID())
 			return
 		}
 

@@ -8,16 +8,11 @@ import (
 	"cafego/internal/models/simple"
 	"fmt"
 
-	"gorm.io/driver/mysql"
-	_ "gorm.io/driver/mysql"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
 type DBConfig struct {
-	Host     string
-	Port     string
-	User     string
-	Password string
 	Database string
 }
 
@@ -26,16 +21,11 @@ type CafeDB struct {
 }
 
 func ConnectToDB(config *DBConfig) (*CafeDB, error) {
-
-	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=true", config.User, config.Password, config.Host, config.Port, config.Database)
-
-	// Creates the db pbject and does not start a connection
-	db, err := gorm.Open(mysql.Open(connectionString), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open("database/"+config.Database+".db"), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
 
-	// Check if database tables are valid
 	err = db.AutoMigrate(&player.Player{}, &cafe.Cafe{}, &coops.Coop{})
 	if err != nil {
 		return nil, err
@@ -71,21 +61,21 @@ func (db *CafeDB) CreateAccount(name, email, password string, a avatar.Avatar) (
 		mastery[id] = 0
 	}
 
-	player := &player.Player{
-		Email:       email,
-		Password:    hashedPasswd,
-		Username:    name,
-		Avatar:      a,
-		Achievement: achievements,
-		Mastery:     mastery,
-	}
+	player := &player.Player{}
+
+	player.SetEmail(email)
+	player.SetPassword(hashedPasswd)
+	player.SetUsername(name)
+	player.SetAvatar(a)
+	player.SetAchievements(achievements)
+	player.SetMastery(mastery)
 
 	// Create player and get id
 	err = db.conn.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(player).Error; err != nil {
 			return fmt.Errorf("Cant create player: %w", err)
 		}
-		cafe := cafe.NewCafeForCreation(player.ID, player.ID, name)
+		cafe := cafe.NewCafeForCreation(player.GetID(), player.GetID(), name)
 
 		if err := tx.Create(cafe).Error; err != nil {
 			return fmt.Errorf("Cant create cafe: %w", err)
@@ -112,7 +102,7 @@ func (db *CafeDB) GetLeaderBoard() ([]map[string]any, error) {
 	err := db.conn.
 		Table("player AS p").
 		Select("p.id AS id, p.username AS username, p.xp AS xp, c.luxury AS luxury").
-		Joins("LEFT JOIN cafe AS c ON c.player_id = p.id").
+		Joins("LEFT JOIN cafe AS c ON c.owner_id = p.id").
 		Scan(&rows).Error
 	if err != nil {
 		return nil, err

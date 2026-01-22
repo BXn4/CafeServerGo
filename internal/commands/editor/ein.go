@@ -1,0 +1,18 @@
+package editor
+
+import (
+	"cafego/internal/client"
+	"cafego/internal/managers"
+	"cafego/internal/types/requests"
+	"cafego/internal/types/responses"
+)
+
+// ein - SendFurnitureInventory
+func SendFurnitureInventory(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
+	inventory := c.Location.Cafe().GetFurnitureInventory().String()
+
+	c.SendExtensionResponse(responses.S2C_EDITOR_INVENTORY, "1", "0",
+		inventory,
+	)
+	return nil
+}

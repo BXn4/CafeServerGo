@@ -6,7 +6,10 @@ import (
 )
 
 func (p *Player) GetAchivements() simple.IntMap {
-	return p.Achievement
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+
+	return p.Achievements
 }
 
 // PLEASE DO NOT MODIFY IT!!!
@@ -15,34 +18,34 @@ func (p *Player) GetAchivements() simple.IntMap {
 // <achievements a="0" w="2001" l="0" r="25000" x="100" ch="500" g="0" />
 // idk, just dont touch it.
 func (p *Player) MakeAchievementCurrentLevels() {
-	if p.AchievementLevel == nil {
+	if p.achievementsLevel == nil {
 		// Set the achievement levels by the progess
-		p.AchievementLevel = make(map[int]int)
+		p.achievementsLevel = make(map[int]int)
 		for id := 2001; id <= 2030; id++ {
 			progress := p.GetAchievementProgress(id)
 			level := p.GetAchievementLevelByProgress(id, progress)
-			p.AchievementLevel[id] = level
+			p.achievementsLevel[id] = level
 			// println("SET ACHIEVEMENT LEVELS FOR: ID:", id, "Progress:", progress, "Current level:", level)
 		}
 	}
 }
 
 func (p *Player) GetAchievementProgress(achievementID int) int {
-	return p.Achievement[achievementID]
+	return p.achievementsLevel[achievementID]
 }
 
 func (p *Player) SetAchievementLevel(achievementID, level int) {
-	p.AchievementLevel[achievementID] = level
+	p.achievementsLevel[achievementID] = level
 }
 
 func (p *Player) GetAchievementLevel(achievementID int) int {
-	return p.AchievementLevel[achievementID]
+	return p.achievementsLevel[achievementID]
 }
 
 // These functions are wrappers for updating achivements
 func (p *Player) SetAchievement(achivementID, proggression int) {
-	if _, ok := p.Achievement[achivementID]; ok {
-		p.Achievement[achivementID] = proggression
+	if _, ok := p.Achievements[achivementID]; ok {
+		p.achievementsLevel[achivementID] = proggression
 	}
 }
 
@@ -97,7 +100,7 @@ func (p *Player) GetAchievementLevelByProgress(achievementID, progress int) int 
 }
 
 func (p *Player) UpdateAchievement(achievementID int, value int) {
-	p.Achievement[achievementID] += value
+	p.Achievements[achievementID] += value
 	p.CheckProgress(achievementID)
 }
 
@@ -147,8 +150,8 @@ func (p *Player) UpdateAchivementFireNPC() {
 }
 
 // <wod id="2010" n="Social" g="Achievement" t="Friendscount" />
-func (p *Player) SetAchivementFriendsCount() {
-	p.UpdateAchievement(2010, 1)
+func (p *Player) SetAchivementFriendsCount(v int) {
+	p.UpdateAchievement(2010, v)
 }
 
 // <wod id="2011" n="Basic" g="Achievement" t="Curiercount" />

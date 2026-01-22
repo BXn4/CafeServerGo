@@ -17,7 +17,7 @@ func SetRating(c *client.Client, gm *managers.GameManager, args []string) error 
 		return err
 	}
 
-	c.Location.Cafe().Rating = rating
+	c.Location.Cafe().SetRating(rating)
 
 	return nil
 }

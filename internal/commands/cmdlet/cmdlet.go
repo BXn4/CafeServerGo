@@ -22,7 +22,7 @@ type Cmdlet struct {
 }
 
 func (cmd *Cmdlet) Run(c *client.Client, gm *managers.GameManager, args []string) error {
-	if cmd.level > AccessLevel(c.Player.AccessLevel) {
+	if cmd.level > AccessLevel(c.Player.GetAccessLevel()) {
 		return fmt.Errorf("Access denied!")
 	}
 	return cmd.fn(c, gm, args)

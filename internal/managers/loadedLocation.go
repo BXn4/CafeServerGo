@@ -119,12 +119,12 @@ func (lc *LoadedLocation) Join(playerID int, channel chan<- responses.Response) 
 		return
 	}
 
-	if c.(*client.Client).Player.SeekingJob {
-		c.(*client.Client).Player.SeekingJob = false
+	if c.(*client.Client).Player.GetIsSeekingJob() {
+		c.(*client.Client).Player.SetIsSeekingJob(false)
 	} // need to clear it
 
 	// Set position of player
-	c.(*client.Client).Player.Position = lc.cafe.GetPlayerStart()
+	c.(*client.Client).Player.SetPos(lc.cafe.GetPlayerStart())
 
 	// Send everyone the joined player
 	lc.announce(playerID, "juj", "-1", "0", c.(*client.Client).Player.String())
@@ -155,33 +155,14 @@ func (lc *LoadedLocation) Join(playerID int, channel chan<- responses.Response) 
 	// Send it to joined player
 	lc.send(playerID, julArgs...)
 
+	// If the room is cafe
 	if lc.cafe.GetRoomType() == cafe.CafeRoom {
-		// Start waiters when the owner joins if not yet stared
-		if playerID == lc.cafe.GetPlayerID() && !lc.cafe.AgentCycleBinded {
-			// Start waiters
-			log.Debug("Waiters spawned and started")
-
-			p, err := lc.Owner()
-			if err != nil {
-				log.Errorf("Cant find owner of cafe: %v", lc.Cafe().GetPlayerID())
-			}
-
-			if p.IsTutorialCompleted && !lc.Cafe().AgentCycleBinded {
-				go agents.FillEmptyCafe(lc)
-				go agents.StartAgentCycles(lc)
-			}
-
-			for i, w := range lc.cafe.Waiters {
-				w.SetIsWorking(false)
-				time.Sleep(10 * time.Millisecond)
-				// Spawn waiters
-				go func() {
-					agents.SpawnWaiter(lc, w, i+1).Start()
-				}()
-			}
-		} else if lc.cafe.AgentCycleBinded {
+		println("IS CAFE")
+		switch lc.running {
+		case true:
+			//println("LOCATION IS RUNNING")
 			// Respawn waiters
-			for _, w := range lc.cafe.Waiters {
+			for _, w := range lc.cafe.GetWaiters() {
 				waiterActionString := w.ActionString()
 				if w.GetCurrentCounter() != nil {
 					// NOTE: Always spawn the waiter to a counter. In the main loop, the waiter will be updated.
@@ -194,29 +175,47 @@ func (lc *LoadedLocation) Join(playerID int, channel chan<- responses.Response) 
 				lc.send(playerID, "nav", "-1", "0", w.SpawnString())
 				lc.send(playerID, "nac", "-1", "0", waiterActionString)
 			}
-		}
 
-		// Send every customer in location
-		log.Debug("JOIN CUSTOMER DATA:")
+			for _, cs := range lc.cafe.GetCustomers() {
+				customerActionString := cs.ActionString()
+				log.Debug("- SENT CUSTOMER DATA")
 
-		for _, cs := range lc.cafe.GetCustomers() {
-			customerActionString := cs.ActionString()
-			log.Debug("- SENT CUSTOMER DATA")
+				if cs.GetAction() == customer.CUSTOMER_WALK_TO_CHAIR {
+					customerActionString = cs.ActionStringToSpawnBack(customer.CUSTOMER_SIT_DOWN)
+				}
 
-			if cs.GetAction() == customer.CUSTOMER_WALK_TO_CHAIR {
-				customerActionString = cs.ActionStringToSpawnBack(customer.CUSTOMER_SIT_DOWN)
+				if cs.GetAction() != customer.CUSTOMER_LEAVE {
+					lc.send(playerID, "nav", "-1", "0", cs.SpawnString())
+					lc.send(playerID, "nac", "-1", "0", customerActionString)
+				}
 			}
+		case false:
+			// println("LOCATION IS NOT RUNNING")
+			if playerID == lc.Cafe().GetOwnerID() {
+				p, err := lc.Owner()
+				if err != nil {
+					log.Errorf("Cant find owner of cafe: %v", lc.Cafe().GetOwnerID())
+				}
 
-			if cs.GetAction() != customer.CUSTOMER_LEAVE {
-				lc.send(playerID, "nav", "-1", "0", cs.SpawnString())
-				lc.send(playerID, "nac", "-1", "0", customerActionString)
+				if p == nil {
+					return
+				}
+
+				if p.GetIsTutorialCompleted() {
+					go agents.FillEmptyCafe(lc)
+					go agents.StartAgentCycles(lc)
+				}
+
+				for i, w := range lc.cafe.GetWaiters() {
+					w.SetIsWorking(false)
+					// Spawn waiters
+					go func() {
+						agents.SpawnWaiter(lc, w, i+1).Start()
+					}()
+				}
+
 			}
 		}
-
-		log.Debugf("CUSTOMER COUNT: %d ", len(lc.cafe.GetCustomers()))
-
-		log.Debugf("WP COND %d %d", playerID, lc.cafe.GetPlayerID())
-
 	}
 
 	lc.running = true
@@ -224,7 +223,6 @@ func (lc *LoadedLocation) Join(playerID int, channel chan<- responses.Response) 
 
 // Leaves the location and broadcasts leave to every one
 func (lc *LoadedLocation) Leave(id int) {
-
 	lc.mu.Lock()
 	defer lc.mu.Unlock()
 
@@ -239,9 +237,9 @@ func (lc *LoadedLocation) Leave(id int) {
 
 	// If there are no players at the location
 	// and the location is not marketplace
-	if lc.cafe != nil && len(lc.occupants) == 0 && lc.cafe.GetID() > 0 && !lc.gm.UnsafeIsOnline(lc.cafe.GetID()) {
+	if lc.cafe != nil && len(lc.occupants) == 0 && lc.cafe.GetID() > 0 && !lc.gm.UnsafeIsOnline(lc.cafe.GetOwnerID()) {
 		log.Debugf("Unloading cafe %v...", lc.cafe.GetID())
-		lc.gm.RemoveLocation(lc.cafe.ID)
+		lc.gm.RemoveLocation(lc.cafe.GetID())
 	}
 
 	// lc.running = false
@@ -409,7 +407,7 @@ func (lc *LoadedLocation) TryStepSleep(d time.Duration) bool {
 	step := 100 * time.Millisecond
 	elapsed := time.Duration(0)
 	for elapsed < d {
-		if !*lc.GetIsRunning() || !lc.Cafe().AgentCycleBinded {
+		if !*lc.GetIsRunning() {
 			return false
 		}
 
