@@ -35,7 +35,7 @@ func init() {
 // MAX GOLD TO BET: 10000 - MAX CASH TO BET: 9999999 (from client)
 
 // mmu - S2C_MINI_MUFFIN
-func MuffinGame(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func MuffinGame(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 	random := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	isWin := random.Float64() <= 1/12.0
@@ -61,7 +61,7 @@ func MuffinGame(req *requests.Request, c *client.Client, gm *managers.GameManage
 	return nil
 }
 
-func MuffinGameValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func MuffinGameValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

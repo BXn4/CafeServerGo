@@ -28,7 +28,7 @@ func init() {
 }
 
 // sga - C2S_SHOP_AVAILIBILITY
-func ShopAvailibility(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func ShopAvailibility(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 	var args []string
 	// checks from the current time
 	if shop.IsShopUnavailable() {

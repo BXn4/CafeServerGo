@@ -72,27 +72,27 @@ func init() {
 	)
 }
 
-func PolicyFileResponse(req *requests.Request, c *client.Client, gm *managers.GameManager, cm CommandConfig) error {
+func PolicyFileResponse(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *CommandConfig) error {
 	c.SendSystemResponse(responses.POLICY_FILE)
 	return nil
 }
 
-func VersionCheckResponse(req *requests.Request, c *client.Client, gm *managers.GameManager, cm CommandConfig) error {
+func VersionCheckResponse(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *CommandConfig) error {
 	c.SendSystemResponse(responses.VERSION_CHECK)
 	return nil
 }
 
-func AutoJoinResponse(req *requests.Request, c *client.Client, gm *managers.GameManager, cm CommandConfig) error {
+func AutoJoinResponse(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *CommandConfig) error {
 	c.SendSystemResponse(responses.AUTO_JOIN)
 	return nil
 }
 
-func RoundTripResponse(req *requests.Request, c *client.Client, gm *managers.GameManager, cm CommandConfig) error {
+func RoundTripResponse(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *CommandConfig) error {
 	c.SendSystemResponse(responses.ROUND_TRIP)
 	return nil
 }
 
-func DisconnectResponse(req *requests.Request, c *client.Client, gm *managers.GameManager, cm CommandConfig) error {
+func DisconnectResponse(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *CommandConfig) error {
 	log.Infof("Logout request from client %d, username: %v", c.ClientID, c.Player.GetUsername())
 
 	// Send logout response first to ensure client gets the message

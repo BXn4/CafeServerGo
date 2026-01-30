@@ -28,7 +28,7 @@ func init() {
 }
 
 // nfi
-func WaiterFire(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func WaiterFire(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 
 	id, _ := strconv.Atoi(req.Args[2])
 
@@ -43,7 +43,7 @@ func WaiterFire(req *requests.Request, c *client.Client, gm *managers.GameManage
 	return nil
 }
 
-func WaiterFireValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func WaiterFireValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

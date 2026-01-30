@@ -79,3 +79,10 @@ func (gm *GameManager) SaveAll() error {
 
 	return nil
 }
+
+func (gm *GameManager) GetClients() map[int]*client.Client {
+	gm.clientMutex.Lock()
+	defer gm.clientMutex.Unlock()
+
+	return gm.clients
+}

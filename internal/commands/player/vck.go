@@ -27,7 +27,7 @@ func init() {
 }
 
 // vck - VersionCheck
-func VersionCheck(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func VersionCheck(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 	version := strconv.Itoa(versions.GetGameVersion())
 	c.SendExtensionResponse(cm.Identifier, "1", "0", version)
 	return nil

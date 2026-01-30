@@ -29,7 +29,7 @@ func init() {
 }
 
 // lcp - ChangePassword
-func ChangePassword(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func ChangePassword(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 
 	oldPasswd, newPasswd := req.Args[2], req.Args[3]
 
@@ -45,7 +45,7 @@ func ChangePassword(req *requests.Request, c *client.Client, gm *managers.GameMa
 	return nil
 }
 
-func ChangePasswordValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func ChangePasswordValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

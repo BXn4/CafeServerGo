@@ -28,7 +28,7 @@ func init() {
 }
 
 // coa - CoopActiveList
-func CoopActiveList(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func CoopActiveList(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 	var args []string
 	if c.Player.GetIsInCoop() {
 		coop, _ := c.DB.GetCoop(c.Player.GetCoopID())
@@ -50,7 +50,7 @@ func CoopActiveList(req *requests.Request, c *client.Client, gm *managers.GameMa
 	return nil
 }
 
-func CoopActiveListValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func CoopActiveListValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

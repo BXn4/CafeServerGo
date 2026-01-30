@@ -254,12 +254,12 @@ func (wa *WaiterAgent) move(pos simple.Position, action waiter.Action) bool {
 	// Set pos
 	wa.w.SetPos(path[1].Pos())
 
-	// println("distance: ", distance)
+	println("distance: ", distance)
 
 	// Set waiter pos
 	wa.doAction(action, pos, time.Duration(distance)*450*time.Millisecond)
 
-	// println("Waiter arrived to the destination pos")
+	println("Waiter arrived to the destination pos")
 
 	return false
 }

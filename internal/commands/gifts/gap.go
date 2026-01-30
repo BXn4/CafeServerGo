@@ -29,7 +29,7 @@ func init() {
 	)
 }
 
-func SendableGifts(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func SendableGifts(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 
 	// Get friends
 	friends := c.Player.GetFriends()
@@ -64,7 +64,7 @@ func SendableGifts(req *requests.Request, c *client.Client, gm *managers.GameMan
 	return nil
 }
 
-func SendableGiftsValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func SendableGiftsValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

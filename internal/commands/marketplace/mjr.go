@@ -28,7 +28,7 @@ func init() {
 }
 
 // mjo - MarketplaceJobRefill
-func MarketplaceJobRefill(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func MarketplaceJobRefill(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 	c.Player.AddGold(-balancing.BalancingConstants.JobRefillGold)
 	c.Player.SetOpenJobs(5)
 
@@ -38,7 +38,7 @@ func MarketplaceJobRefill(req *requests.Request, c *client.Client, gm *managers.
 	return nil
 }
 
-func MarketplaceJobRefillValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func MarketplaceJobRefillValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

@@ -30,7 +30,7 @@ func init() {
 }
 
 // sbi - C2S_SHOP_BUY_ITEM
-func BuyIngredient(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func BuyIngredient(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 	// SCP command hanles when buying from currior
 
 	ingredientID, _ := strconv.Atoi(req.Args[2])
@@ -52,7 +52,7 @@ func BuyIngredient(req *requests.Request, c *client.Client, gm *managers.GameMan
 	return nil
 }
 
-func BuyIngredientValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func BuyIngredientValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

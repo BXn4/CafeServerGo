@@ -34,12 +34,14 @@ func init() {
 // TODO: add more chars
 var invalidChars = "+%&*/()[]{}\"'\\´`^°§€²³,;:?µ$"
 
-func Register(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func Register(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 	username := req.Args[2]
 	email := req.Args[3]
 	password := req.Args[4]
 
 	log.Debug("Everything is fine! Player register should start")
+
+	c.Player.Avatar.Name = username
 
 	avatar := c.Player.GetAvatar()
 
@@ -54,12 +56,13 @@ func Register(req *requests.Request, c *client.Client, gm *managers.GameManager,
 	if err != nil {
 		return fmt.Errorf("Failed to load location for player %d: %v", c.Player.GetID(), err)
 	}
+
 	c.Location = location
 
 	c.SendExtensionResponse(cm.Identifier, "-1", "0")
 
 	// Send room list (rlu)
-	err = cafe.RoomList(req, c, gm, cm) // -- cm is not used
+	err = cafe.RoomList(req, c, gm, nil) // -- cm is not used
 	if err != nil {
 		return err
 	}
@@ -100,7 +103,7 @@ func Register(req *requests.Request, c *client.Client, gm *managers.GameManager,
 	return nil
 }
 
-func RegisterValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func RegisterValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

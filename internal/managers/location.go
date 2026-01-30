@@ -67,12 +67,14 @@ func (gm *GameManager) AddLocation(id int) (*LoadedLocation, error) {
 		return nil, fmt.Errorf("Player %d has no cafe: %v", id, err)
 	}
 
-	cafeObj.Initalize()
+	if cafeObj.GetRoomType() == cafe.CafeRoom {
+		cafeObj.Initalize()
+	}
 
 	loc := NewLoadedLocation(cafeObj, gm)
 	gm.locations[id] = loc
 
-	println("LOADED CAFE: ", id)
+	// println("LOADED CAFE: ", id)
 
 	return loc, nil
 }

@@ -30,7 +30,7 @@ func init() {
 }
 
 // sdi - C2S_SHOP_DELETE_ITEM
-func SellIngredient(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func SellIngredient(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 	ingredientID, _ := strconv.Atoi(req.Args[2])
 	sellAmount, _ := strconv.Atoi(req.Args[3])
 	ingredientInfo, _ := utils.GetIngredient(ingredientID)
@@ -45,7 +45,7 @@ func SellIngredient(req *requests.Request, c *client.Client, gm *managers.GameMa
 	return nil
 }
 
-func SellIngredientValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func SellIngredientValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

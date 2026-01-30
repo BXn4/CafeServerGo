@@ -26,6 +26,29 @@ func ConnectToDB(config *DBConfig) (*CafeDB, error) {
 		return nil, err
 	}
 
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, err
+	}
+
+	sqlDB.SetMaxOpenConns(1)
+	sqlDB.SetMaxIdleConns(1)
+
+	pragmas := []string{
+		"PRAGMA journal_mode=WAL",    // Allows concurrent reads during writes
+		"PRAGMA busy_timeout=5000",   // Prevents immediate "locked" errors
+		"PRAGMA synchronous=NORMAL",  // Good for WAL mode (faster than FULL)
+		"PRAGMA cache_size=-128000",  // 128MB cache (negative = KB)
+		"PRAGMA foreign_keys=ON",     // Good practice for data integrity
+		"PRAGMA temp_store=memory",   // Faster temporary operations
+		"PRAGMA mmap_size=268435456", // 256MB memory-mapped I/O (faster reads)
+	}
+	for _, pragma := range pragmas {
+		if _, err := sqlDB.Exec(pragma); err != nil {
+			return nil, fmt.Errorf("failed to set pragma: %w", err)
+		}
+	}
+
 	err = db.AutoMigrate(&player.Player{}, &cafe.Cafe{}, &coops.Coop{})
 	if err != nil {
 		return nil, err

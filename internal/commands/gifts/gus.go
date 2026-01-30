@@ -31,7 +31,7 @@ func init() {
 	)
 }
 
-func UseGift(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func UseGift(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 
 	slot, _ := strconv.Atoi(req.Args[2])
 	gifts := c.Player.GetGifts()
@@ -79,7 +79,7 @@ func UseGift(req *requests.Request, c *client.Client, gm *managers.GameManager, 
 	return nil
 }
 
-func UseGiftValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func UseGiftValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

@@ -29,7 +29,7 @@ func init() {
 }
 
 // ebf - C2S_EDITOR_BUY_FLOOR
-func BuyFloor(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func BuyFloor(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 
 	// Dont allow players to modify the packet and sending us EBF while not in editor.
 	if c.Location.IsRunning() {

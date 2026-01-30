@@ -31,7 +31,7 @@ func init() {
 	)
 }
 
-func StoveDeliver(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func StoveDeliver(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 	stoveX, _ := strconv.Atoi(req.Args[2])
 	stoveY, _ := strconv.Atoi(req.Args[3])
 	counterX, _ := strconv.Atoi(req.Args[4])
@@ -135,7 +135,7 @@ func StoveDeliver(req *requests.Request, c *client.Client, gm *managers.GameMana
 	return nil
 }
 
-func StoveDeliverValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func StoveDeliverValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

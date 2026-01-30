@@ -65,10 +65,7 @@ func (c *Cafe) GetFridgeFreeSpace() int {
 
 	freeSpace := c.fridgeCapacity
 
-	println(c.fridgeCapacity)
-
 	for ingredientID := range c.FridgeInventory {
-		println(ingredientID)
 		// Fancy does not take space in the fridge inventory. Fancys starts at ID 1401
 		if ingredientID < 1401 {
 			freeSpace -= 1

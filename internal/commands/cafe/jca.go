@@ -28,11 +28,9 @@ func init() {
 }
 
 // jca - JoinCafe
-func JoinCafe(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func JoinCafe(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 	// Get id of cafe to join
 	id, _ := strconv.Atoi(req.Args[3])
-
-	println(id)
 
 	// Adds cafe to manager (loads it if not loaded)
 	location, err := gm.AddLocation(id)
@@ -63,7 +61,7 @@ func JoinCafe(req *requests.Request, c *client.Client, gm *managers.GameManager,
 	return nil
 }
 
-func JoinCafeValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func JoinCafeValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

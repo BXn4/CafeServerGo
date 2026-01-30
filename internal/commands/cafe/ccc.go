@@ -33,7 +33,7 @@ func init() {
 }
 
 // ccc - C2S_CAFE_COOK
-func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 	var usingFancy int = 0
 
 	posX, _ := strconv.Atoi(req.Args[2])
@@ -42,16 +42,11 @@ func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameMana
 	isPrepared, _ := strconv.Atoi(req.Args[5])
 	usingFancy, _ = strconv.Atoi(req.Args[6])
 
-	println("1")
-
 	cookingTime := c.Player.GetDishMasteryDuration(dishID)
-	println("2")
 	stove := c.Location.Cafe().GetObjectByPosXY(posX, posY)
-	println("3")
 
 	if isPrepared == 0 {
 		dishInfo, _ := utils.GetDish(dishID)
-		println("4")
 
 		ingredientsStr := dishInfo.Requirements
 		ingredientsMap := make(map[int]int)
@@ -72,8 +67,6 @@ func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameMana
 			}
 		}
 
-		println("5")
-
 		for ingredientID, ingredientAmount := range ingredientsMap {
 			c.Location.Cafe().RemoveFromFridge(ingredientID, ingredientAmount)
 		}
@@ -84,8 +77,6 @@ func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameMana
 		if usingFancy == 1 {
 			c.Player.UpdateAchivementFancyCount()
 		}
-
-		println("6")
 
 		// sweets = 0
 		// meals = 1
@@ -132,7 +123,7 @@ func StartCooking(req *requests.Request, c *client.Client, gm *managers.GameMana
 	return nil
 }
 
-func StartCookingValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func StartCookingValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

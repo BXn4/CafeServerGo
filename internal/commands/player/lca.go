@@ -30,7 +30,7 @@ func init() {
 	)
 }
 
-func CreateAvatar(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func CreateAvatar(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 
 	guestName := fmt.Sprintf("Guest_%v", rand.Intn(89999999)+10000000)
 	// userName+gender+Avatar+smartfoxClient.connectionTime+smartfoxClient.roundTripTime
@@ -47,7 +47,7 @@ func CreateAvatar(req *requests.Request, c *client.Client, gm *managers.GameMana
 	return nil
 }
 
-func CreateAvatarValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func CreateAvatarValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

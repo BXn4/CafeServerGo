@@ -13,14 +13,14 @@ import (
 
 type Command struct {
 	Config    CommandConfig
-	Validator func(req *requests.Request, c *client.Client, gm *managers.GameManager, cm CommandConfig) (string, ErrorCodes)
-	Handler   func(req *requests.Request, c *client.Client, gm *managers.GameManager, cm CommandConfig) error
+	Validator func(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *CommandConfig) (string, ErrorCodes)
+	Handler   func(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *CommandConfig) error
 	DBSaver   func(c *client.Client) error
 }
 
 type CommandConfig struct {
 	Name        string // Command name to us to easier to known which command is that (CafeWalk)
-	Identifier  string // 3 letter identifier to the command (CWA)
+	Identifier  string // 3 letter identifier ddto the command (CWA)
 	Description string // Whats the command will do.
 	Args        string // What args needed to be send back.
 
@@ -39,8 +39,8 @@ var Commands = map[requests.RequestKind]Command{}
 func RegisterCommand(
 	kind requests.RequestKind,
 	commandConfig CommandConfig,
-	commandValidator func(*requests.Request, *client.Client, *managers.GameManager, CommandConfig) (string, ErrorCodes),
-	commandHandler func(*requests.Request, *client.Client, *managers.GameManager, CommandConfig) error,
+	commandValidator func(*requests.Request, *client.Client, *managers.GameManager, *CommandConfig) (string, ErrorCodes),
+	commandHandler func(*requests.Request, *client.Client, *managers.GameManager, *CommandConfig) error,
 	commandDBSaver func(*client.Client) error,
 ) {
 	Commands[kind] = Command{
@@ -58,6 +58,10 @@ func ErrorHandler(req *requests.Request, c *client.Client, cm *CommandConfig, re
 
 func HandleClient(c *client.Client, gm *managers.GameManager) {
 	for req := range c.RequestQueue {
+		if c.GetIsDisconnecting() {
+			log.Debug("Client is disconnecting, stopping request handler")
+			return
+		}
 		if req == nil {
 			return
 		}
@@ -97,7 +101,7 @@ func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameMan
 	// command error = int
 	// all error codes what the cafe having in int
 	if command.Validator != nil {
-		reason, commandError := command.Validator(req, c, gm, command.Config)
+		reason, commandError := command.Validator(req, c, gm, &command.Config)
 
 		// If theres an ANY error, then dont run the handler.
 		if commandError != NO_ERROR {
@@ -105,7 +109,7 @@ func HandleRequest(req *requests.Request, c *client.Client, gm *managers.GameMan
 		}
 	}
 
-	err := command.Handler(req, c, gm, command.Config)
+	err := command.Handler(req, c, gm, &command.Config)
 	if err != nil {
 		return fmt.Errorf("Error during command handling: %w", err)
 	}

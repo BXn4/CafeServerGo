@@ -4,6 +4,7 @@ import (
 	"cafego/internal/client"
 	"cafego/internal/commands"
 	"cafego/internal/managers"
+	"cafego/internal/models/event"
 	"cafego/internal/types/requests"
 	"cafego/internal/types/responses"
 	"cafego/internal/utils"
@@ -33,7 +34,7 @@ func init() {
 
 // min level 9
 
-func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 	if c.Player.GetPlayedWheel() {
 		c.Player.AddGold(-1)
 	} else {
@@ -47,7 +48,20 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 
 	random := rand.New(rand.NewSource(time.Now().UnixNano()))
 
-	rewards := []int{0, 9, 13, 3, 11, 15, 14, 8, 10, 12}
+	rewards := []int{
+		9, 13, 3, 11, 15, 14, 10, 12,
+		9, 13, 3, 11, 15, 14, 10, 12,
+		9, 13, 3, 11, 15, 14, 10, 12,
+		9, 13, 3, 11, 15, 14, 10, 12,
+		9, 13, 3, 11, 15, 14, 10, 12,
+		9, 13, 3, 11, 15, 14, 10, 12,
+		9, 13, 3, 11, 15, 14, 10, 12,
+		9, 13, 3, 11, 15, 14, 10, 12,
+		9, 13, 3, 11, 15, 14, 10, 12,
+		9, 13, 3, 11, 15, 14, 10, 12,
+		0, 8, // gold rewards
+	}
+
 	reward := rewards[random.Intn(len(rewards))]
 	rewardStr := strconv.Itoa(reward)
 
@@ -56,7 +70,9 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 		c.Player.AddGold(10)
 		c.SendExtensionResponse(cm.Identifier, "-1", "0", rewardStr, "1902+10")
 	case 9:
-		amount := 300 + rand.Intn((401-300)/5)*5
+		cashAmount := rand.Intn((401 - 300) / 5)
+		factor := float64(c.Player.GetLevel()) * 0.5
+		amount := 300 + int(float64(cashAmount)*factor)
 		c.Player.AddCash(amount)
 		amountStr := strconv.Itoa(amount)
 		c.SendExtensionResponse(cm.Identifier, "-1", "0", rewardStr, "1901+"+amountStr)
@@ -65,20 +81,20 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 		gifts.AddGift(1450, 1, -1)
 		c.SendExtensionResponse(cm.Identifier, "-1", "0", rewardStr, "1450+1")
 	case 3:
-		decorations, err := utils.GetItems("deco")
-		if err != nil {
-			return err
+		basicDecorIDs := make([]int, 9)
+		for i := 0; i < 9; i++ {
+			basicDecorIDs[i] = 501 + i
 		}
-		choice := rand.Intn(len(decorations))
-		dec := decorations[choice]
-		idStr := strconv.Itoa(dec.ID)
+
+		wonDecorID := basicDecorIDs[rand.Intn(len(basicDecorIDs))]
+		idStr := strconv.Itoa(wonDecorID)
 
 		// Add won decoration to inventory
 		mycafe, err := c.DB.GetCafeByPlayerID(c.Player.GetID())
 		if err != nil {
 			return nil
 		}
-		mycafe.AddFurnitures(dec.ID, 1)
+		mycafe.AddFurnitures(wonDecorID, 1)
 
 		c.SendExtensionResponse(cm.Identifier, "-1", "0", rewardStr, idStr+"+1")
 	case 11:
@@ -113,10 +129,18 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 			return err
 		}
 
+		var validDishes []utils.Wod
+
+		for _, dish := range dishes {
+			if event.GetEvent() <= dish.Events {
+				validDishes = append(validDishes, dish)
+			}
+		}
+
 		dishesStr := []string{}
 		for i := 0; i < dishCount; i++ {
 			// Get fancy and amount
-			choice := rand.Intn(len(dishes))
+			choice := rand.Intn(len(validDishes))
 			dish := dishes[choice]
 			amount := rand.Intn(10) + 1
 
@@ -189,7 +213,7 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 	return nil
 }
 
-func WheelOfFortuneValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func WheelOfFortuneValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

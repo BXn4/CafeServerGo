@@ -29,7 +29,7 @@ func init() {
 }
 
 // cod - CoopDetail
-func CoopDetail(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func CoopDetail(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 	coopID, _ := strconv.Atoi(req.Args[2])
 
 	if coopID == -2 {
@@ -65,7 +65,7 @@ func CoopDetail(req *requests.Request, c *client.Client, gm *managers.GameManage
 	return nil
 }
 
-func CoopDetailValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func CoopDetailValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

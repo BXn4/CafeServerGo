@@ -5,14 +5,15 @@ import (
 	"cafego/internal/database"
 	"cafego/internal/interfaces"
 	"cafego/internal/models/player"
+	"io"
+	"strings"
 	"time"
-
-	"github.com/charmbracelet/log"
 
 	"cafego/internal/types/requests"
 	"cafego/internal/types/responses"
 	"net"
-	"strings"
+
+	"github.com/charmbracelet/log"
 )
 
 // Client
@@ -27,6 +28,8 @@ type Client struct {
 	ClientManager interfaces.ClientManager
 
 	TimeoutStamp time.Time
+
+	isDisconnecting bool
 
 	RequestQueue  chan *requests.Request
 	ResponseQueue chan responses.Response
@@ -56,34 +59,13 @@ func (c *Client) SetClientID(id int) {
 	c.ClientID = id
 }
 
+func (c *Client) GetIP() string {
+	return strings.Split(c.Conn.RemoteAddr().String(), ":")[0]
+}
+
 func (c *Client) Start() {
 	go c.receiveRequests()
 	go c.sendResponses()
-	go c.autoSave()
-	go c.listenToPin()
-}
-
-func (c *Client) Disconnect() error {
-	if c.Player != nil {
-		// id := c.Player.ID
-
-		if c.Player.GetIsTutorialCompleted() {
-			c.Player.SetLastLogin(time.Now().UTC())
-			c.DB.UpdateLastLogin(c.Player.GetID(), c.Player.GetLastLogin())
-			c.DB.SavePlayer(c.Player)
-			if c.Location != nil {
-				if c.Location.Cafe() != nil {
-					c.DB.SaveCafe(c.Location.Cafe())
-				}
-			}
-		}
-	}
-
-	c.ClientManager.DisconnectClient(c.ClientID)
-	c.Conn.Close()
-	log.Infof("Client disconnected: %s", c.GetIP())
-
-	return nil
 }
 
 func (c *Client) SendSystemResponse(args ...string) {
@@ -98,8 +80,32 @@ func (c *Client) SendExtensionResponse(args ...string) {
 	c.ResponseQueue <- resp
 }
 
-func (c *Client) GetIP() string {
-	return strings.Split(c.Conn.RemoteAddr().String(), ":")[0]
+func (c *Client) receiveRequests() {
+	defer close(c.RequestQueue)
+	for {
+		message, err := c.Reader.ReadString('\x00')
+		if err != nil {
+			if err == io.EOF {
+				log.Infof("Client disconnected (EOF): %s", c.GetIP())
+			} else if netErr, ok := err.(net.Error); ok {
+				log.Infof("Network error from %s: %v", c.GetIP(), netErr)
+			} else if strings.Contains(err.Error(), "use of closed network connection") {
+				log.Infof("Connection closed: %s", c.GetIP())
+			} else {
+				log.Errorf("Read error from %s: %v", c.GetIP(), err)
+			}
+			c.Disconnect()
+			return
+		}
+		log.Logf(log.Level(-5), "%s", message)
+		// Parse request
+		req, err := requests.ParseRequest(strings.Trim(message, "\x00"))
+		if err != nil {
+			log.Error("Failed to parse request: %v", err)
+			continue
+		}
+		c.RequestQueue <- req
+	}
 }
 
 func (c *Client) sendResponses() {
@@ -113,83 +119,18 @@ func (c *Client) sendResponses() {
 	}
 }
 
-func (c *Client) receiveRequests() {
-	defer close(c.RequestQueue)
-	for {
+func (c *Client) Disconnect() error {
+	c.isDisconnecting = true
 
-		message, err := c.Reader.ReadString('\x00')
-		if err != nil {
-			return
-		}
+	log.Infof("Client being disconnected: %s", c.GetIP())
 
-		log.Logf(log.Level(-5), "%s", message)
+	c.ClientManager.DisconnectClient(c.ClientID)
 
-		// Parse request
-		req, err := requests.ParseRequest(strings.Trim(message, "\x00"))
-		if err != nil {
-			log.Error("Failed to parse request: %v", err)
-			continue
-		}
+	c.Conn.Close()
 
-		c.RequestQueue <- req
-	}
+	return nil
 }
 
-func (c *Client) autoSave() {
-	ticker := time.NewTicker(5 * time.Minute)
-	defer ticker.Stop()
-
-	for {
-		if c == nil {
-			return
-		}
-		select {
-		case <-ticker.C:
-			// Check if player exists
-			if c.Player == nil {
-				continue
-			}
-
-			// Save player data
-			if c.Player.GetIsTutorialCompleted() {
-				err := c.DB.SavePlayer(c.Player)
-				if err != nil {
-					log.Errorf("Failed to auto-save player data: %v", err)
-				} else {
-					log.Debugf("Auto-saved player %v data", c.Player.GetID())
-				}
-
-				// Save cafe
-				cafe, err := c.DB.GetCafeByPlayerID(c.Player.GetID())
-				if err != nil {
-					log.Errorf("Failed to get cafe for auto-save: %v", err)
-					continue
-				}
-
-				err = c.DB.SaveCafe(cafe)
-				if err != nil {
-					log.Error("Failed to auto-save cafe data: %v", err)
-				} else {
-					log.Debug("Auto-saved cafe %v data", cafe.GetID())
-				}
-			}
-		}
-	}
-}
-
-func (c *Client) listenToPin() {
-	const timeout = 1 * time.Minute // client sends pin command in every 1 minutes
-	ticker := time.NewTicker(10 * time.Second)
-	defer ticker.Stop()
-
-	for range ticker.C {
-		if c.Player == nil {
-			return
-		}
-		if time.Since(c.TimeoutStamp) > timeout {
-			log.Warnf("Client %v timed out", c.Player.GetID())
-			c.Disconnect()
-			return
-		}
-	}
+func (c *Client) GetIsDisconnecting() bool {
+	return c.isDisconnecting
 }

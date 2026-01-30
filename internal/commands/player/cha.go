@@ -30,7 +30,7 @@ func init() {
 }
 
 // ChangeAvatar - cha command
-func ChangeAvatar(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func ChangeAvatar(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 	newAvatar := avatar.NewAvatarFromString(req.Args[2])
 
 	if c.Player.GetAvatarChanged() && c.Player.GetIsRegistered() {
@@ -57,7 +57,7 @@ func ChangeAvatar(req *requests.Request, c *client.Client, gm *managers.GameMana
 	return nil
 }
 
-func ChangeAvatarValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func ChangeAvatarValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

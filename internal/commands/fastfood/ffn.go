@@ -31,7 +31,7 @@ func init() {
 }
 
 // ffn
-func FastFoodUse(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func FastFoodUse(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 
 	items, err := utils.MultiAtoi(req.Args[2:]...)
 	if err != nil {
@@ -56,7 +56,7 @@ func FastFoodUse(req *requests.Request, c *client.Client, gm *managers.GameManag
 	return nil
 }
 
-func FastFoodUseValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func FastFoodUseValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

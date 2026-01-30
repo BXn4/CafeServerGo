@@ -30,7 +30,7 @@ func init() {
 }
 
 // hsl - Highscore list
-func HighscoreList(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func HighscoreList(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 	search := req.Args[2]
 	orderBy := utils.If(req.Args[3] == "0", leaderboard.OrderByXP, leaderboard.OrderByLuxury)
 	offset := 0
@@ -45,7 +45,7 @@ func HighscoreList(req *requests.Request, c *client.Client, gm *managers.GameMan
 	return nil
 }
 
-func HighscoreListValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func HighscoreListValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

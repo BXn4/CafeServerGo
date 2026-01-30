@@ -33,7 +33,7 @@ func init() {
 
 // ebu - C2S_EDITOR_BUY_OBJECT
 // TODO: Need to check level.
-func BuyObject(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func BuyObject(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 	items, _ := utils.MultiAtoi(req.Args[2:]...)
 	objX, objY, objID, objRotation := items[0], items[1], items[2], items[3]
 	objectInfo, _ := utils.GetItem(objID)
@@ -95,7 +95,7 @@ func BuyObject(req *requests.Request, c *client.Client, gm *managers.GameManager
 	return nil
 }
 
-func BuyObjectValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func BuyObjectValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

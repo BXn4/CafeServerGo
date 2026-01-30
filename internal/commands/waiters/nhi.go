@@ -33,7 +33,7 @@ func init() {
 // min level 3
 
 // nhi - C2S_NPC_HIRE
-func WaiterHire(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func WaiterHire(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 	// Pay price
 	c.Player.AddGold(-balancing.BalancingConstants.StaffPrice)
 
@@ -71,7 +71,7 @@ func WaiterHire(req *requests.Request, c *client.Client, gm *managers.GameManage
 	return nil
 }
 
-func WaiterHireValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func WaiterHireValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

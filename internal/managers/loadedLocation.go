@@ -157,7 +157,6 @@ func (lc *LoadedLocation) Join(playerID int, channel chan<- responses.Response) 
 
 	// If the room is cafe
 	if lc.cafe.GetRoomType() == cafe.CafeRoom {
-		println("IS CAFE")
 		switch lc.running {
 		case true:
 			//println("LOCATION IS RUNNING")

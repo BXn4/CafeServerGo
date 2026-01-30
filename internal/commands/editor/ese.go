@@ -30,7 +30,7 @@ func init() {
 }
 
 // ese - C2S_EDITOR_SELL_OBJECT
-func SellObject(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func SellObject(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 	objX, _ := strconv.Atoi(req.Args[2])
 	objY, _ := strconv.Atoi(req.Args[3])
 	objID, _ := strconv.Atoi(req.Args[4])
@@ -57,7 +57,7 @@ func SellObject(req *requests.Request, c *client.Client, gm *managers.GameManage
 	return nil
 }
 
-func SellObjectValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func SellObjectValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

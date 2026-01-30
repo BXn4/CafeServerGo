@@ -29,7 +29,7 @@ func init() {
 	)
 }
 
-func SeekingJob(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func SeekingJob(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 	isSeekingJob := utils.If(req.Args[2] == "1", true, false)
 	if !isSeekingJob {
 		c.Player.SetIsSeekingJob(false)
@@ -44,7 +44,7 @@ func SeekingJob(req *requests.Request, c *client.Client, gm *managers.GameManage
 
 }
 
-func SeekingJobValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func SeekingJobValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

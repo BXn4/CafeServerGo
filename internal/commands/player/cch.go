@@ -29,7 +29,7 @@ func init() {
 }
 
 // cch - C2S_CAFE_CHAT
-func SendChatMessage(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func SendChatMessage(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 	message := req.Args[2]
 
 	if strings.HasPrefix(message, "/") {
@@ -37,12 +37,14 @@ func SendChatMessage(req *requests.Request, c *client.Client, gm *managers.GameM
 		return nil
 	}
 
+	println(c.Player.GetPos().X)
+
 	c.Location.Broadcast(cm.Identifier, "-1", "0", strconv.Itoa(c.Player.GetID()), message)
 
 	return nil
 }
 
-func ChatMessageValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func ChatMessageValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

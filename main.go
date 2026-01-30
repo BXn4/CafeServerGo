@@ -34,7 +34,7 @@ func init() {
 	initStyles()
 
 	// Uncomment to enable debug level logging:
-	log.SetLevel(log.Level(-5))
+	// log.SetLevel(log.Level(-5))
 
 	// Uncomment to enable info level logging:
 	// log.SetLevel(log.InfoLevel)

@@ -30,7 +30,7 @@ func init() {
 }
 
 // edit - C2S_EDITOR_MODE
-func EditorMode(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func EditorMode(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 	status, _ := strconv.Atoi(req.Args[2])
 
 	switch status {
@@ -72,7 +72,7 @@ func EditorMode(req *requests.Request, c *client.Client, gm *managers.GameManage
 	return nil
 }
 
-func EditorModeValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func EditorModeValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

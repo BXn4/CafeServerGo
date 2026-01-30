@@ -27,7 +27,7 @@ func init() {
 }
 
 // see - S2C_SPECIAL_EVENT
-func SendSpecialEvent(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func SendSpecialEvent(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 	if event.GetEvent() == 0 || c.Player == nil {
 		return nil
 	}

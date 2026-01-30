@@ -27,7 +27,7 @@ func init() {
 	)
 }
 
-func WaiterCustomize(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func WaiterCustomize(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 
 	selectedWaiter, _ := strconv.Atoi(req.Args[2])
 	newPriority, _ := strconv.Atoi(req.Args[4])
@@ -52,7 +52,7 @@ func WaiterCustomize(req *requests.Request, c *client.Client, gm *managers.GameM
 	return nil
 }
 
-func WaiterCustomizeValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func WaiterCustomizeValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

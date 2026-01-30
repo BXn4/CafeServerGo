@@ -3,6 +3,7 @@ package server
 import (
 	"cafego/internal/client"
 	"cafego/internal/commands"
+	"cafego/internal/commands/player"
 	"cafego/internal/database"
 	"cafego/internal/managers"
 	"cafego/internal/models/leaderboard"
@@ -13,6 +14,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/charmbracelet/log"
 )
@@ -72,6 +74,8 @@ func (s *CafeServer) Run() {
 	// Caching / updates it in every 5 mins.
 	leaderboard.CheckLeaderBoard(db)
 
+	go ListenToPin(s.gm)
+
 	// Start the TCP server
 	address := fmt.Sprintf("%s:%s", s.config.Host, s.config.Port)
 	listener, err := net.Listen("tcp", address)
@@ -109,4 +113,25 @@ func (s *CafeServer) Run() {
 		log.Info("All data saved successfully")
 	}
 
+}
+
+func ListenToPin(gm *managers.GameManager) {
+	const timeout = 1 * time.Minute // client sends pin command in every 1 minutes
+	ticker := time.NewTicker(10 * time.Second)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		println("PIN TICKER TICK")
+		for _, c := range gm.GetClients() {
+			println("LISTENTOPIN CLIENT ID:", c.ID())
+
+			if time.Since(c.TimeoutStamp) > timeout {
+				log.Warnf("Client %v timed out", c.ID)
+				gm.DisconnectClient(c.ID())
+				return
+			}
+
+			player.SendPing(nil, c, nil, nil)
+		}
+	}
 }

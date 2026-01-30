@@ -29,7 +29,7 @@ func init() {
 }
 
 // scp - C2S_SHOP_CARRIER_PIGEON
-func BuyIngredientFromShopCarrier(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func BuyIngredientFromShopCarrier(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 
 	ingredientID, _ := strconv.Atoi(req.Args[2])
 
@@ -42,14 +42,14 @@ func BuyIngredientFromShopCarrier(req *requests.Request, c *client.Client, gm *m
 
 		c.SendExtensionResponse(cm.Identifier, "-1", "0", strconv.Itoa(ingredientID), strconv.Itoa(ingredientAmount))
 	} else {
-		ShopAvailibility(req, c, gm, cm) // -- cm is not used here
+		ShopAvailibility(req, c, gm, nil) // -- cm is not used here
 		return nil
 	}
 
 	return nil
 }
 
-func BuyIngredientFromShopCarrierValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func BuyIngredientFromShopCarrierValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

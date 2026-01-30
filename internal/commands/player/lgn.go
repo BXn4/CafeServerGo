@@ -33,7 +33,7 @@ func init() {
 }
 
 // lgn - Login
-func Login(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func Login(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 	name := req.Args[2]
 	password := req.Args[3]
 

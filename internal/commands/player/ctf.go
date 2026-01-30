@@ -22,7 +22,7 @@ func init() {
 	)
 }
 
-func TutorialComplete(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func TutorialComplete(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 	if !c.Player.GetIsTutorialCompleted() {
 		c.Player.SetIsTutorialCompleted(true)
 

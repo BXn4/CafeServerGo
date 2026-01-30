@@ -29,13 +29,13 @@ func init() {
 }
 
 // abr - AllowEmails
-func AllowEmails(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func AllowEmails(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 	c.Player.SetAllowEmails(utils.If(req.Args[2] == "1", true, false))
 	c.SendExtensionResponse(cm.Identifier, "-1", req.Args[2], strconv.Itoa(c.Player.GetID()))
 	return nil
 }
 
-func AllowEmailsValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func AllowEmailsValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

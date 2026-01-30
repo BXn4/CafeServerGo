@@ -26,7 +26,7 @@ func init() {
 }
 
 // pin
-func SendPing(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func SendPing(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 	c.TimeoutStamp = time.Now()
 	c.SendExtensionResponse(responses.S2C_PING, "-1")
 	return nil

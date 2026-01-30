@@ -29,7 +29,7 @@ func init() {
 }
 
 // emo - C2S_EDITOR_MOVE_OBJECT
-func MoveObject(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func MoveObject(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 
 	items, _ := utils.MultiAtoi(req.Args[2:]...)
 	oldObjPos := simple.NewPosition(items[0], items[1])
@@ -42,7 +42,7 @@ func MoveObject(req *requests.Request, c *client.Client, gm *managers.GameManage
 	return nil
 }
 
-func MoveObjectValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func MoveObjectValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

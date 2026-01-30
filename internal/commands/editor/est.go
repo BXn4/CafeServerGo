@@ -28,7 +28,7 @@ func init() {
 }
 
 // est - C2S_EDITOR_STORE_OBJECT
-func StoreObject(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func StoreObject(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 	objX, _ := strconv.Atoi(req.Args[2])
 	objY, _ := strconv.Atoi(req.Args[3])
 
@@ -43,7 +43,7 @@ func StoreObject(req *requests.Request, c *client.Client, gm *managers.GameManag
 	return nil
 }
 
-func StoreObjectValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func StoreObjectValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

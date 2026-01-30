@@ -28,7 +28,7 @@ func init() {
 }
 
 // cal
-func AchievementList(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) error {
+func AchievementList(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 
 	id, _ := strconv.Atoi(req.Args[2])
 	achivements := map[int]int{}
@@ -62,7 +62,7 @@ func AchievementList(req *requests.Request, c *client.Client, gm *managers.GameM
 	return nil
 }
 
-func AchievementListValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm commands.CommandConfig) (string, commands.ErrorCodes) {
+func AchievementListValidator(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) (string, commands.ErrorCodes) {
 	if len(req.Args) < cm.MinArgs {
 		return fmt.Sprintf("Not enough args. NEEDED/GOT: %d/%d", cm.MinArgs, len(req.Args)), commands.MIN_ARGS
 	}

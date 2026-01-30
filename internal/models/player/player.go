@@ -46,7 +46,7 @@ type Player struct {
 	DailyLogin          time.Time                                     `gorm:"column:daily_login;type:datetime;default:null"`
 	GiftRefreshTime     time.Time                                     `gorm:"column:gift_refresh_time;type:datetime;default:null"`
 	Gifts               gift.GiftList                                 `gorm:"column:gifts;type:text;default:null"`
-	isRegistered        bool                                          `gorm:"-"`
+	IsRegistered        bool                                          `gorm:"column:is_registered;type:bool;default:false"`
 	isTutorialCompleted bool                                          `gorm:"-"`
 	AccessLevel         int                                           `gorm:"column:access_level;default:0;type:int"`
 	maxInstants         int                                           `gorm:"-"`
@@ -334,7 +334,7 @@ func (p *Player) SetIsRegistered(v bool) {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
-	p.isRegistered = v
+	p.IsRegistered = v
 }
 
 func (p *Player) SetIsTutorialCompleted(v bool) {
@@ -610,7 +610,7 @@ func (p *Player) GetIsRegistered() bool {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
-	return p.isRegistered
+	return p.IsRegistered
 }
 
 func (p *Player) GetIsTutorialCompleted() bool {

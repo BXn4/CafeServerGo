@@ -9,6 +9,7 @@ import (
 	"cafego/internal/utils"
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"strconv"
 	"sync"
 
@@ -455,6 +456,29 @@ func (c *Cafe) GetCustomer(id int) *customer.Customer {
 func (c *Cafe) GetPlayerStart() simple.Position {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
+
+	if c.roomType == MarketRoom {
+		var posX, posY int
+		forbidden := map[[2]int]bool{
+			{1, 9}:  true, // Object
+			{5, 11}: true, // Object
+			{6, 5}:  true, // Center object
+			{6, 6}:  true, // Center object
+			{5, 5}:  true, // Center object
+			{5, 6}:  true, // Center object
+		}
+
+		for {
+			posX = rand.IntN(11) + 1
+			posY = rand.IntN(11) + 1
+
+			if !forbidden[[2]int{posX, posY}] {
+				break
+			}
+		}
+
+		return simple.NewPosition(posX, posY)
+	}
 
 	return c.playerStart
 }
