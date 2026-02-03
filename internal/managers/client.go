@@ -82,8 +82,10 @@ func (gm *GameManager) DisconnectClient(id int) {
 		}
 
 		if c.Location != nil {
-			c.Location.Leave(c.Player.GetID())
+			// SAVE -> AFTER LEAVE!!!!!!!!!
+			// DONT FLIP IT!!!!!!!!
 			gm.db.SaveCafe(c.Location.Cafe())
+			c.Location.Leave(c.Player.GetID())
 		}
 		c.Player = nil
 	}

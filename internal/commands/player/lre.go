@@ -92,7 +92,7 @@ func Register(req *requests.Request, c *client.Client, gm *managers.GameManager,
 	}
 
 	// Send Ping (pin)
-	err = SendPing(req, c, gm, cm) // -- cm is not used
+	err = SendPing(req, c, gm, nil)
 	if err != nil {
 		return err
 	}

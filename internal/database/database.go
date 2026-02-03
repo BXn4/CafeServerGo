@@ -21,7 +21,9 @@ type CafeDB struct {
 }
 
 func ConnectToDB(config *DBConfig) (*CafeDB, error) {
-	db, err := gorm.Open(sqlite.Open("database/"+config.Database+".db"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open("database/"+config.Database+".db"), &gorm.Config{
+		// Logger: logger.Default.LogMode(logger.Info),
+	})
 	if err != nil {
 		return nil, err
 	}

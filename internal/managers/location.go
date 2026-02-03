@@ -25,24 +25,16 @@ func (gm *GameManager) RemoveLocation(id int) {
 
 	println("REMOVED CAFE: ", id)
 
+	// I removed the DB saving
+
 	for i, lc := range gm.locations {
 		if lc.cafe.GetID() == id {
-			// This removes the location by id by not changing the others memory addresses
-			owner := lc.Cafe().GetOwnerName()
-			player, err := gm.db.GetPlayerByName(owner)
-			if err == nil {
-				if player.GetIsTutorialCompleted() {
-					gm.db.SaveCafe(lc.Cafe())
-					log.Debugf("Saved %v cafe to db", lc.cafe.GetID())
-				}
+			if lc.running {
+				lc.Cafe().ClearAllCustomers()
+				lc.Cafe().CleaAllWaiters()
+				delete(gm.locations, i)
+				return
 			}
-		}
-
-		if lc.running {
-			lc.Cafe().ClearAllCustomers()
-			lc.Cafe().CleaAllWaiters()
-			delete(gm.locations, i)
-			return
 		}
 	}
 }
@@ -66,6 +58,8 @@ func (gm *GameManager) AddLocation(id int) (*LoadedLocation, error) {
 		log.Errorf("Player with id %v has no cafe in database: %v", id, err)
 		return nil, fmt.Errorf("Player %d has no cafe: %v", id, err)
 	}
+
+	println("got cafe")
 
 	if cafeObj.GetRoomType() == cafe.CafeRoom {
 		cafeObj.Initalize()

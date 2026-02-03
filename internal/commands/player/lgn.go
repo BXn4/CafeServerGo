@@ -80,6 +80,17 @@ func Login(req *requests.Request, c *client.Client, gm *managers.GameManager, cm
 		// Set player
 		c.Player = p
 
+		id := c.Player.GetID()
+
+		location, err := gm.AddLocation(id)
+
+		if err != nil {
+			return fmt.Errorf("Failed to load location %d: %v", id, err)
+		}
+
+		// Save location
+		c.Location = location
+
 		p.MakeAchievementCurrentLevels() // only make if its not exist
 
 		// Handle login bonus (lbu)

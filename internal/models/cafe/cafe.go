@@ -29,20 +29,20 @@ const (
 
 type Cafe struct {
 	ID                 int                        `gorm:"column:id;primaryKey;autoIncrement;type:int"`
-	OwnerID            int                        `gorm:"column:owner_ID;not null;type:int"`
+	OwnerID            int                        `gorm:"column:owner_id;not null;type:int"`
 	OwnerName          string                     `gorm:"column:owner_name;not null;type:text"`
 	Rating             int                        `gorm:"column:rating;default:50;type:int"`
 	Luxury             int                        `gorm:"column:luxury;default:0;type:int"`
 	size               int                        `gorm:"-"`
 	background         int                        `gorm:"-"`
-	ExpansionID        int                        `gorm:"coulmn:expansion_ID;type:int;default:0"`
-	Tiles              simple.IntMatrix           `gorm:"column:tiles;type:longtext"`
-	Objects            object.ObjectList          `gorm:"column:objects;type:longtext"`
+	ExpansionID        int                        `gorm:"column:expansion_id;type:int;default:0"`
+	Tiles              simple.IntMatrix           `gorm:"column:tiles;type:longtext;not null"`
+	Objects            object.ObjectList          `gorm:"column:objects;type:longtext;not null"`
 	availableTables    object.ObjectList          `gorm:"-"`
 	fridgeCapacity     int                        `gorm:"-"`
 	FridgeInventory    simple.IntMap              `gorm:"column:fridge_inv;type:text"`
 	FurnitureInventory simple.IntMap              `gorm:"column:furniture_inv;type:text"`
-	Waiters            waiter.WaiterList          `gorm:"column:waiters;type:longtext;"`
+	Waiters            waiter.WaiterList          `gorm:"column:waiters;type:longtext;not null"`
 	customers          map[int]*customer.Customer `gorm:"-"`
 	playerStart        simple.Position            `gorm:"-"`
 	roomType           int                        `gorm:"-"`
@@ -618,6 +618,7 @@ func (cafe *Cafe) GetObjectByPosXY(x, y int) *object.Object {
 func (cafe *Cafe) GetDoor() *object.Object {
 	cafe.mutex.RLock()
 	defer cafe.mutex.RUnlock()
+
 	for _, obj := range cafe.Objects {
 		if obj.IsDoor() {
 			return obj

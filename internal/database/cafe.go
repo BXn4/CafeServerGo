@@ -18,13 +18,11 @@ func (db *CafeDB) GetCafeByPlayerID(playerID int) (*cafe.Cafe, error) {
 		return nil, fmt.Errorf("Database error: %v", err)
 	}
 
-	c.GetPlayerStart()
-
 	return &c, nil
 }
 
 func (db *CafeDB) SaveCafe(c *cafe.Cafe) error {
-	if c.GetID() > 0 {
+	if c.GetRoomType() == cafe.CafeRoom {
 		err := db.conn.Model(&cafe.Cafe{}).
 			Where("id = ?", c.GetID()).
 			Updates(map[string]any{
@@ -34,7 +32,7 @@ func (db *CafeDB) SaveCafe(c *cafe.Cafe) error {
 				"objects":       c.GetObjects().StringForDB(),
 				"fridge_inv":    c.GetFridgeInventory().String(),
 				"furniture_inv": c.GetFurnitureInventory().String(),
-				"waiters":       c.GetWaiters(),
+				"waiters":       c.GetWaiters().String(),
 			}).Error
 
 		if err != nil {
