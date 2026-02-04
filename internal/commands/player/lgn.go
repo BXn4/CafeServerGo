@@ -139,11 +139,9 @@ func Login(req *requests.Request, c *client.Client, gm *managers.GameManager, cm
 			gm.SendEarnAchievement(id, level, p.GetUsername())
 		}
 
-		if c.Player.GetXP() == 0 && !c.Player.GetIsTutorialCompleted() {
+		if !c.Player.GetIsTutorialCompleted() {
 			// reset it to allow player to complete the tutorial
 			c.SendExtensionResponse("lgn", "-1", strconv.Itoa(commands.LOGIN_SET_FIRST_LOGIN))
-		} else {
-			c.Player.SetIsTutorialCompleted(true) // Default false, because after register, the customers should not start.
 		}
 	}
 

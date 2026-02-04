@@ -11,7 +11,6 @@ import (
 )
 
 func (db *CafeDB) GetPlayerByName(name string) (*player.Player, error) {
-
 	var p player.Player
 	err := db.conn.Where("username = ? OR email = ?", name, name).First(&p).Error
 	if err != nil {
@@ -21,16 +20,11 @@ func (db *CafeDB) GetPlayerByName(name string) (*player.Player, error) {
 		return nil, fmt.Errorf("SQL ERR: %v", err)
 	}
 
-	avatar := p.GetAvatar()
-
-	avatar.Name = p.GetUsername()
-
 	return &p, nil
 
 }
 
 func (db *CafeDB) GetPlayer(id int) (*player.Player, error) {
-	println("GetPlayer")
 	var p player.Player
 	err := db.conn.First(&p, id).Error
 	if err != nil {
@@ -39,9 +33,7 @@ func (db *CafeDB) GetPlayer(id int) (*player.Player, error) {
 		}
 		return nil, fmt.Errorf("SQL ERR: %v", err)
 	}
-	avatar := p.GetAvatar()
 
-	avatar.Name = p.GetUsername()
 	return &p, nil
 }
 

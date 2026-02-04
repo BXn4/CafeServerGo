@@ -85,8 +85,6 @@ func StoveDeliver(req *requests.Request, c *client.Client, gm *managers.GameMana
 
 	masteryXP := c.Player.GetDishMasteryXP(dish.ID)
 
-	println(masteryXP)
-
 	// Increase xp
 	c.Player.AddXP(masteryXP)
 

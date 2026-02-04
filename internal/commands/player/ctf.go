@@ -23,8 +23,10 @@ func init() {
 }
 
 func TutorialComplete(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
+	println("TUTORIAL DONE")
+	println(c.Player.GetXP())
 	if !c.Player.GetIsTutorialCompleted() {
-		c.Player.SetIsTutorialCompleted(true)
+		println("DONE")
 
 		c.Player.AddXP(5) // 5 XP reward for tutorial complete
 

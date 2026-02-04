@@ -38,6 +38,8 @@ func init() {
 
 	// Uncomment to enable info level logging:
 	// log.SetLevel(log.InfoLevel)
+	//
+	log.SetLevel(log.ErrorLevel)
 
 }
 

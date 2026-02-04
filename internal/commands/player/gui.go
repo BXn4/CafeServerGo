@@ -21,6 +21,7 @@ func UserInfo(req *requests.Request, c *client.Client, gm *managers.GameManager)
 	}
 
 	avatar := c.Player.GetAvatar()
+	avatar.Name = c.Player.Username
 
 	c.SendExtensionResponse(
 		"gui",

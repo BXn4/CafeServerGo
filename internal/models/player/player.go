@@ -47,7 +47,6 @@ type Player struct {
 	GiftRefreshTime     time.Time                                     `gorm:"column:gift_refresh_time;type:datetime;default:null"`
 	Gifts               gift.GiftList                                 `gorm:"column:gifts;type:text;default:null"`
 	IsRegistered        bool                                          `gorm:"column:is_registered;type:bool;default:false"`
-	isTutorialCompleted bool                                          `gorm:"-"`
 	AccessLevel         int                                           `gorm:"column:access_level;default:0;type:int"`
 	maxInstants         int                                           `gorm:"-"`
 	job                 PlayerJob                                     `gorm:"-"`
@@ -122,6 +121,8 @@ func (p *Player) AddCash(v int) {
 	} else if v < 0 {
 		p.UpdateAchivementSpendChips(v)
 	}
+
+	p.Cash += v
 }
 
 func (p *Player) SetGold(v int) {
@@ -134,6 +135,11 @@ func (p *Player) SetGold(v int) {
 func (p *Player) AddGold(v int) {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
+
+	println("adding")
+	println(v)
+	println("total")
+	println(p.Gold)
 
 	p.Gold += v
 	if v < 0 {
@@ -335,13 +341,6 @@ func (p *Player) SetIsRegistered(v bool) {
 	defer p.mutex.Unlock()
 
 	p.IsRegistered = v
-}
-
-func (p *Player) SetIsTutorialCompleted(v bool) {
-	p.mutex.Lock()
-	defer p.mutex.Unlock()
-
-	p.isTutorialCompleted = v
 }
 
 func (p *Player) SetAccessLevel(v int) {
@@ -617,7 +616,7 @@ func (p *Player) GetIsTutorialCompleted() bool {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
-	return p.isTutorialCompleted
+	return p.XP >= 10
 }
 
 func (p *Player) GetAccessLevel() int {
