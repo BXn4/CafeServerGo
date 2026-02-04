@@ -53,7 +53,6 @@ func (db *CafeDB) SavePlayer(p *player.Player) error {
 	}
 
 	avatar := p.GetAvatar()
-	gifts := p.GetGifts()
 
 	updateData := map[string]any{
 		"cash":                  int(p.GetCash()),
@@ -78,7 +77,7 @@ func (db *CafeDB) SavePlayer(p *player.Player) error {
 		"achievements":          p.GetAchivements().String(),
 		"last_login":            p.GetLastLogin(),
 		"daily_login":           p.GetDailyLogin(),
-		"gifts":                 gifts,
+		"gifts":                 p.GetGifts().String(),
 	}
 
 	err := db.conn.Model(&player.Player{}).Where("id = ?", p.GetID()).Updates(updateData).Error

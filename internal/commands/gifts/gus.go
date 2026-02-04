@@ -21,7 +21,7 @@ func init() {
 			Identifier:   responses.S2C_GIFT_USE,
 			Description:  "Using an gift from the gift inventory",
 			Args:         "{slotID} {giftID} {giftAmount} {posX} {posY}",
-			MinArgs:      5,
+			MinArgs:      3,
 			MaxArgs:      7,
 			FeatureLevel: 7,
 		},
@@ -36,7 +36,7 @@ func UseGift(req *requests.Request, c *client.Client, gm *managers.GameManager, 
 	slot, _ := strconv.Atoi(req.Args[2])
 	gifts := c.Player.GetGifts()
 	gift := gifts[slot]
-	gifts.RemoveGift(slot)
+	c.Player.RemoveGift(slot)
 
 	item, _ := utils.GetItem(gift.ID)
 	strId := strconv.Itoa(item.ID)
@@ -75,7 +75,7 @@ func UseGift(req *requests.Request, c *client.Client, gm *managers.GameManager, 
 		c.SendExtensionResponse(cm.Identifier, "-1", "0", req.Args[2], strId, strAmount, posX, posY)
 	}
 
-	SendPlayerGifts(req, c, gm)
+	SendPlayerGifts(req, c, gm, nil)
 	return nil
 }
 
@@ -141,6 +141,7 @@ func UseGiftDBSaver(c *client.Client) error {
 	c.DB.UpdateObjects(c.Location.Cafe().GetID(), c.Location.Cafe().GetObjects().StringForDB())
 	c.DB.UpdateFridgeInventory(c.Location.Cafe().GetID(), c.Location.Cafe().GetFridgeInventory().String())
 	c.DB.UpdateFurnitureInventory(c.Location.Cafe().GetID(), c.Location.Cafe().GetFurnitureInventory().String())
+	c.DB.UpdateGifts(c.Player.GetID(), c.Player.GetGifts().String())
 
 	return nil
 }

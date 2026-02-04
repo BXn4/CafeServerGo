@@ -12,7 +12,6 @@ import (
 	"math/rand"
 	"strconv"
 	"strings"
-	"time"
 )
 
 func init() {
@@ -46,7 +45,7 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 	c.DB.UpdateAchievement(c.Player.GetID(), c.Player.GetAchivements().String())
 	c.DB.UpdatePlayedWheel(c.Player.GetID(), c.Player.GetPlayedWheel())
 
-	random := rand.New(rand.NewSource(time.Now().UnixNano()))
+	/* random := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	rewards := []int{
 		9, 13, 3, 11, 15, 14, 10, 12,
@@ -62,7 +61,8 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 		0, 8, // gold rewards
 	}
 
-	reward := rewards[random.Intn(len(rewards))]
+	reward := rewards[random.Intn(len(rewards))] */
+	reward := 10
 	rewardStr := strconv.Itoa(reward)
 
 	switch reward {
@@ -77,8 +77,7 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 		amountStr := strconv.Itoa(amount)
 		c.SendExtensionResponse(cm.Identifier, "-1", "0", rewardStr, "1901+"+amountStr)
 	case 13:
-		gifts := c.Player.GetGifts()
-		gifts.AddGift(1450, 1, -1)
+		c.Player.AddGift(1450, 1, -1)
 		c.SendExtensionResponse(cm.Identifier, "-1", "0", rewardStr, "1450+1")
 	case 3:
 		basicDecorIDs := make([]int, 9)
@@ -113,8 +112,7 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 			amount := rand.Intn(10) + 1
 
 			// Add won fancy to gifts
-			gifts := c.Player.GetGifts()
-			gifts.AddGift(fancy.ID, amount, -1)
+			c.Player.AddGift(fancy.ID, amount, -1)
 
 			// Add to won fancy list
 			fancyStr := fmt.Sprintf("%v+%v", fancy.ID, amount)
@@ -145,8 +143,7 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 			amount := rand.Intn(10) + 1
 
 			// Add won dish to gifts
-			gifts := c.Player.GetGifts()
-			gifts.AddGift(dish.ID, amount, -1)
+			c.Player.AddGift(dish.ID, amount, -1)
 
 			// Add to won fancy list
 			dishStr := fmt.Sprintf("%v+%v", dish.ID, amount)
@@ -178,8 +175,7 @@ func WheelOfFortune(req *requests.Request, c *client.Client, gm *managers.GameMa
 			amount := rand.Intn(10) + 1
 
 			// Add won ingredient to gifts
-			gifts := c.Player.GetGifts()
-			gifts.AddGift(ingredient.ID, amount, -1)
+			c.Player.AddGift(ingredient.ID, amount, -1)
 
 			// Add to won ingredient list
 			dishStr := fmt.Sprintf("%v+%v", ingredient.ID, amount)
@@ -241,11 +237,10 @@ func WheelOfFortuneValidator(req *requests.Request, c *client.Client, gm *manage
 }
 
 func WheelOfFortuneDBSaver(c *client.Client) error {
-	gifts := c.Player.GetGifts()
 	c.DB.UpdateCash(c.Player.GetID(), c.Player.GetCash())
 	c.DB.UpdateGold(c.Player.GetID(), c.Player.GetGold())
 	c.DB.UpdateXP(c.Player.GetID(), c.Player.GetXP())
-	c.DB.UpdateGifts(c.Player.GetID(), gifts.String())
+	c.DB.UpdateGifts(c.Player.GetID(), c.Player.GetGifts().String())
 	c.DB.UpdateFurnitureInventory(c.Location.Cafe().GetID(), c.Location.Cafe().GetFurnitureInventory().String())
 
 	return nil

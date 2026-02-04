@@ -136,11 +136,6 @@ func (p *Player) AddGold(v int) {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
-	println("adding")
-	println(v)
-	println("total")
-	println(p.Gold)
-
 	p.Gold += v
 	if v < 0 {
 		p.UpdateAchivementSpendGold(-v)
@@ -733,4 +728,32 @@ func (p *Player) GetIsInCoop() bool {
 	}
 
 	return true
+}
+
+func (p *Player) AddGift(id, amount, sender int) {
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+
+	gift := gift.NewGift(id, amount, sender, time.Now().UTC())
+	p.Gifts = append(p.Gifts, gift)
+}
+
+func (p *Player) RemoveGift(index int) {
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+
+	p.Gifts = append(p.Gifts[:index], p.Gifts[index+1:]...)
+}
+
+func (p *Player) GetGiftStringWithIndex() string {
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+
+	giftsStr := []string{}
+	for i, gift := range p.Gifts {
+		iStr := strconv.Itoa(i)
+		giftsStr = append(giftsStr, iStr+"+"+gift.String())
+	}
+
+	return strings.Join(giftsStr, "#")
 }

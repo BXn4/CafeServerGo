@@ -6,6 +6,7 @@
 FIXED:
 Cooking. When the player was used fancy, only fancy got removed from the inventory.
 Less chance to win in muffin minigame. 1/12
+Fixed the fortune wheel
  
  IS FIXED? = NO
  LEVEL = EASY

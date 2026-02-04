@@ -124,7 +124,11 @@ func (lc *LoadedLocation) Join(playerID int, channel chan<- responses.Response) 
 	} // need to clear it
 
 	// Set position of player
-	c.(*client.Client).Player.SetPos(lc.cafe.GetPlayerStart())
+	pos := lc.cafe.GetPlayerStart()
+	c.(*client.Client).Player.SetPos(pos)
+	if lc.cafe.GetRoomType() == cafe.MarketRoom {
+		lc.cafe.SetPlayerStart(pos)
+	}
 
 	// Send everyone the joined player
 	lc.announce(playerID, "juj", "-1", "0", c.(*client.Client).Player.String())

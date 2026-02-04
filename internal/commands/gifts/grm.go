@@ -32,11 +32,10 @@ func init() {
 func RemoveGift(req *requests.Request, c *client.Client, gm *managers.GameManager, cm *commands.CommandConfig) error {
 
 	slot, _ := strconv.Atoi(req.Args[2])
-	gifts := c.Player.GetGifts()
-	gifts.RemoveGift(slot)
+	c.Player.RemoveGift(slot)
 	c.SendExtensionResponse(cm.Identifier, "-1", "0", req.Args[2])
 
-	SendPlayerGifts(req, c, gm)
+	SendPlayerGifts(req, c, gm, nil)
 	return nil
 }
 
@@ -70,9 +69,7 @@ func RemoveGiftValidator(req *requests.Request, c *client.Client, gm *managers.G
 }
 
 func RemoveGiftDBSaver(c *client.Client) error {
-	gifts := c.Player.GetGifts()
-
-	c.DB.UpdateGifts(c.Player.GetID(), gifts.String())
+	c.DB.UpdateGifts(c.Player.GetID(), c.Player.GetGifts().String())
 
 	return nil
 }
