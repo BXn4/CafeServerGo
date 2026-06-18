@@ -3,8 +3,12 @@ package managers
 import (
 	"cafego/internal/client"
 	"cafego/internal/database"
-	"cafego/internal/objects"
+	"cafego/internal/models/cafe"
+	"cafego/internal/models/event"
+	"cafego/internal/models/shop"
+	"slices"
 	"sync"
+	"time"
 )
 
 type GameManager struct {
@@ -14,13 +18,13 @@ type GameManager struct {
 	locations     map[int]*LoadedLocation
 
 	clientMutex sync.Mutex
-	clients     []*client.Client
+	clients     map[int]*client.Client
 }
 
 func NewGameManager() (*GameManager, error) {
 
 	// Marketplace object
-	cafeObj, err := objects.NewMarketplace()
+	cafeObj, err := cafe.NewMarketplace(-1) // Default marketplace
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +32,7 @@ func NewGameManager() (*GameManager, error) {
 	// Create game manager
 	gm := &GameManager{
 		locations: make(map[int]*LoadedLocation, 0),
-		clients:   make([]*client.Client, 0),
+		clients:   make(map[int]*client.Client, 0),
 	}
 
 	// Create marketplace
@@ -37,13 +41,22 @@ func NewGameManager() (*GameManager, error) {
 	// Add marketplace to cafe list
 	gm.SetLocation(-1, marketplace)
 
+	go event.CheckForEvent(10 * time.Minute)
+	go shop.CheckForShopAvailablity(10 * time.Minute)
+
 	return gm, nil
 }
 
 func (gm *GameManager) SaveAll() error {
 
+	var nonCompletedTutorialPlayers []string // dont need save cafe
+
 	for _, client := range gm.clients {
 		if client.Player != nil {
+			if !client.Player.GetIsTutorialCompleted() {
+				nonCompletedTutorialPlayers = append(nonCompletedTutorialPlayers, client.Player.GetUsername())
+				continue
+			}
 			err := gm.db.SavePlayer(client.Player)
 			if err != nil {
 				return err
@@ -53,12 +66,23 @@ func (gm *GameManager) SaveAll() error {
 
 	for _, location := range gm.locations {
 		if location != nil {
-			err := gm.db.SaveCafe(location.Cafe())
-			if err != nil {
-				return err
+			if location.cafe.GetRoomType() == cafe.CafeRoom {
+				if !slices.Contains(nonCompletedTutorialPlayers, location.Cafe().GetOwnerName()) {
+					err := gm.db.SaveCafe(location.cafe)
+					if err != nil {
+						return err
+					}
+				}
 			}
 		}
 	}
 
 	return nil
+}
+
+func (gm *GameManager) GetClients() map[int]*client.Client {
+	gm.clientMutex.Lock()
+	defer gm.clientMutex.Unlock()
+
+	return gm.clients
 }

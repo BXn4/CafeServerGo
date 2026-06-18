@@ -3,14 +3,18 @@ package server
 import (
 	"cafego/internal/client"
 	"cafego/internal/commands"
+	"cafego/internal/commands/player"
 	"cafego/internal/database"
 	"cafego/internal/managers"
+	"cafego/internal/models/leaderboard"
 	"cafego/internal/utils"
+	"cafego/internal/versions"
 	"fmt"
 	"net"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/charmbracelet/log"
 )
@@ -51,16 +55,26 @@ func (s *CafeServer) Run() {
 	// Read the items XML file and cache it
 	utils.ReadAndCacheItems()
 
-	// Set up MariaDB connection
+	// Read the levels XML file and cache it
+	utils.ReadAndCacheLevels()
+
+	// Read the achievements XML file and cache it
+	utils.ReadAndCacheAchievements()
+
+	// Set up sqlite connection
 	db, err := database.ConnectToDB(s.dbConfig)
 	if err != nil {
-		log.Fatalf("%v", err)
 		return
 	}
 	defer db.Close()
-	log.Infof("Server connected to database...")
+	log.Infof("Server connected to database.")
 
 	s.gm.SetCafeDB(db)
+
+	// Caching / updates it in every 5 mins.
+	leaderboard.CheckLeaderBoard(db)
+
+	go ListenToPin(s.gm)
 
 	// Start the TCP server
 	address := fmt.Sprintf("%s:%s", s.config.Host, s.config.Port)
@@ -70,18 +84,19 @@ func (s *CafeServer) Run() {
 	}
 	defer listener.Close()
 
-	log.Infof("Server started and listening on %s...", address)
+	log.Infof("Server started with game version %v, and listening on %s", versions.GetGameVersion(), address)
 
 	// Handle connections
 	go func() {
 		for {
 			conn, err := listener.Accept()
 			if err != nil {
-				continue
+				return
 			}
 			defer conn.Close()
 
 			c := client.New(conn, db, s.gm)
+			c.SetClientID(s.gm.NextClientID())
 			s.gm.AddClient(c)
 			c.Start()
 			go commands.HandleClient(c, s.gm)
@@ -98,4 +113,25 @@ func (s *CafeServer) Run() {
 		log.Info("All data saved successfully")
 	}
 
+}
+
+func ListenToPin(gm *managers.GameManager) {
+	const timeout = 1 * time.Minute // client sends pin command in every 1 minutes
+	ticker := time.NewTicker(10 * time.Second)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		println("PIN TICKER TICK")
+		for _, c := range gm.GetClients() {
+			println("LISTENTOPIN CLIENT ID:", c.ID())
+
+			if time.Since(c.TimeoutStamp) > timeout {
+				log.Warnf("Client %v timed out", c.ID)
+				gm.DisconnectClient(c.ID())
+				return
+			}
+
+			player.SendPing(nil, c, nil, nil)
+		}
+	}
 }

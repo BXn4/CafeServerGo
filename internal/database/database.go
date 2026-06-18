@@ -1,19 +1,18 @@
 package database
 
 import (
-	"cafego/internal/objects"
+	"cafego/internal/models/avatar"
+	"cafego/internal/models/cafe"
+	"cafego/internal/models/coops"
+	"cafego/internal/models/player"
+	"cafego/internal/models/simple"
 	"fmt"
 
-	"gorm.io/driver/mysql"
-	_ "gorm.io/driver/mysql"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
 type DBConfig struct {
-	Host     string
-	Port     string
-	User     string
-	Password string
 	Database string
 }
 
@@ -22,22 +21,40 @@ type CafeDB struct {
 }
 
 func ConnectToDB(config *DBConfig) (*CafeDB, error) {
-
-	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", config.User, config.Password, config.Host, config.Port, config.Database)
-
-	// This only creates the db pbject and does not start a connection
-	db, err := gorm.Open(mysql.Open(connectionString), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open("database/"+config.Database+".db"), &gorm.Config{
+		// Logger: logger.Default.LogMode(logger.Info),
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	// We might want to use this in the future but for compatibility reasons we will not use it
-	/*
-		// err = db.AutoMigrate(&PlayerDAO{}, &CafeDAO{})
-		// if err != nil {
-		// 	return nil, err
-		// }
-	*/
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, err
+	}
+
+	sqlDB.SetMaxOpenConns(1)
+	sqlDB.SetMaxIdleConns(1)
+
+	pragmas := []string{
+		"PRAGMA journal_mode=WAL",    // Allows concurrent reads during writes
+		"PRAGMA busy_timeout=5000",   // Prevents immediate "locked" errors
+		"PRAGMA synchronous=NORMAL",  // Good for WAL mode (faster than FULL)
+		"PRAGMA cache_size=-128000",  // 128MB cache (negative = KB)
+		"PRAGMA foreign_keys=ON",     // Good practice for data integrity
+		"PRAGMA temp_store=memory",   // Faster temporary operations
+		"PRAGMA mmap_size=268435456", // 256MB memory-mapped I/O (faster reads)
+	}
+	for _, pragma := range pragmas {
+		if _, err := sqlDB.Exec(pragma); err != nil {
+			return nil, fmt.Errorf("failed to set pragma: %w", err)
+		}
+	}
+
+	err = db.AutoMigrate(&player.Player{}, &cafe.Cafe{}, &coops.Coop{})
+	if err != nil {
+		return nil, err
+	}
 
 	cafe_db := &CafeDB{conn: db}
 
@@ -52,45 +69,80 @@ func (db *CafeDB) Close() error {
 	return sqlDB.Close()
 }
 
-func (db *CafeDB) CreateAccount(name, email, password string, avatar objects.Avatar) (*objects.Player, error) {
+func (db *CafeDB) CreateAccount(name, email, password string, a avatar.Avatar) (*player.Player, error) {
 
 	hashedPasswd, err := HashPassword(password)
 	if err != nil {
 		return nil, err
 	}
 
-	dao := &PlayerDAO{
-		Email:    email,
-		Password: hashedPasswd,
-		Username: name,
-		Avatar:   avatar.String(name),
+	achievements := make(simple.IntMap)
+	for id := 2001; id <= 2030; id++ {
+		achievements[id] = 0
 	}
+
+	mastery := make(simple.IntMap)
+	for id := 1201; id <= 1255; id++ {
+		mastery[id] = 0
+	}
+
+	player := &player.Player{}
+
+	player.SetEmail(email)
+	player.SetPassword(hashedPasswd)
+	player.SetUsername(name)
+	player.SetAvatar(a)
+	player.SetAchievements(achievements)
+	player.SetMastery(mastery)
 
 	// Create player and get id
 	err = db.conn.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Create(dao).Error; err != nil {
+		if err := tx.Create(player).Error; err != nil {
 			return fmt.Errorf("Cant create player: %w", err)
 		}
-		cafe := &CafeDAO{
-			ID:        dao.ID,
-			PlayerID:  dao.ID,
-			OwnerName: name,
-		}
+		cafe := cafe.NewCafeForCreation(player.GetID(), player.GetID(), name)
+
 		if err := tx.Create(cafe).Error; err != nil {
-			return fmt.Errorf("cant create cafe: %w", err)
+			return fmt.Errorf("Cant create cafe: %w", err)
 		}
 		return nil
 	})
 
 	if err != nil {
-		return nil, fmt.Errorf("Cant create cafe: %v", err)
-	}
-
-	// Parse player
-	player, err := ConvertPlayerDAOToPlayer(*dao)
-	if err != nil {
-		return nil, fmt.Errorf("Cant parse player: %v", err)
+		return nil, err
 	}
 
 	return player, nil
+}
+
+func (db *CafeDB) GetLeaderBoard() ([]map[string]any, error) {
+	type Entry struct {
+		ID       int
+		Username string
+		XP       int
+		Luxury   int
+	}
+
+	var rows []Entry
+	err := db.conn.
+		Table("player AS p").
+		Select("p.id AS id, p.username AS username, p.xp AS xp, c.luxury AS luxury").
+		Joins("LEFT JOIN cafe AS c ON c.owner_id = p.id").
+		Scan(&rows).Error
+	if err != nil {
+		return nil, err
+	}
+
+	leaderboard := make([]map[string]any, len(rows))
+	for i, item := range rows {
+		leaderboard[i] = map[string]any{
+			"rank":     i + 1,
+			"id":       item.ID,
+			"username": item.Username,
+			"xp":       item.XP,
+			"luxury":   item.Luxury,
+		}
+	}
+
+	return leaderboard, nil
 }

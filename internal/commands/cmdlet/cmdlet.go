@@ -22,15 +22,16 @@ type Cmdlet struct {
 }
 
 func (cmd *Cmdlet) Run(c *client.Client, gm *managers.GameManager, args []string) error {
-	if cmd.level > AccessLevel(c.Player.AccessLevel) {
+	if cmd.level > AccessLevel(c.Player.GetAccessLevel()) {
 		return fmt.Errorf("Access denied!")
 	}
 	return cmd.fn(c, gm, args)
 }
 
 var cmdlets = map[string]Cmdlet{
-	"ach": {Admin, SetAchivement},
-	"xp":  {Admin, SetXP},
+	"ach":    {Admin, SetAchivement},
+	"xp":     {Admin, SetXP},
+	"rating": {Admin, SetRating},
 }
 
 func HandleCmdlets(c *client.Client, gm *managers.GameManager, message string) {

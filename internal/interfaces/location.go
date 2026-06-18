@@ -1,8 +1,12 @@
 package interfaces
 
 import (
-	"cafego/internal/objects"
+	"cafego/internal/models/cafe"
+	"cafego/internal/models/object"
+	"cafego/internal/models/player"
+	"cafego/internal/models/simple"
 	"cafego/internal/types/responses"
+	"time"
 )
 
 // This is a wrapper for a cafe
@@ -23,29 +27,29 @@ type CafeLocation interface {
 	Send(id int, arg ...string)
 
 	// The wrapped cafe object
-	Cafe() *objects.Cafe
+	Cafe() *cafe.Cafe
 
 	// This reserves this object so it cannot be interacted with
 	// the reservation stays until the reserver unlocks it (like mutex without wait)
 	// this should prevent us from iterating over every object in the cafe
 	// this returns false is already reserved
-	ReserveObject(*objects.CafeObject) bool
+	ReserveObject(*object.Object) bool
 
 	// This returns a reserved object by pos
-	GetReservedObject(int, int) *objects.CafeObject
+	GetReservedObject(simple.Position) *object.Object
 
 	// This unreserves a dirty table and a chair
 	// returns the chair
-	GetDirtySpace() *objects.CafeObject
+	GetDirtySpace() (*object.Object, *object.Object)
 
 	// This unreserves the reserved object
-	UnreserveObject(*objects.CafeObject)
+	UnreserveObject(*object.Object)
 
 	//
 	ClearReservedObjects()
 
 	//
-	Owner() (*objects.Player, error)
+	Owner() (*player.Player, error)
 
 	//
 	IsEmpty() bool
@@ -56,9 +60,6 @@ type CafeLocation interface {
 	GetUniqueCustomerID() int
 
 	//
-	AddCustomer(*objects.Customer)
-
-	//
 	SetRunning(bool)
 
 	//
@@ -66,4 +67,6 @@ type CafeLocation interface {
 
 	//
 	GetIsRunning() *bool
+
+	TryStepSleep(time.Duration) bool
 }

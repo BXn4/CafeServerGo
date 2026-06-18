@@ -2,9 +2,28 @@ package main
 
 import (
 	"cafego/internal/database"
+	"cafego/internal/models/balancing"
 	"cafego/internal/server"
 	"cafego/internal/utils"
+	"cafego/internal/versions"
 	"os"
+	"strconv"
+
+	_ "cafego/internal/commands/achievements"
+	_ "cafego/internal/commands/cafe"
+	_ "cafego/internal/commands/cmdlet"
+	_ "cafego/internal/commands/coops"
+	_ "cafego/internal/commands/editor"
+	_ "cafego/internal/commands/fastfood"
+	_ "cafego/internal/commands/friends"
+	_ "cafego/internal/commands/gifts"
+	_ "cafego/internal/commands/job"
+	_ "cafego/internal/commands/marketplace"
+	_ "cafego/internal/commands/minigames"
+	_ "cafego/internal/commands/player"
+	_ "cafego/internal/commands/settings"
+	_ "cafego/internal/commands/shop"
+	_ "cafego/internal/commands/waiters"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/log"
@@ -15,10 +34,12 @@ func init() {
 	initStyles()
 
 	// Uncomment to enable debug level logging:
-	log.SetLevel(log.Level(-5))
+	// log.SetLevel(log.Level(-5))
 
 	// Uncomment to enable info level logging:
 	// log.SetLevel(log.InfoLevel)
+	//
+	log.SetLevel(log.ErrorLevel)
 
 }
 
@@ -41,16 +62,22 @@ func main() {
 		},
 		// This is the database config
 		&database.DBConfig{
-			Host:     utils.If(hasConfig, envFile["DB_HOST"], "localhost"),
-			Port:     utils.If(hasConfig, envFile["DB_PORT"], "3306"),
 			Database: utils.If(hasConfig, envFile["DB_NAME"], "gg_cafe"),
-			User:     utils.If(hasConfig, envFile["DB_USER"], "root"),
-			Password: utils.If(hasConfig, envFile["DB_PASSWORD"], ""),
 		},
 	)
 
+	versionStr := utils.If(hasConfig, envFile["GAME_VERSION"], "1603")
+	version, err := strconv.Atoi(versionStr)
 	if err != nil {
-		log.Errorf("Failed to create the server object!")
+		log.Fatalf("Invalid GAME_VERSION: %v", versionStr)
+	}
+
+	versions.SetGameVersion(version)
+
+	balancing.LoadBalancing(hasConfig, envFile)
+
+	if err != nil {
+		log.Errorf("Failed to create the server object: %v", err)
 		os.Exit(1)
 	} else {
 		srv.Run()

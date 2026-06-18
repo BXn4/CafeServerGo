@@ -2,12 +2,16 @@ package agents
 
 import (
 	"cafego/internal/interfaces"
-	"cafego/internal/objects"
+	"cafego/internal/models/cafe"
+	"cafego/internal/models/object"
+	"math"
+	"math/rand"
 	"time"
+
+	"github.com/charmbracelet/log"
 )
 
-func AgentCycle(l interfaces.CafeLocation) {
-
+func StartAgentCycles(l interfaces.CafeLocation) {
 	// Clean tables and chairs
 	for _, obj := range l.Cafe().GetObjects() {
 		if obj.IsTable() || obj.IsChair() {
@@ -15,61 +19,87 @@ func AgentCycle(l interfaces.CafeLocation) {
 		}
 	}
 
-	//
+	// Empty reserved objects
 	l.ClearReservedObjects()
 
-	// Spawn waiters
-	for i, w := range l.Cafe().GetWaiters() {
-		// Spawn waiter
-		w.ID = i + 1
-		SpawnWaiter(l, w)
-	}
-
-	// Count chairs
-	var chairs []*objects.CafeObject
-	for _, obj := range l.Cafe().GetObjects() {
-		if obj.IsChair() {
-			chairs = append(chairs, obj)
-		}
-	}
-
-	// Spawn customers
 	go func() {
-		for l.IsRunning() {
-			if len(l.Cafe().GetCustomers()) < len(chairs) {
-				go IterateCustomer(l, SpawnCustomer(l))
+		ticker := time.NewTicker(1 * time.Second)
+		defer ticker.Stop()
+
+		nextSpawn := time.Now().UTC().Add(GetSpawnInterval(l))
+
+		for range ticker.C {
+			if !*l.GetIsRunning() {
+				println("Agent cycle paused")
+				continue
 			}
+
+			if time.Now().UTC().After(nextSpawn) {
+				nextSpawn = time.Now().UTC().Add(GetSpawnInterval(l))
+
+				go Spawn(l, NewCustomer(l))
+			}
+
+			// println("TICK!")
 		}
-		l.Cafe().SetCustomers([]*objects.Customer{})
 	}()
-
-	// IterateWaiters
-	waiters := l.Cafe().GetWaiters()
-	for _, waiter := range waiters {
-
-		go func() {
-			for waiter.IsWorking {
-				IterateWaiter(l, waiter)
-			}
-			waiter.CurrentCounter = nil
-			waiter.Dish = -1
-		}()
-	}
-
 }
 
-// This is a sleep wrapper that checks every 100ms the paramater boolean
-// and returns false if it stopped being true
-func SleepWhileChecking(l interfaces.CafeLocation, d time.Duration, isRunning *bool) bool {
-	startTime := time.Now()
-	tick := time.NewTicker(100 * time.Millisecond)
-	defer tick.Stop()
-	for time.Since(startTime) < d {
-		// If program is not running
-		if !*isRunning {
-			return false
+/*
+Get a random counter,
+that is reachable,
+prioritizes counter with food,
+return counter, distance
+*/
+func GetRandomCounter(c *cafe.Cafe) (*object.Object, int) {
+	var counters []*object.Object
+
+	// Gather counters and check for ones with food
+	for _, obj := range c.GetObjects() {
+		if !obj.IsCounter() {
+			continue
 		}
-		<-tick.C
+
+		counters = append(counters, obj)
+
+		if obj.GetDishID() >= 0 {
+			start := NewCafePoint(c.GetPlayerStart(), c)
+			end := NewCafePoint(obj.GetPos(), c)
+			_, distance, found := Path(start, end)
+			if found {
+				return obj, distance
+			}
+		}
 	}
-	return true
+
+	// Try random counters if no counter with food is found
+	for len(counters) > 0 {
+		i := rand.Intn(len(counters))
+		rc := counters[i]
+		start := NewCafePoint(c.GetPlayerStart(), c)
+		end := NewCafePoint(rc.GetPos(), c)
+		_, distance, found := Path(start, end)
+
+		if found {
+			return rc, distance
+		}
+		counters = append(counters[:i], counters[i+1:]...)
+	}
+
+	return nil, -1
+}
+
+func GetSpawnInterval(l interfaces.CafeLocation) time.Duration {
+	maxSpawn := 30.0
+	minSpawn := 2.0
+	rating := float64(l.Cafe().GetRating())
+	expansion := float64(l.Cafe().GetExpansionID())
+	ratingFactor := math.Min(rating/1000.0, 10.0)
+	expansionFactor := math.Min(expansion/8.0, 1.0)
+	progress := ratingFactor*0.6 + expansionFactor*0.4
+	spawnBase := maxSpawn - progress*(maxSpawn-minSpawn)
+	variation := 0.8 + rand.Float64()*0.4
+	nextSpawn := time.Duration(spawnBase*variation) * time.Second
+	log.Debugf("NPC spawn interval: %s", nextSpawn.String())
+	return nextSpawn
 }

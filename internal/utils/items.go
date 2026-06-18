@@ -29,6 +29,7 @@ type Wod struct {
 	DishCategory     int    `xml:"dishcategory,attr,omitempty"`
 	Category         string `xml:"category,attr,omitempty"`
 	Requirements     string `xml:"requirements,attr,omitempty"`
+	ExpansionID      int    `xml:"expansionID,attr,omitempty"`
 	SizeX            int    `xml:"sizeX,attr,omitempty"`
 	SizeY            int    `xml:"sizeY,attr,omitempty"`
 	MaxMembers       int    `xml:"maxMember,attr,omitempty"`
@@ -36,6 +37,7 @@ type Wod struct {
 	Chips            int    `xml:"chips,attr,omitempty"`
 	RatingBonus      int    `xml:"ratingBonus,attr,omitempty"`
 	Dishes           string `xml:"dishes,attr,omitempty"`
+	Colors           string `xml:"colors,attr,omitempty"`
 }
 
 type Data struct {
@@ -78,6 +80,7 @@ func GetItems(s string) ([]Wod, error) {
 		category = "ingredient"
 	}
 	items, ok := itemCollection[strings.ToLower(category)]
+
 	if !ok {
 		return nil, fmt.Errorf("Item category with name %v not exist", category)
 
@@ -236,7 +239,7 @@ func GetVendingmachine(id int) (Wod, error) {
 
 func GetExpansion(id int) (Wod, error) {
 	for _, item := range itemCollection["expansion"] {
-		if id == item.ID {
+		if id == item.ExpansionID {
 			return item, nil
 		}
 	}
@@ -263,6 +266,15 @@ func GetCoop(id int) (Wod, error) {
 
 func GetFastfood(id int) (Wod, error) {
 	for _, item := range itemCollection["fastfood"] {
+		if id == item.ID {
+			return item, nil
+		}
+	}
+	return Wod{}, fmt.Errorf("No item found with id: %v", id)
+}
+
+func GetAvatar(id int) (Wod, error) {
+	for _, item := range itemCollection["avatar"] {
 		if id == item.ID {
 			return item, nil
 		}

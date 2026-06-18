@@ -4,7 +4,8 @@ import (
 	"cafego/internal/client"
 	"cafego/internal/interfaces"
 	"fmt"
-	"time"
+
+	"github.com/charmbracelet/log"
 )
 
 // AddClient adds a new client to the list
@@ -14,48 +15,19 @@ func (gm *GameManager) AddClient(item interfaces.ManagedItem) {
 
 	c := item.(*client.Client)
 
-	gm.clients = append(gm.clients, c)
+	clientID := gm.NextClientID()
+	c.SetClientID(clientID)
+
+	gm.clients[clientID] = c
+
+	log.Info("Assigned a ID to client: ", clientID)
 }
 
-// RemoveClient removes a client by id
-func (gm *GameManager) DisconnectClient(id int) {
-	gm.clientMutex.Lock()
-	defer gm.clientMutex.Unlock()
-
-	for i, c := range gm.clients {
-		if c.Player == nil {
-			continue
+func (gm *GameManager) NextClientID() int {
+	for i := 1; ; i++ {
+		if _, exists := gm.clients[i]; !exists {
+			return i
 		}
-
-		// Skip if not player
-		if c.Player.ID != id {
-			continue
-		}
-
-		// Send signal to close connection
-		for len(c.RequestQueue) > 0 {
-			c.RequestQueue <- nil
-		}
-		time.Sleep(time.Millisecond * 100) // Wait until procceses stop
-
-		// Save player to db
-		gm.db.SavePlayer(gm.clients[i].Player)
-		c.Player = nil
-
-		// Leave current location
-		if c.Location != nil {
-			c.Location.Leave(id)
-			// Check if empty, owner offline, not market
-			if c.Location.IsEmpty() && !gm.isOnline(c.Location.Cafe().GetID()) && c.Location.Cafe().GetID() > 0 {
-				gm.RemoveLocation(id)
-			}
-		}
-
-		// Remove client by re-slicing
-		gm.clients = append(gm.clients[:i], gm.clients[i+1:]...)
-
-		return
-
 	}
 }
 
@@ -68,44 +40,12 @@ func (gm *GameManager) GetClient(id int) (interfaces.ManagedItem, error) {
 		if c.Player == nil {
 			continue
 		}
-		if c.Player.ID == id {
+		if c.Player.GetID() == id {
 			return c, nil
 		}
 	}
 
 	return nil, fmt.Errorf("Client with ID %v not found", id)
-}
-
-// Checks if client is online
-func (gm *GameManager) IsOnline(id int) bool {
-	gm.clientMutex.Lock()
-	defer gm.clientMutex.Unlock()
-
-	for _, c := range gm.clients {
-		if c.Player == nil {
-			continue
-		}
-		if c.Player.ID == id {
-			return true
-		}
-	}
-
-	return false
-}
-
-// Checks if client is online
-func (gm *GameManager) isOnline(id int) bool {
-
-	for _, c := range gm.clients {
-		if c.Player == nil {
-			continue
-		}
-		if c.Player.ID == id {
-			return true
-		}
-	}
-
-	return false
 }
 
 func (gm *GameManager) GetClientByName(name string) (*client.Client, error) {
@@ -115,9 +55,56 @@ func (gm *GameManager) GetClientByName(name string) (*client.Client, error) {
 		if c.Player == nil {
 			continue
 		}
-		if c.Player.Username == name {
+		if c.Player.GetUsername() == name {
 			return c, nil
 		}
 	}
 	return nil, fmt.Errorf("Client with username %v not found", name)
+}
+
+func (gm *GameManager) DisconnectClient(id int) {
+	gm.clientMutex.Lock()
+	defer gm.clientMutex.Unlock()
+
+	c, ok := gm.clients[id]
+	if !ok {
+		log.Info("[Disconnect] Client ID not found:", id)
+		return
+	}
+
+	delete(gm.clients, id)
+
+	log.Info("[Disconnect] Disconnecting client id:", id)
+
+	if c.Player != nil {
+		if c.Player.GetIsTutorialCompleted() {
+			gm.db.SavePlayer(c.Player)
+		}
+
+		if c.Location != nil {
+			// SAVE -> AFTER LEAVE!!!!!!!!!
+			// DONT FLIP IT!!!!!!!!
+			if c.Player.GetIsTutorialCompleted() {
+				gm.db.SaveCafe(c.Location.Cafe())
+			}
+			c.Location.Leave(c.Player.GetID())
+		}
+		c.Player = nil
+	}
+
+	log.Info("[Disconnect] Client removed, remaining clients:", len(gm.clients))
+}
+
+func (gm *GameManager) UnsafeIsOnline(id int) bool {
+
+	for _, c := range gm.clients {
+		if c.Player == nil {
+			continue
+		}
+		if c.Player.GetID() == id {
+			return true
+		}
+	}
+
+	return false
 }

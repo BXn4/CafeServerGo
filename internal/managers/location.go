@@ -2,7 +2,7 @@ package managers
 
 import (
 	"cafego/internal/database"
-	"cafego/internal/objects"
+	"cafego/internal/models/cafe"
 	"fmt"
 
 	"github.com/charmbracelet/log"
@@ -23,18 +23,24 @@ func (gm *GameManager) RemoveLocation(id int) {
 	gm.locationMutex.Lock()
 	defer gm.locationMutex.Unlock()
 
+	println("REMOVED CAFE: ", id)
+
+	// I removed the DB saving
+
 	for i, lc := range gm.locations {
 		if lc.cafe.GetID() == id {
-			// This removes the location by id by not changing the others memory addresses
-			gm.db.SaveCafe(lc.Cafe())
-			log.Debugf("Saved %v cafe to db", lc.cafe.GetID())
-			delete(gm.locations, i)
-			return
+			if lc.running {
+				lc.Cafe().ClearAllCustomers()
+				lc.Cafe().CleaAllWaiters()
+				delete(gm.locations, i)
+				return
+			}
 		}
 	}
 }
 
-func (gm *GameManager) AddLocation(id int) *LoadedLocation {
+// Return the cafe if its already exists, or create a new cafe, set the values.
+func (gm *GameManager) AddLocation(id int) (*LoadedLocation, error) {
 	gm.locationMutex.Lock()
 	defer gm.locationMutex.Unlock()
 
@@ -42,23 +48,27 @@ func (gm *GameManager) AddLocation(id int) *LoadedLocation {
 	item, err := gm.getLocationByID(id)
 	if err == nil {
 		// If there is a location already loaded return it
-		return item
+		return item, nil
 	}
 
 	// If there is no loaded cafe load one
-	var cafeObj *objects.Cafe
+	var cafeObj *cafe.Cafe
 	cafeObj, err = gm.db.GetCafeByPlayerID(id)
 	if err != nil {
-		// BIG FUCK UP
 		log.Errorf("Player with id %v has no cafe in database: %v", id, err)
-		return nil
+		return nil, fmt.Errorf("Player %d has no cafe: %v", id, err)
 	}
 
-	//
+	if cafeObj.GetRoomType() == cafe.CafeRoom {
+		cafeObj.Initalize()
+	}
+
 	loc := NewLoadedLocation(cafeObj, gm)
 	gm.locations[id] = loc
 
-	return loc
+	// println("LOADED CAFE: ", id)
+
+	return loc, nil
 }
 
 // |========================================|
@@ -66,6 +76,7 @@ func (gm *GameManager) AddLocation(id int) *LoadedLocation {
 // |========================================|
 
 func (gm *GameManager) getLocationByID(id int) (*LoadedLocation, error) {
+
 	cafe, ok := gm.locations[id]
 	if ok {
 		return cafe, nil

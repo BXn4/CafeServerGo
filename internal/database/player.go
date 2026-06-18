@@ -1,89 +1,18 @@
 package database
 
 import (
-	"cafego/internal/objects"
+	"cafego/internal/models/player"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
 	"gorm.io/gorm"
 )
 
-type PlayerDAO struct {
-	ID                  int    `gorm:"column:id"`
-	Email               string `gorm:"column:email"`
-	Password            string `gorm:"column:password"`
-	Cash                int    `gorm:"column:cash"`
-	Gold                int    `gorm:"column:gold"`
-	XP                  int    `gorm:"column:xp"`
-	InstantCookings     int    `gorm:"column:instant_cookings"`
-	OpenJobs            int    `gorm:"column:open_jobs"`
-	PlayedWheel         bool   `gorm:"column:played_wheel"`
-	AllowFriendRequests bool   `gorm:"column:allow_friend_requests"`
-	Friends             string `gorm:"column:friends"`
-	FriendsWithGifts    string `gorm:"column:friends_with_gifts"`
-	AllowEmails         bool   `gorm:"column:allow_emails"`
-	EmailVerified       bool   `gorm:"column:email_verified"`
-	Username            string `gorm:"column:username"`
-	Avatar              string `gorm:"column:avatar"`
-	IsBanned            bool   `gorm:"column:is_banned"`
-	Mastery             string `gorm:"column:mastery"`
-	Achievement         string `gorm:"column:achievement"`
-	LastLogin           string `gorm:"column:last_login"`
-	DailyLogin          string `gorm:"column:daily_login"`
-	Gifts               string `gorm:"column:gifts"`
-	GiftRefreshTime     string `gorm:"column:gift_refresh_time"`
-	SendableGifts       string `gorm:"column:sendable_gifts"`
-	AccessLevel         int    `gorm:"column:access_level"`
-}
-
-func (playerDAO PlayerDAO) TableName() string {
-	return "player"
-}
-
-func ConvertPlayerDAOToPlayer(playerDAO PlayerDAO) (*objects.Player, error) {
-
-	var player objects.Player
-
-	// Fill in simple data
-	player.ID = playerDAO.ID
-	player.SetCash(playerDAO.Cash)
-	player.SetGold(playerDAO.Gold)
-	player.SetXP(playerDAO.XP)
-	player.ParseAchievement(playerDAO.Achievement)
-	player.InstantCookings = playerDAO.InstantCookings
-	player.OpenJobs = playerDAO.OpenJobs
-	player.PlayedWheel = playerDAO.PlayedWheel
-	player.AllowFriendRequests = playerDAO.AllowFriendRequests
-	player.AllowEmails = playerDAO.AllowEmails
-	player.EmailVerified = playerDAO.EmailVerified
-	player.Username = playerDAO.Username
-	player.AccessLevel = playerDAO.AccessLevel
-	player.Position = [2]int{0, 0}
-
-	// Parse gifts
-	gifts, err := objects.ParseGifts(playerDAO.Gifts)
-	if err != nil {
-		return nil, err
-	}
-	player.Gifts = gifts
-
-	player.ParseFriends(playerDAO.Friends)
-	player.ParseMastery(playerDAO.Mastery)
-
-	// Fill avatar
-	player.Avatar = *objects.NewAvatarFromString(playerDAO.Avatar)
-	player.Avatar.IsNPC = false
-
-	return &player, nil
-}
-
-func (db *CafeDB) GetPlayerByName(name string) (*objects.Player, error) {
-
-	var playerDAO PlayerDAO
-	err := db.conn.Where("username = ? OR email = ?", name, name).First(&playerDAO).Error
+func (db *CafeDB) GetPlayerByName(name string) (*player.Player, error) {
+	var p player.Player
+	err := db.conn.Where("username = ? OR email = ?", name, name).First(&p).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("NAME: %v NOT FOUND", name)
@@ -91,18 +20,13 @@ func (db *CafeDB) GetPlayerByName(name string) (*objects.Player, error) {
 		return nil, fmt.Errorf("SQL ERR: %v", err)
 	}
 
-	player, err := ConvertPlayerDAOToPlayer(playerDAO)
-	if err != nil {
-		return nil, err
-	}
-
-	return player, nil
+	return &p, nil
 
 }
 
-func (db *CafeDB) GetPlayer(id int) (*objects.Player, error) {
-	var playerDAO PlayerDAO
-	err := db.conn.First(&playerDAO, id).Error
+func (db *CafeDB) GetPlayer(id int) (*player.Player, error) {
+	var p player.Player
+	err := db.conn.First(&p, id).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("ID NOT FOUND")
@@ -110,38 +34,53 @@ func (db *CafeDB) GetPlayer(id int) (*objects.Player, error) {
 		return nil, fmt.Errorf("SQL ERR: %v", err)
 	}
 
-	player, err := ConvertPlayerDAOToPlayer(playerDAO)
-	if err != nil {
-		return nil, err
-	}
-
-	return player, nil
+	return &p, nil
 }
 
-func (db *CafeDB) SavePlayer(player *objects.Player) error {
+func (db *CafeDB) SavePlayer(p *player.Player) error {
+
+	p.SetLastLogin(time.Now().UTC())
 
 	// Build friends
 	friendsStr := []string{}
-	for _, f := range player.Friends {
+	for _, f := range p.GetFriends() {
 		friendsStr = append(friendsStr, strconv.Itoa(f))
 	}
 
-	updateData := map[string]interface{}{
-		"cash":                  uint(player.GetCash()),
-		"gold":                  player.GetGold(),
-		"xp":                    player.GetXP(),
-		"instant_cookings":      player.InstantCookings,
-		"open_jobs":             player.OpenJobs,
-		"played_wheel":          player.PlayedWheel,
-		"allow_friend_requests": player.AllowFriendRequests,
-		"friends":               strings.Join(friendsStr, "#"),
-		"avatar":                player.Avatar.Apperance(),
-		"mastery":               player.BuildMastery(),
-		"achievement":           player.BuildAchievement(),
-		"gifts":                 objects.BuildGifts(player.Gifts),
+	friendsWithGiftsStr := []string{}
+	for _, f := range p.GetFriendsWithGifts() {
+		friendsWithGiftsStr = append(friendsWithGiftsStr, strconv.Itoa(f))
 	}
 
-	err := db.conn.Model(&PlayerDAO{}).Where("id = ?", player.ID).Updates(updateData).Error
+	avatar := p.GetAvatar()
+
+	updateData := map[string]any{
+		"cash":                  int(p.GetCash()),
+		"gold":                  p.GetGold(),
+		"xp":                    p.GetXP(),
+		"instant_cookings_used": p.GetInstantCookingsUsed(),
+		"open_jobs":             p.GetOpenJobs(),
+		"refilled_jobs":         p.GetRefilledJobs(),
+		"coop_id":               p.GetCoopID(),
+		"played_wheel":          p.GetPlayedWheel(),
+		"allow_friend_requests": p.GetAllowFriendRequests(),
+		"friends":               strings.Join(friendsStr, "#"),
+		"friends_with_gifts":    strings.Join(friendsWithGiftsStr, "#"),
+		"sendable_gifts":        p.GetSendableGifts(),
+		"allow_emails":          p.GetAllowEmails(),
+		"email_verified":        p.GetEmailVerified(),
+		"username":              p.GetUsername(),
+		"is_banned":             p.GetIsBanned(),
+		"avatar":                avatar.Apperance(),
+		"avatar_changed":        p.GetAvatarChanged(),
+		"mastery":               p.GetMastery(),
+		"achievements":          p.GetAchivements().String(),
+		"last_login":            p.GetLastLogin(),
+		"daily_login":           p.GetDailyLogin(),
+		"gifts":                 p.GetGifts().String(),
+	}
+
+	err := db.conn.Model(&player.Player{}).Where("id = ?", p.GetID()).Updates(updateData).Error
 	if err != nil {
 		return fmt.Errorf("Cant save player: %v", err)
 	}
@@ -149,17 +88,15 @@ func (db *CafeDB) SavePlayer(player *objects.Player) error {
 }
 
 func (db *CafeDB) DeleteFriend(playerID, friendID int) error {
-	var playerDAO PlayerDAO
-	err := db.conn.First(&playerDAO, playerID).Error
+	var p player.Player
+	err := db.conn.First(&p, playerID).Error
 	if err != nil {
 		return fmt.Errorf("Player not found: %v", err)
 	}
 
-	friends := strings.Split(playerDAO.Friends, "#")
-	friendIDStr := strconv.Itoa(friendID)
 	index := -1
-	for i, f := range friends {
-		if f == friendIDStr {
+	for i, f := range p.GetFriends() {
+		if f == friendID {
 			index = i
 			break
 		}
@@ -168,85 +105,292 @@ func (db *CafeDB) DeleteFriend(playerID, friendID int) error {
 		return nil // Friend not found, no action needed
 	}
 
-	newFriends := append(friends[:index], friends[index+1:]...)
-	playerDAO.Friends = strings.Join(newFriends, "#")
+	p.SetFriends(append(p.GetFriends()[:index], p.GetFriends()[index+1:]...))
 
-	err = db.conn.Save(&playerDAO).Error
+	err = db.conn.Save(&p).Error
 	if err != nil {
 		return fmt.Errorf("Cant save friends: %v", err)
 	}
 	return nil
 }
-func (db *CafeDB) GetDailyLogin(playerID int) (*time.Time, error) {
-	var playerDAO PlayerDAO
-	err := db.conn.Select("daily_login").First(&playerDAO, playerID).Error
+
+func (db *CafeDB) UpdateCash(playerID, playerCash int) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("cash", playerCash).Error
 	if err != nil {
-		return nil, err
-	}
-
-	dailyLogin, err := time.Parse("2006-01-02 15:04:05", playerDAO.DailyLogin)
-	if err != nil {
-		return nil, fmt.Errorf("Error parsing daily login time: %v", err)
-	}
-
-	return &dailyLogin, nil
-}
-
-func (db *CafeDB) GetGiftRefreshTime(playerID int) (*time.Time, error) {
-	var playerDAO PlayerDAO
-	err := db.conn.Select("gift_refresh_time").First(&playerDAO, playerID).Error
-	if err != nil {
-		return nil, err
-	}
-
-	refreshTime, err := time.Parse("2006-01-02 15:04:05", playerDAO.GiftRefreshTime)
-	if err != nil {
-		return nil, fmt.Errorf("Error parsing daily login time: %v", err)
-	}
-
-	return &refreshTime, nil
-}
-
-func (db *CafeDB) GetFriendsWithGifts(playerID int) ([]string, error) {
-	var playerDAO PlayerDAO
-	err := db.conn.Select("friends_with_gifts").First(&playerDAO, playerID).Error
-	if err != nil {
-		return nil, err
-	}
-
-	return strings.Split(playerDAO.FriendsWithGifts, "+"), nil
-}
-
-func (db *CafeDB) GetSendableGifts(playerID int) (string, error) {
-	var playerDAO PlayerDAO
-	err := db.conn.Select("gift_refresh_time").First(&playerDAO, playerID).Error
-	if err != nil {
-		return "", err
-	}
-
-	return playerDAO.SendableGifts, nil
-}
-
-func (db *CafeDB) ResetDailyLogin(playerID int) error {
-	err := db.conn.Model(&PlayerDAO{}).Where("id = ?", playerID).Update("daily_login", time.Now().Format("2006-01-02 15:04:05")).Error
-	if err != nil {
-		return fmt.Errorf("Cant reset daily login: %v", err)
+		return fmt.Errorf("Cant update player: %v", err)
 	}
 	return nil
 }
 
-func (db *CafeDB) ResetGiftRefreshTime(playerID int) error {
-	err := db.conn.Model(&PlayerDAO{}).Where("id = ?", playerID).Update("gift_refresh_time", time.Now().Format("2006-01-02 15:04:05")).Error
+func (db *CafeDB) UpdateGold(playerID, playerGold int) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("gold", playerGold).Error
 	if err != nil {
-		return fmt.Errorf("Cant reset gift refresh time: %v", err)
+		return fmt.Errorf("Cant update player: %v", err)
 	}
 	return nil
 }
 
-func (db *CafeDB) UpdateSendableGifts(playerID int, gifts string) error {
-	err := db.conn.Model(&PlayerDAO{}).Where("id = ?", playerID).Update("sendable_gifts", gifts).Error
+func (db *CafeDB) SetRegistered(playerID int) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("is_registered", true).Error
 	if err != nil {
-		return fmt.Errorf("Cant update sendable gifts: %v", err)
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateAvatarChanged(playerID int, playerAvatarChanged bool) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("avatar_changed", playerAvatarChanged).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateAvatar(playerID int, avatar string) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("avatar", avatar).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateEmail(playerID int, email string) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("email", email).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdatePassord(playerID int, password string) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("password", password).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateXP(playerID int, xp int) error {
+	println(xp)
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("xp", xp).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateInstantCookings(playerID int, instantCookings int) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("instant_cookings", instantCookings).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateOpenJobs(playerID int, openJobs int) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("open_jobs", openJobs).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateRefilledJobs(playerID int, refilledJobs int) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("refilled_jobs", refilledJobs).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdatePlayedWheel(playerID int, playedWheel bool) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("played_wheel", playedWheel).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateAllowFriendRequests(playerID int, allowFriendRequests bool) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("allow_friend_requests", allowFriendRequests).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateFriends(playerID int, friends string) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("friends", friends).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateFriendsWithGifts(playerID int, friendsWithGifts string) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("friends_with_gifts", friendsWithGifts).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateSendableGifts(playerID int, sendableGifts string) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("sendable_gifts", sendableGifts).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateAllowEmails(playerID int, allowEmails bool) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("allow_emails", allowEmails).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateEmailVerified(playerID int, emailVerified bool) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("email_verified", emailVerified).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateUsername(playerID int, username string) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("username", username).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateIsBanned(playerID int, isBanned bool) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("is_banned", isBanned).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateMastery(playerID int, mastery string) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("mastery", mastery).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateAchievement(playerID int, achievement string) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("achievements", achievement).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateCoopID(playerID int, coopID int) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("coop_id", coopID).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateLastLogin(playerID int, lastLogin time.Time) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("last_login", lastLogin).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateDailyLogin(playerID int, dailyLogin time.Time) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("daily_login", dailyLogin).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateGiftRefreshTime(playerID int, giftRefreshTime time.Time) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("gift_refresh_time", giftRefreshTime).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateGifts(playerID int, gifts string) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("gifts", gifts).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
+	}
+	return nil
+}
+
+func (db *CafeDB) UpdateStartedCoop(playerID int, started_coop bool) error {
+	err := db.conn.Model(&player.Player{}).
+		Where("id = ?", playerID).
+		Update("started_coop", started_coop).Error
+	if err != nil {
+		return fmt.Errorf("Cant update player: %v", err)
 	}
 	return nil
 }

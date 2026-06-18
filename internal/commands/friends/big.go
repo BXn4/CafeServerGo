@@ -1,0 +1,125 @@
+package friends
+
+import (
+	"cafego/internal/client"
+	"cafego/internal/managers"
+	"cafego/internal/models/player"
+	"cafego/internal/types/requests"
+	"fmt"
+	"slices"
+	"strconv"
+)
+
+// min level 4
+
+const (
+	REQUEST  = 0
+	ACCEPT   = 1
+	DENY     = 2
+	UNFRIEND = 3
+)
+
+func SendFriendRequest(req *requests.Request, c *client.Client, gm *managers.GameManager) error {
+
+	action, err := strconv.Atoi(req.Args[2]) // REQUEST, ACCEPT, DENY, UNFRIEND
+	if err != nil {
+		return err
+	}
+
+	fromPlayerID, err := strconv.Atoi(req.Args[3])
+	if err != nil {
+		return err
+	}
+
+	toPlayerID, err := strconv.Atoi(req.Args[4])
+	if err != nil {
+		return err
+	}
+
+	// Get from player
+	item, err := gm.GetClient(fromPlayerID)
+	var fromClient *client.Client
+	var fromPlayer *player.Player
+	if err == nil {
+		fromClient = item.(*client.Client)
+		fromPlayer = fromClient.Player
+	}
+
+	// Get to player
+	item, err = gm.GetClient(toPlayerID)
+	var toClient *client.Client
+	var toPlayer *player.Player
+	if err == nil {
+		toClient = item.(*client.Client)
+		toPlayer = toClient.Player
+	}
+
+	// Handle actions
+	switch action {
+	case REQUEST:
+		if toPlayer == nil {
+			break
+		}
+
+		// If they are not friends and to player allows friend requests
+		if !slices.Contains(fromPlayer.GetFriends(), fromPlayer.GetID()) && toPlayer.GetAllowFriendRequests() {
+			toClient.SendExtensionResponse("big", "-1", "0", "0", req.Args[3], req.Args[4])
+		}
+
+	case ACCEPT:
+		if toPlayer == nil {
+			break
+		}
+
+		// Add friends
+		toPlayer.AddFriend(fromPlayer.GetID())
+		fromPlayer.AddFriend(toPlayer.GetID())
+
+		// Send messages
+		err = SendFriendsAvatar(nil, toClient, gm)
+		if err != nil {
+			return err
+		}
+
+		err = SendFriendsAvatar(nil, fromClient, gm)
+		if err != nil {
+			return err
+		}
+
+		toClient.DB.UpdateFriends(toClient.Player.GetID(), toClient.Player.GetFriends().String())
+		fromClient.DB.UpdateFriends(fromClient.Player.GetID(), fromClient.Player.GetFriends().String())
+	case DENY:
+		if toPlayer == nil {
+			break
+		}
+		avatar := toPlayer.GetAvatar()
+
+		fromClient.SendExtensionResponse("big", "-1", "0", "2",
+			req.Args[3],
+			req.Args[4],
+			fmt.Sprintf("%v+%v+%v", toPlayer.GetID(), toPlayer.GetXP(), avatar),
+		)
+	case UNFRIEND:
+		// TODO: Test
+
+		fromPlayer.DeleteFriend(toPlayer.GetID())
+
+		if toPlayer != nil {
+			// if player online
+			toPlayer.DeleteFriend(fromPlayer.GetID())
+			avatar := toPlayer.GetAvatar()
+
+			fromClient.SendExtensionResponse("big", "-1", "0", "3",
+				req.Args[3],
+				req.Args[4],
+				fmt.Sprintf("%v+%v+%v", toPlayer.GetID(), toPlayer.GetXP(), avatar.String()),
+			)
+		} else {
+			// if player offline
+			c.DB.DeleteFriend(toPlayerID, fromPlayer.GetID())
+		}
+
+	}
+
+	return nil
+}

@@ -4,28 +4,32 @@ import (
 	"bufio"
 	"cafego/internal/database"
 	"cafego/internal/interfaces"
+	"cafego/internal/models/player"
+	"io"
+	"strings"
 	"time"
 
-	"github.com/charmbracelet/log"
-
-	"cafego/internal/objects"
 	"cafego/internal/types/requests"
 	"cafego/internal/types/responses"
 	"net"
-	"strings"
+
+	"github.com/charmbracelet/log"
 )
 
 // Client
 type Client struct {
+	ClientID      int
 	Conn          net.Conn
 	Writer        *bufio.Writer           // Buffered write connection to the client
 	Reader        *bufio.Reader           // Buffered read  connection to the client
 	DB            *database.CafeDB        // Connection to the database
 	Location      interfaces.CafeLocation // Players current location
-	Player        *objects.Player         // Player object
+	Player        *player.Player          // Player object
 	ClientManager interfaces.ClientManager
 
 	TimeoutStamp time.Time
+
+	isDisconnecting bool
 
 	RequestQueue  chan *requests.Request
 	ResponseQueue chan responses.Response
@@ -33,6 +37,7 @@ type Client struct {
 
 func New(conn net.Conn, dbc *database.CafeDB, cm interfaces.ClientManager) *Client {
 	return &Client{
+		ClientID:      0,
 		Conn:          conn,
 		Reader:        bufio.NewReader(conn),
 		Writer:        bufio.NewWriter(conn),
@@ -47,21 +52,20 @@ func New(conn net.Conn, dbc *database.CafeDB, cm interfaces.ClientManager) *Clie
 }
 
 func (c *Client) ID() int {
-	return c.Player.ID
+	return c.ClientID
+}
+
+func (c *Client) SetClientID(id int) {
+	c.ClientID = id
+}
+
+func (c *Client) GetIP() string {
+	return strings.Split(c.Conn.RemoteAddr().String(), ":")[0]
 }
 
 func (c *Client) Start() {
 	go c.receiveRequests()
 	go c.sendResponses()
-}
-
-func (c *Client) Disconnect() error {
-	if c.Player != nil {
-		id := c.Player.ID
-		c.ClientManager.DisconnectClient(id)
-	}
-	c.Conn.Close()
-	return nil
 }
 
 func (c *Client) SendSystemResponse(args ...string) {
@@ -76,8 +80,32 @@ func (c *Client) SendExtensionResponse(args ...string) {
 	c.ResponseQueue <- resp
 }
 
-func (c *Client) GetIP() string {
-	return strings.Split(c.Conn.RemoteAddr().String(), ":")[0]
+func (c *Client) receiveRequests() {
+	defer close(c.RequestQueue)
+	for {
+		message, err := c.Reader.ReadString('\x00')
+		if err != nil {
+			if err == io.EOF {
+				log.Infof("Client disconnected (EOF): %s", c.GetIP())
+			} else if netErr, ok := err.(net.Error); ok {
+				log.Infof("Network error from %s: %v", c.GetIP(), netErr)
+			} else if strings.Contains(err.Error(), "use of closed network connection") {
+				log.Infof("Connection closed: %s", c.GetIP())
+			} else {
+				log.Errorf("Read error from %s: %v", c.GetIP(), err)
+			}
+			c.Disconnect()
+			return
+		}
+		log.Logf(log.Level(-5), "%s", message)
+		// Parse request
+		req, err := requests.ParseRequest(strings.Trim(message, "\x00"))
+		if err != nil {
+			log.Error("Failed to parse request: %v", err)
+			continue
+		}
+		c.RequestQueue <- req
+	}
 }
 
 func (c *Client) sendResponses() {
@@ -91,23 +119,18 @@ func (c *Client) sendResponses() {
 	}
 }
 
-func (c *Client) receiveRequests() {
-	defer close(c.RequestQueue)
-	for {
+func (c *Client) Disconnect() error {
+	c.isDisconnecting = true
 
-		message, err := c.Reader.ReadString('\x00')
-		if err != nil {
-			return
-		}
-		log.Logf(log.Level(-5), "%s", message)
+	log.Infof("Client being disconnected: %s", c.GetIP())
 
-		// Parse request
-		req, err := requests.ParseRequest(strings.Trim(message, "\x00"))
-		if err != nil {
-			log.Error("Failed to parse request: %v", err)
-			continue
-		}
+	c.ClientManager.DisconnectClient(c.ClientID)
 
-		c.RequestQueue <- req
-	}
+	c.Conn.Close()
+
+	return nil
+}
+
+func (c *Client) GetIsDisconnecting() bool {
+	return c.isDisconnecting
 }
