@@ -50,7 +50,6 @@ func (db *CafeDB) UpdateObjects(cafeID int, objects string) error {
 	if err != nil {
 		return fmt.Errorf("Cant update Cafe: %v", err)
 	}
-	}
 
 	return nil
 }
