@@ -1,4 +1,5 @@
 # CafeServerGo
+<img width="137" height="20" alt="maintainability" src="https://i.imgur.com/l4OHKDe.png" />
 
 A high-performance TCP socket server written in Go, ported from [Café Server Python](https://github.com/GGReborn/CafeServer), and Smartfox server.
 Way more faster than any Python implementations.
