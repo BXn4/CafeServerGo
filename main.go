@@ -1,3 +1,9 @@
+/*
+CafeServerGo
+A custom TCP socket server hosting library / game server.
+Copyright (C) 2026 BXn4 and Hurka5
+*/
+
 package main
 
 import (
@@ -39,7 +45,7 @@ func init() {
 	// Uncomment to enable info level logging:
 	// log.SetLevel(log.InfoLevel)
 	//
-	log.SetLevel(log.ErrorLevel)
+	// log.SetLevel(log.ErrorLevel)
 
 }
 

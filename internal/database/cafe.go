@@ -1,3 +1,9 @@
+/*
+CafeServerGo
+A custom TCP socket server hosting library / game server.
+Copyright (C) 2026 BXn4 and Hurka5
+*/
+
 package database
 
 import (
@@ -49,7 +55,6 @@ func (db *CafeDB) UpdateObjects(cafeID int, objects string) error {
 		Update("objects", objects).Error
 	if err != nil {
 		return fmt.Errorf("Cant update Cafe: %v", err)
-	}
 	}
 
 	return nil

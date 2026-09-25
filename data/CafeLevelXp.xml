@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Goodgame Studios Cafe - LevelLimits -->
 <levellimits>
 <limit l="0" f="1" c="3" i="12" s="3" w="1" ch="0" g="1" />
 <limit l="1" f="1" c="3" i="12" s="3" w="1" ch="500" g="1" />

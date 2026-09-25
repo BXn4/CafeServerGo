@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Goodgame Studios Cafe - WOD -->
 <wodIds>
 <wod id="1" n="Static" g="Tile" t="Stonemediumgrey" walkable="1" rotatetype="0" cash="20" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="0" />
 <wod id="2" n="Static" g="Tile" t="Wooddarkbrown" walkable="1" rotatetype="0" cash="20" gold="0" friends="0" goldNoFriends="0" releaseDate="0" world="0" events="0" xp="0" level="1" />
